@@ -2,9 +2,11 @@
 import { useAuthActions } from "@convex-dev/auth/react";
 import { useState } from "react";
 import { toast } from "sonner";
+import { useNavigate } from "react-router-dom";
 
 export function SignInForm() {
   const { signIn } = useAuthActions();
+  const navigate = useNavigate();
   const [flow, setFlow] = useState<"signIn" | "signUp">("signIn");
   const [submitting, setSubmitting] = useState(false);
 
@@ -56,6 +58,19 @@ export function SignInForm() {
         <button className="auth-button" type="submit" disabled={submitting}>
           {flow === "signIn" ? "Sign in" : "Sign up"}
         </button>
+        
+        {flow === "signIn" && (
+          <div className="text-center">
+            <button
+              type="button"
+              onClick={() => navigate("/forgot-password")}
+              className="text-sm text-primary hover:text-primary-hover hover:underline"
+            >
+              Forgot your password?
+            </button>
+          </div>
+        )}
+        
         <div className="text-center text-sm text-secondary">
           <span>
             {flow === "signIn"

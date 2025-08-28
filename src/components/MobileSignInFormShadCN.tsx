@@ -7,9 +7,11 @@ import { Input } from "./ui/input";
 import { Label } from "./ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
+import { useNavigate } from "react-router-dom";
 
 export function MobileSignInFormShadCN() {
   const { signIn } = useAuthActions();
+  const navigate = useNavigate();
   const [flow, setFlow] = useState<"signIn" | "signUp">("signIn");
   const [submitting, setSubmitting] = useState(false);
 
@@ -114,6 +116,18 @@ export function MobileSignInFormShadCN() {
                     "Sign Up"
                   )}
                 </Button>
+
+                {flow === "signIn" && (
+                  <div className="text-center">
+                    <button
+                      type="button"
+                      onClick={() => navigate("/forgot-password")}
+                      className="text-sm text-blue-600 hover:text-blue-800 hover:underline"
+                    >
+                      Forgot your password?
+                    </button>
+                  </div>
+                )}
               </form>
             </TabsContent>
           </Tabs>
