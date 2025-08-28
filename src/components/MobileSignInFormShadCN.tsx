@@ -30,14 +30,17 @@ export function MobileSignInFormShadCN() {
         toast.success("Account created! Check your email for a verification link to complete sign-up.", {
           duration: 6000,
         });
-        setSubmitting(false);
       }
       // If signing in successfully, the user will be redirected automatically
       // so we don't need to show a toast message
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Auth error:", error);
+      
+      // Safely extract error message with type narrowing
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      
       let toastTitle = "";
-      if (error.message.includes("Invalid password")) {
+      if (errorMessage.includes("Invalid password")) {
         toastTitle =
           flow === "signIn"
             ? "Invalid password. Please try again."
@@ -49,6 +52,8 @@ export function MobileSignInFormShadCN() {
             : "Could not sign up, did you mean to sign in?";
       }
       toast.error(toastTitle);
+    } finally {
+      // Always reset submitting state regardless of success or failure
       setSubmitting(false);
     }
   };
