@@ -14,11 +14,23 @@ export function MobileSignInFormShadCN() {
   const navigate = useNavigate();
   const [flow, setFlow] = useState<"signIn" | "signUp">("signIn");
   const [submitting, setSubmitting] = useState(false);
+  const [signUpSuccess, setSignUpSuccess] = useState(false);
+  const [signUpEmail, setSignUpEmail] = useState("");
+
+  const handleFlowChange = (newFlow: "signIn" | "signUp") => {
+    setFlow(newFlow);
+    // Reset success state when switching tabs
+    if (signUpSuccess) {
+      setSignUpSuccess(false);
+      setSignUpEmail("");
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setSubmitting(true);
     const formData = new FormData(e.target as HTMLFormElement);
+    const email = formData.get("email") as string;
     formData.set("flow", flow);
 
     try {
@@ -27,12 +39,13 @@ export function MobileSignInFormShadCN() {
       // Debug logging to understand what happens during sign-up/sign-in
       console.log("Sign-in result:", { flow, result, typeof: typeof result });
       
-      // For sign-up flow, always show toast since email verification is required
-      // The user won't be immediately authenticated and needs to verify their email
+      // For sign-up flow, show success state with email verification instructions
       if (flow === "signUp") {
-        console.log("Showing sign-up success toast");
-        toast.success("Account created! Check your email for a verification link to complete sign-up.", {
-          duration: 6000,
+        console.log("Showing sign-up success state");
+        setSignUpEmail(email);
+        setSignUpSuccess(true);
+        toast.success("Account created! Check your email for a verification link.", {
+          duration: 4000,
         });
       }
       // For sign-in: if result is truthy, user is authenticated and will be redirected
@@ -71,7 +84,7 @@ export function MobileSignInFormShadCN() {
         <CardContent>
           <Tabs
             value={flow}
-            onValueChange={(value) => setFlow(value as "signIn" | "signUp")}
+            onValueChange={handleFlowChange}
           >
             <TabsList className="grid w-full grid-cols-2 mb-6">
               <TabsTrigger value="signIn" className="text-sm">
@@ -83,7 +96,49 @@ export function MobileSignInFormShadCN() {
             </TabsList>
 
             <TabsContent value={flow} className="space-y-0">
-              <form onSubmit={handleSubmit} className="space-y-6">
+              {flow === "signUp" && signUpSuccess ? (
+                // Success state for sign-up
+                <div className="space-y-6 text-center">
+                  <div className="bg-green-50 border border-green-200 rounded-lg p-6">
+                    <div className="flex items-center justify-center mb-4">
+                      <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
+                        <span className="text-2xl">✉️</span>
+                      </div>
+                    </div>
+                    <h3 className="text-lg font-semibold text-green-800 mb-2">
+                      Check Your Email!
+                    </h3>
+                    <p className="text-green-700 mb-2">
+                      We've sent a verification link to:
+                    </p>
+                    <p className="font-medium text-green-800 mb-4">
+                      {signUpEmail}
+                    </p>
+                    <p className="text-sm text-green-600">
+                      Click the link in your email to activate your account and start creating leagues!
+                    </p>
+                  </div>
+                  
+                  <div className="space-y-3">
+                    <p className="text-sm text-gray-600">
+                      Don't see the email? Check your spam folder.
+                    </p>
+                    <Button
+                      variant="outline"
+                      onClick={() => {
+                        setSignUpSuccess(false);
+                        setSignUpEmail("");
+                        setFlow("signIn");
+                      }}
+                      className="w-full"
+                    >
+                      Back to Sign In
+                    </Button>
+                  </div>
+                </div>
+              ) : (
+                // Regular form for sign-in or sign-up
+                <form onSubmit={handleSubmit} className="space-y-6">
                 <div className="space-y-2">
                   <Label htmlFor="email" className="text-base font-medium">
                     Email
@@ -150,7 +205,8 @@ export function MobileSignInFormShadCN() {
                     </button>
                   </div>
                 )}
-              </form>
+                </form>
+              )}
             </TabsContent>
           </Tabs>
         </CardContent>
