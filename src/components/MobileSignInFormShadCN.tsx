@@ -90,7 +90,6 @@ export function MobileSignInFormShadCN() {
     <div className="w-full max-w-md mx-auto">
       <Card className="border-none shadow-lg">
         <CardHeader className="text-center pb-6">
-          <CardTitle className="text-2xl font-bold">NFL Pool</CardTitle>
         </CardHeader>
         <CardContent>
           <Tabs

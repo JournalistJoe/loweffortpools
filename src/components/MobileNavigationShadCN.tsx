@@ -20,6 +20,7 @@ import {
   Settings,
   Home,
 } from "lucide-react";
+import { ThemeToggle } from "./ThemeToggle";
 import { DraftCountdown } from "./DraftCountdown";
 
 interface NavigationProps {
@@ -142,6 +143,7 @@ export function MobileNavigationShadCN({ league }: NavigationProps) {
                 );
               })}
 
+              <ThemeToggle />
               <SignOutButtonShadCN />
             </div>
           </div>
@@ -172,12 +174,14 @@ export function MobileNavigationShadCN({ league }: NavigationProps) {
               )}
             </div>
 
-            <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
-              <SheetTrigger asChild>
-                <Button variant="ghost" size="sm" className="p-2">
-                  <Menu className="h-5 w-5" />
-                </Button>
-              </SheetTrigger>
+            <div className="flex items-center space-x-2">
+              <ThemeToggle />
+              <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
+                <SheetTrigger asChild>
+                  <Button variant="ghost" size="sm" className="p-2">
+                    <Menu className="h-5 w-5" />
+                  </Button>
+                </SheetTrigger>
               <SheetContent side="right">
                 <SheetHeader>
                   <SheetTitle>Navigation</SheetTitle>
@@ -211,7 +215,8 @@ export function MobileNavigationShadCN({ league }: NavigationProps) {
                   <SignOutButtonShadCN />
                 </div>
               </SheetContent>
-            </Sheet>
+              </Sheet>
+            </div>
           </div>
         </div>
 

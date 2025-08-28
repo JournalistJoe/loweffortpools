@@ -64,7 +64,7 @@ export function SignInForm() {
             <button
               type="button"
               onClick={() => navigate("/forgot-password")}
-              className="text-sm text-primary hover:text-primary-hover hover:underline"
+              className="text-sm text-primary hover:brightness-75 hover:underline"
             >
               Forgot your password?
             </button>
@@ -79,7 +79,7 @@ export function SignInForm() {
           </span>
           <button
             type="button"
-            className="text-primary hover:text-primary-hover hover:underline font-medium cursor-pointer"
+            className="text-primary hover:brightness-75 hover:underline font-medium cursor-pointer"
             onClick={() => setFlow(flow === "signIn" ? "signUp" : "signIn")}
           >
             {flow === "signIn" ? "Sign up instead" : "Sign in instead"}

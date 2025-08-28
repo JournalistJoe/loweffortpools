@@ -9,6 +9,7 @@ import {
   Navigate,
 } from "react-router-dom";
 import { LeagueProvider } from "./contexts/LeagueContext";
+import { ThemeProvider } from "./contexts/ThemeContext";
 import { LeagueSelectionPageShadCN as LeagueSelectionPage } from "./pages/LeagueSelectionPageShadCN";
 import { DraftPageShadCN as DraftPage } from "./pages/DraftPageShadCN";
 import { AdminPageShadCN as AdminPage } from "./pages/AdminPageShadCN";
@@ -114,23 +115,25 @@ function App() {
   }
 
   return (
-    <Router>
-      <Routes>
-        {/* Public routes that work regardless of auth status */}
-        <Route path="/forgot-password" element={<ForgotPasswordPage />} />
-        <Route path="/reset-password" element={<PasswordResetPage />} />
-        <Route path="/verify-email" element={<EmailVerificationPage />} />
-        
-        {/* Protected routes */}
-        <Route
-          path="/*"
-          element={
-            isAuthenticated ? <AuthenticatedRoutes /> : <SignInPage />
-          }
-        />
-      </Routes>
-      <Toaster position="top-center" />
-    </Router>
+    <ThemeProvider>
+      <Router>
+        <Routes>
+          {/* Public routes that work regardless of auth status */}
+          <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+          <Route path="/reset-password" element={<PasswordResetPage />} />
+          <Route path="/verify-email" element={<EmailVerificationPage />} />
+          
+          {/* Protected routes */}
+          <Route
+            path="/*"
+            element={
+              isAuthenticated ? <AuthenticatedRoutes /> : <SignInPage />
+            }
+          />
+        </Routes>
+        <Toaster position="top-center" />
+      </Router>
+    </ThemeProvider>
   );
 }
 

@@ -13,8 +13,6 @@
 
 body {
   font-family: var(--font-sans);
-  color: var(--color-dark);
-  background: var(--color-light);
 }
 
 /* only use this to update the style of the auth input fields. use a different class for all other input fields */
@@ -24,7 +22,7 @@ body {
 
 /* only use this to update the style of the auth buttons. use the button class for all other buttons */
 .auth-button {
-  @apply w-full px-4 py-3 rounded bg-primary text-white font-semibold hover:bg-primary-hover transition-colors shadow-sm hover:shadow disabled:opacity-50 disabled:cursor-not-allowed;
+  @apply w-full px-4 py-3 rounded bg-primary text-white font-semibold hover:brightness-90 transition-colors shadow-sm hover:shadow disabled:opacity-50 disabled:cursor-not-allowed;
 }
 
 
@@ -41,39 +39,39 @@ body {
     --tracking-widest: calc(var(--tracking-normal) + 0.1em);
   }
   :root {
-    --background: oklch(1.0000 0 0);
-    --foreground: oklch(0.3485 0 0);
-    --card: oklch(0.9702 0 0);
-    --card-foreground: #3a3a3a;
-    --popover: oklch(1.0000 0 0);
-    --popover-foreground: oklch(0.3485 0 0);
-    --primary: oklch(0.3785 0.0753 237.8048);
-    --primary-foreground: oklch(0.9551 0 0);
-    --secondary: oklch(0.5561 0.1998 18.5209);
-    --secondary-foreground: oklch(0.9551 0 0);
-    --muted: oklch(0.9702 0 0);
-    --muted-foreground: oklch(0.5555 0 0);
-    --accent: oklch(0.9219 0 0);
-    --accent-foreground: oklch(0.2046 0 0);
-    --destructive: oklch(0.6823 0.1365 10.3688);
-    --destructive-foreground: oklch(1.0000 0 0);
-    --border: oklch(0.9219 0 0);
-    --input: oklch(0.9219 0 0);
-    --ring: oklch(0.3785 0.0753 237.8048);
-    --chart-1: oklch(0.3785 0.0753 237.8048);
-    --chart-2: oklch(0.5561 0.1998 18.5209);
-    --chart-3: oklch(0.7001 0.1356 58.2280);
-    --chart-4: oklch(0.6820 0.1537 155.8417);
-    --chart-5: oklch(0.7205 0.1038 273.6722);
+    --background: 1.0000 0 0;
+    --foreground: 0.3485 0 0;
+    --card: 0.9702 0 0;
+    --card-foreground: 0.2264 0 0;
+    --popover: 1.0000 0 0;
+    --popover-foreground: 0.3485 0 0;
+    --primary: 0.3785 0.0753 237.8048;
+    --primary-foreground: 0.9551 0 0;
+    --secondary: 0.5561 0.1998 18.5209;
+    --secondary-foreground: 0.9551 0 0;
+    --muted: 0.9702 0 0;
+    --muted-foreground: 0.5555 0 0;
+    --accent: 0.9219 0 0;
+    --accent-foreground: 0.2046 0 0;
+    --destructive: 0.6823 0.1365 10.3688;
+    --destructive-foreground: 1.0000 0 0;
+    --border: 0.9219 0 0;
+    --input: 0.9219 0 0;
+    --ring: 0.3785 0.0753 237.8048;
+    --chart-1: 0.3785 0.0753 237.8048;
+    --chart-2: 0.5561 0.1998 18.5209;
+    --chart-3: 0.7001 0.1356 58.2280;
+    --chart-4: 0.6820 0.1537 155.8417;
+    --chart-5: 0.7205 0.1038 273.6722;
     --radius: 0.025rem;
-    --sidebar: oklch(0.9702 0 0);
-    --sidebar-foreground: oklch(0.1684 0 0);
-    --sidebar-primary: oklch(0.3785 0.0753 237.8048);
-    --sidebar-primary-foreground: oklch(0.9551 0 0);
-    --sidebar-accent: oklch(1.0000 0 0);
-    --sidebar-accent-foreground: oklch(0.1684 0 0);
-    --sidebar-border: oklch(0.9219 0 0);
-    --sidebar-ring: oklch(0.3785 0.0753 237.8048);
+    --sidebar: 0.9702 0 0;
+    --sidebar-foreground: 0.1684 0 0;
+    --sidebar-primary: 0.3785 0.0753 237.8048;
+    --sidebar-primary-foreground: 0.9551 0 0;
+    --sidebar-accent: 1.0000 0 0;
+    --sidebar-accent-foreground: 0.1684 0 0;
+    --sidebar-border: 0.9219 0 0;
+    --sidebar-ring: 0.3785 0.0753 237.8048;
     --font-sans: Architects Daughter, cursive;
     --font-serif: Lora, ui-serif, serif;
     --font-mono: Geist Mono, ui-monospace, monospace;
@@ -96,39 +94,39 @@ body {
     --tracking-normal: 0.05em;
   }
   .dark {
-    --background: oklch(0.1448 0 0);
-    --foreground: oklch(0.9851 0 0);
-    --card: oklch(0.2264 0 0);
-    --card-foreground: oklch(0.9851 0 0);
-    --popover: oklch(0.1448 0 0);
-    --popover-foreground: oklch(0.9851 0 0);
-    --primary: oklch(0.3785 0.0753 237.8048);
-    --primary-foreground: oklch(1.0000 0 0);
-    --secondary: oklch(0.5561 0.1998 18.5209);
-    --secondary-foreground: oklch(1.0000 0 0);
-    --muted: oklch(0.2686 0 0);
-    --muted-foreground: oklch(0.7155 0 0);
-    --accent: oklch(0.2686 0 0);
-    --accent-foreground: oklch(0.9851 0 0);
-    --destructive: oklch(0.4189 0.1124 12.9603);
-    --destructive-foreground: oklch(0.9851 0 0);
-    --border: oklch(0.2686 0 0);
-    --input: oklch(0.2686 0 0);
-    --ring: oklch(0.3785 0.0753 237.8048);
-    --chart-1: oklch(0.3785 0.0753 237.8048);
-    --chart-2: oklch(0.5561 0.1998 18.5209);
-    --chart-3: oklch(0.6271 0.1570 46.5777);
-    --chart-4: oklch(0.5805 0.1331 156.1295);
-    --chart-5: oklch(0.6214 0.1372 275.9795);
+    --background: 0.1448 0 0;
+    --foreground: 0.9851 0 0;
+    --card: 0.2264 0 0;
+    --card-foreground: 0.9851 0 0;
+    --popover: 0.1448 0 0;
+    --popover-foreground: 0.9851 0 0;
+    --primary: 0.3785 0.0753 237.8048;
+    --primary-foreground: 1.0000 0 0;
+    --secondary: 0.5561 0.1998 18.5209;
+    --secondary-foreground: 1.0000 0 0;
+    --muted: 0.2686 0 0;
+    --muted-foreground: 0.7155 0 0;
+    --accent: 0.2686 0 0;
+    --accent-foreground: 0.9851 0 0;
+    --destructive: 0.4189 0.1124 12.9603;
+    --destructive-foreground: 0.9851 0 0;
+    --border: 0.2686 0 0;
+    --input: 0.2686 0 0;
+    --ring: 0.3785 0.0753 237.8048;
+    --chart-1: 0.3785 0.0753 237.8048;
+    --chart-2: 0.5561 0.1998 18.5209;
+    --chart-3: 0.6271 0.1570 46.5777;
+    --chart-4: 0.5805 0.1331 156.1295;
+    --chart-5: 0.6214 0.1372 275.9795;
     --radius: 0.025rem;
-    --sidebar: oklch(0.2264 0 0);
-    --sidebar-foreground: oklch(0.9851 0 0);
-    --sidebar-primary: oklch(0.3785 0.0753 237.8048);
-    --sidebar-primary-foreground: oklch(1.0000 0 0);
-    --sidebar-accent: oklch(0.2686 0 0);
-    --sidebar-accent-foreground: oklch(0.9851 0 0);
-    --sidebar-border: oklch(0.2686 0 0);
-    --sidebar-ring: oklch(0.3785 0.0753 237.8048);
+    --sidebar: 0.2264 0 0;
+    --sidebar-foreground: 0.9851 0 0;
+    --sidebar-primary: 0.3785 0.0753 237.8048;
+    --sidebar-primary-foreground: 1.0000 0 0;
+    --sidebar-accent: 0.2686 0 0;
+    --sidebar-accent-foreground: 0.9851 0 0;
+    --sidebar-border: 0.2686 0 0;
+    --sidebar-ring: 0.3785 0.0753 237.8048;
     --font-sans: Architects Daughter, cursive;
     --font-serif: Lora, ui-serif, serif;
     --font-mono: Geist Mono, ui-monospace, monospace;

@@ -57,7 +57,7 @@ export function MobileSignInForm() {
           required
         />
         <button
-          className="w-full px-4 py-4 rounded-lg bg-primary text-white font-semibold hover:bg-primary-hover transition-colors shadow-sm hover:shadow disabled:opacity-50 disabled:cursor-not-allowed text-base min-h-[44px]"
+          className="w-full px-4 py-4 rounded-lg bg-primary text-white font-semibold hover:brightness-90 transition-colors shadow-sm hover:shadow disabled:opacity-50 disabled:cursor-not-allowed text-base min-h-[44px]"
           type="submit"
           disabled={submitting}
         >
@@ -80,7 +80,7 @@ export function MobileSignInForm() {
           </span>
           <button
             type="button"
-            className="text-primary hover:text-primary-hover hover:underline font-medium cursor-pointer min-h-[44px] px-2 py-1"
+            className="text-primary hover:brightness-75 hover:underline font-medium cursor-pointer min-h-[44px] px-2 py-1"
             onClick={() => setFlow(flow === "signIn" ? "signUp" : "signIn")}
           >
             {flow === "signIn" ? "Sign up instead" : "Sign in instead"}
