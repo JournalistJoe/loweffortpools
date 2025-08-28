@@ -36,12 +36,23 @@ export function MobileSignInFormShadCN() {
     try {
       const result = await signIn("password", formData);
       
-      // Debug logging to understand what happens during sign-up/sign-in
-      console.log("Sign-in result:", { flow, result, typeof: typeof result });
+      // Defensive guard: ensure we have a valid result
+      if (!result) {
+        throw new Error(
+          flow === "signIn" 
+            ? "Sign-in failed. Please check your credentials and try again."
+            : "Sign-up failed. Please try again or contact support."
+        );
+      }
+      
+      // Development-only debug logging (no sensitive data)
+      if (import.meta.env.DEV) {
+        console.log("Auth flow completed:", { flow, signingIn: result?.signingIn });
+      }
       
       // For sign-up flow, show success state with email verification instructions
-      if (flow === "signUp") {
-        console.log("Showing sign-up success state");
+      // Only show when backend has sent verification email (signingIn === false)
+      if (flow === "signUp" && result?.signingIn === false) {
         setSignUpEmail(email);
         setSignUpSuccess(true);
         toast.success("Account created! Check your email for a verification link.", {
@@ -49,7 +60,7 @@ export function MobileSignInFormShadCN() {
         });
       }
       // For sign-in: if result is truthy, user is authenticated and will be redirected
-      // If result is falsy, an error should be thrown, so we don't need to handle it here
+      // All errors (including falsy results) are handled by the catch block above
     } catch (error: unknown) {
       console.error("Auth error:", error);
       
@@ -84,7 +95,7 @@ export function MobileSignInFormShadCN() {
         <CardContent>
           <Tabs
             value={flow}
-            onValueChange={handleFlowChange}
+            onValueChange={(value) => handleFlowChange(value as "signIn" | "signUp")}
           >
             <TabsList className="grid w-full grid-cols-2 mb-6">
               <TabsTrigger value="signIn" className="text-sm">
