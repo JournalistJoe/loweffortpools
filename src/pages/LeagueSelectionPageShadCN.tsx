@@ -1,6 +1,6 @@
 import { useQuery, useMutation } from "convex/react";
 import { api } from "../../convex/_generated/api";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { toast } from "sonner";
 import { useLeagueContext } from "../contexts/LeagueContext";
 import { Button } from "../components/ui/button";
@@ -52,10 +52,28 @@ export function LeagueSelectionPageShadCN() {
     joinCode.length === 6 ? { joinCode } : "skip",
   );
 
+  // Calculate minimum local datetime for datetime-local input
+  const minLocalDatetime = useMemo(() => {
+    const now = new Date();
+    const localTime = new Date(now.getTime() - (now.getTimezoneOffset() * 60000));
+    return localTime.toISOString().slice(0, 16);
+  }, []);
+
   const handleCreateLeague = async () => {
     if (!leagueName.trim()) {
       toast.error("Please enter a league name");
       return;
+    }
+
+    // Parse and validate scheduledDraftDate
+    let scheduledDraftMs: number | undefined = undefined;
+    if (scheduledDraftDate) {
+      scheduledDraftMs = new Date(scheduledDraftDate).getTime();
+      if (!isFinite(scheduledDraftMs) || scheduledDraftMs <= Date.now()) {
+        toast.error("Please enter a valid future date for the draft");
+        setIsCreating(false);
+        return;
+      }
     }
 
     setIsCreating(true);
@@ -63,7 +81,7 @@ export function LeagueSelectionPageShadCN() {
       const leagueId = await createLeague({
         name: leagueName.trim(),
         seasonYear: parseInt(seasonYear),
-        scheduledDraftDate: scheduledDraftDate ? new Date(scheduledDraftDate).getTime() : undefined,
+        scheduledDraftDate: scheduledDraftMs,
       });
       toast.success("League created successfully!");
       setShowCreateForm(false);
@@ -272,7 +290,7 @@ export function LeagueSelectionPageShadCN() {
                     type="datetime-local"
                     value={scheduledDraftDate}
                     onChange={(e) => setScheduledDraftDate(e.target.value)}
-                    min={new Date().toISOString().slice(0, 16)}
+                    min={minLocalDatetime}
                   />
                   <p className="text-xs text-muted-foreground mt-1">
                     Set when you want the draft to begin. You can change this later.
