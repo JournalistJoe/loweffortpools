@@ -7,6 +7,8 @@ import {
   Routes,
   Route,
   Navigate,
+  useLocation,
+  useNavigate,
 } from "react-router-dom";
 import { LeagueProvider } from "./contexts/LeagueContext";
 import { ThemeProvider } from "./contexts/ThemeContext";
@@ -21,22 +23,36 @@ import { LeagueWrapper } from "./components/LeagueWrapper";
 import { ForgotPasswordPage } from "./pages/ForgotPasswordPage";
 import { PasswordResetPage } from "./pages/PasswordResetPage";
 import { EmailVerificationPage } from "./pages/EmailVerificationPage";
+import { HomePage } from "./pages/HomePage";
+import { TermsOfServicePage } from "./pages/TermsOfServicePage";
 import { Toaster } from "sonner";
 
 function SignInPage() {
+  const location = useLocation();
+  const navigate = useNavigate();
+  const searchParams = new URLSearchParams(location.search);
+  const joinCode = searchParams.get("joinCode");
+
   return (
-    <div className="flex justify-center items-center min-h-screen">
+    <div className="flex justify-center items-center min-h-screen bg-background">
       <div className="w-full max-w-md p-8">
         <div className="text-center mb-8">
-          <img 
-            src="/lowEffortLogo.png" 
-            alt="LowEffort.bet Logo" 
-            className="h-16 w-16 mx-auto mb-4"
-          />
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">LowEffort.bet</h1>
-          <p className="text-gray-600">Sign in to manage your leagues</p>
+          <button
+            onClick={() => navigate("/")}
+            className="flex items-center justify-center mx-auto mb-4 hover:opacity-75 transition-opacity"
+          >
+            <img 
+              src="/lowEffortLogo.png" 
+              alt="LowEffort.bet Logo" 
+              className="h-16 w-16"
+            />
+          </button>
+          <h1 className="text-3xl font-bold text-foreground mb-2">LowEffort.bet</h1>
+          <p className="text-muted-foreground">
+            {joinCode ? `Join league with code: ${joinCode}` : "Sign in to manage your leagues"}
+          </p>
         </div>
-        <MobileSignInFormShadCN />
+        <MobileSignInFormShadCN joinCode={joinCode} />
       </div>
     </div>
   );
@@ -122,12 +138,22 @@ function App() {
           <Route path="/forgot-password" element={<ForgotPasswordPage />} />
           <Route path="/reset-password" element={<PasswordResetPage />} />
           <Route path="/verify-email" element={<EmailVerificationPage />} />
+          <Route path="/signin" element={<SignInPage />} />
+          <Route path="/terms" element={<TermsOfServicePage />} />
           
-          {/* Protected routes */}
+          {/* Homepage for unauthenticated users, protected routes for authenticated */}
+          <Route
+            path="/"
+            element={
+              isAuthenticated ? <AuthenticatedRoutes /> : <HomePage />
+            }
+          />
+          
+          {/* Protected routes - redirect to homepage if not authenticated */}
           <Route
             path="/*"
             element={
-              isAuthenticated ? <AuthenticatedRoutes /> : <SignInPage />
+              isAuthenticated ? <AuthenticatedRoutes /> : <HomePage />
             }
           />
         </Routes>

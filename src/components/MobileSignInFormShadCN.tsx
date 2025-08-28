@@ -9,7 +9,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
 import { useNavigate } from "react-router-dom";
 
-export function MobileSignInFormShadCN() {
+interface MobileSignInFormShadCNProps {
+  joinCode?: string | null;
+}
+
+export function MobileSignInFormShadCN({ joinCode }: MobileSignInFormShadCNProps) {
   const { signIn } = useAuthActions();
   const navigate = useNavigate();
   const [flow, setFlow] = useState<"signIn" | "signUp">("signIn");
