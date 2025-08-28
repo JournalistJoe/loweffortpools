@@ -149,6 +149,16 @@ export const createLeague = mutation({
       throw new Error("Failed to generate unique join code");
     }
 
+    // Validate scheduledDraftDate if provided
+    if (args.scheduledDraftDate !== undefined) {
+      if (!Number.isFinite(args.scheduledDraftDate)) {
+        throw new Error("Invalid scheduled draft date");
+      }
+      if (args.scheduledDraftDate < Date.now()) {
+        throw new Error("Scheduled draft date must be in the future");
+      }
+    }
+
     const leagueId = await ctx.db.insert("leagues", {
       name: args.name,
       status: "setup",
@@ -264,6 +274,16 @@ export const updateLeague = mutation({
 
     if (league.adminUserId !== userId) {
       throw new Error("Only admin can update league");
+    }
+
+    // Validate scheduledDraftDate if provided
+    if (args.scheduledDraftDate !== undefined) {
+      if (!Number.isFinite(args.scheduledDraftDate)) {
+        throw new Error("Invalid scheduled draft date");
+      }
+      if (args.scheduledDraftDate < Date.now()) {
+        throw new Error("Scheduled draft date must be in the future");
+      }
     }
 
     await ctx.db.patch(args.leagueId, {
