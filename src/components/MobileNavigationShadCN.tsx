@@ -20,6 +20,7 @@ import {
   Settings,
   Home,
 } from "lucide-react";
+import { DraftCountdown } from "./DraftCountdown";
 
 interface NavigationProps {
   league: {
@@ -28,6 +29,7 @@ interface NavigationProps {
     status: string;
     isAdmin: boolean;
     isParticipant: boolean;
+    scheduledDraftDate?: number;
   };
 }
 
@@ -105,11 +107,19 @@ export function MobileNavigationShadCN({ league }: NavigationProps) {
 
               <Separator orientation="vertical" className="h-6" />
 
-              <div className="flex items-center space-x-1">
-                <span className="text-muted-foreground">›</span>
-                <span className="text-foreground font-medium">
-                  {league.name || "Unnamed League"}
-                </span>
+              <div className="flex flex-col space-y-1">
+                <div className="flex items-center space-x-1">
+                  <span className="text-muted-foreground">›</span>
+                  <span className="text-foreground font-medium">
+                    {league.name || "Unnamed League"}
+                  </span>
+                </div>
+                {league.status === "setup" && league.scheduledDraftDate && (
+                  <DraftCountdown
+                    scheduledDraftDate={league.scheduledDraftDate}
+                    className="text-xs ml-4"
+                  />
+                )}
               </div>
             </div>
 
@@ -154,6 +164,12 @@ export function MobileNavigationShadCN({ league }: NavigationProps) {
               <div className="text-sm text-muted-foreground truncate mt-0.5">
                 {league.name || "Unnamed League"}
               </div>
+              {league.status === "setup" && league.scheduledDraftDate && (
+                <DraftCountdown
+                  scheduledDraftDate={league.scheduledDraftDate}
+                  className="text-xs mt-1"
+                />
+              )}
             </div>
 
             <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>

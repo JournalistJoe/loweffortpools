@@ -17,6 +17,7 @@ const applicationTables = {
     currentPickIndex: v.optional(v.number()),
     draftStartedAt: v.optional(v.number()),
     currentPickStartedAt: v.optional(v.number()),
+    scheduledDraftDate: v.optional(v.number()),
   })
     .index("by_admin", ["adminUserId"])
     .index("by_join_code", ["joinCode"]),

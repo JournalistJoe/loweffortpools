@@ -30,6 +30,7 @@ import {
   UserCheck,
   Eye,
 } from "lucide-react";
+import { DraftCountdown } from "../components/DraftCountdown";
 
 export function LeagueSelectionPageShadCN() {
   const leagues = useQuery(api.leagues.getUserLeagues);
@@ -38,6 +39,7 @@ export function LeagueSelectionPageShadCN() {
   const [showJoinForm, setShowJoinForm] = useState(false);
   const [leagueName, setLeagueName] = useState("");
   const [seasonYear, setSeasonYear] = useState("2025");
+  const [scheduledDraftDate, setScheduledDraftDate] = useState("");
   const [isCreating, setIsCreating] = useState(false);
   const [joinCode, setJoinCode] = useState("");
   const [displayName, setDisplayName] = useState("");
@@ -61,10 +63,12 @@ export function LeagueSelectionPageShadCN() {
       const leagueId = await createLeague({
         name: leagueName.trim(),
         seasonYear: parseInt(seasonYear),
+        scheduledDraftDate: scheduledDraftDate ? new Date(scheduledDraftDate).getTime() : undefined,
       });
       toast.success("League created successfully!");
       setShowCreateForm(false);
       setLeagueName("");
+      setScheduledDraftDate("");
       setSelectedLeagueId(leagueId);
     } catch (error) {
       toast.error(String(error));
@@ -171,22 +175,30 @@ export function LeagueSelectionPageShadCN() {
                 </div>
               </CardHeader>
               <CardContent>
-                <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                  {league.isParticipant && league.participant ? (
-                    <>
-                      <UserCheck className="h-4 w-4" />
-                      <span>Team: {league.participant.displayName}</span>
-                    </>
-                  ) : league.isAdmin ? (
-                    <>
-                      <Crown className="h-4 w-4" />
-                      <span>League Administrator</span>
-                    </>
-                  ) : (
-                    <>
-                      <Eye className="h-4 w-4" />
-                      <span>Spectator</span>
-                    </>
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                    {league.isParticipant && league.participant ? (
+                      <>
+                        <UserCheck className="h-4 w-4" />
+                        <span>Team: {league.participant.displayName}</span>
+                      </>
+                    ) : league.isAdmin ? (
+                      <>
+                        <Crown className="h-4 w-4" />
+                        <span>League Administrator</span>
+                      </>
+                    ) : (
+                      <>
+                        <Eye className="h-4 w-4" />
+                        <span>Spectator</span>
+                      </>
+                    )}
+                  </div>
+                  {league.status === "setup" && league.scheduledDraftDate && (
+                    <DraftCountdown
+                      scheduledDraftDate={league.scheduledDraftDate}
+                      className="text-xs"
+                    />
                   )}
                 </div>
               </CardContent>
@@ -253,6 +265,20 @@ export function LeagueSelectionPageShadCN() {
                   </Select>
                 </div>
 
+                <div>
+                  <Label htmlFor="draft-date">Scheduled Draft Date (Optional)</Label>
+                  <Input
+                    id="draft-date"
+                    type="datetime-local"
+                    value={scheduledDraftDate}
+                    onChange={(e) => setScheduledDraftDate(e.target.value)}
+                    min={new Date().toISOString().slice(0, 16)}
+                  />
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Set when you want the draft to begin. You can change this later.
+                  </p>
+                </div>
+
                 <Separator />
 
                 <div className="flex gap-3">
@@ -268,6 +294,7 @@ export function LeagueSelectionPageShadCN() {
                     onClick={() => {
                       setShowCreateForm(false);
                       setLeagueName("");
+                      setScheduledDraftDate("");
                     }}
                   >
                     Cancel

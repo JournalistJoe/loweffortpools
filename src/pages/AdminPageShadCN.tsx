@@ -67,6 +67,7 @@ export function AdminPageShadCN() {
   const [newPosition, setNewPosition] = useState("1");
   const [editingLeague, setEditingLeague] = useState(false);
   const [newLeagueName, setNewLeagueName] = useState("");
+  const [scheduledDraftDate, setScheduledDraftDate] = useState("");
 
   const importTeams = useMutation(api.nflData.importTeams);
   const startDraft = useMutation(api.leagues.startDraft);
@@ -202,6 +203,7 @@ export function AdminPageShadCN() {
       await updateLeague({
         leagueId: leagueId as any,
         name: newLeagueName.trim(),
+        scheduledDraftDate: scheduledDraftDate ? new Date(scheduledDraftDate).getTime() : undefined,
       });
       toast.success("League updated successfully");
       setEditingLeague(false);
@@ -343,6 +345,32 @@ export function AdminPageShadCN() {
                 </div>
               </div>
 
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label>Scheduled Draft Date</Label>
+                  {editingLeague ? (
+                    <Input
+                      type="datetime-local"
+                      value={scheduledDraftDate}
+                      onChange={(e) => setScheduledDraftDate(e.target.value)}
+                      min={new Date().toISOString().slice(0, 16)}
+                    />
+                  ) : (
+                    <p className="mt-2 text-sm text-foreground">
+                      {league.scheduledDraftDate
+                        ? new Date(league.scheduledDraftDate).toLocaleString()
+                        : "Not scheduled"}
+                    </p>
+                  )}
+                </div>
+                <div>
+                  <Label>Season Year</Label>
+                  <p className="mt-2 text-sm text-foreground">
+                    {league.seasonYear}
+                  </p>
+                </div>
+              </div>
+
               {/* Join Code Section */}
               <div>
                 <Label>Join Code</Label>
@@ -392,6 +420,7 @@ export function AdminPageShadCN() {
                       onClick={() => {
                         setEditingLeague(false);
                         setNewLeagueName("");
+                        setScheduledDraftDate("");
                       }}
                       className="gap-2"
                     >
@@ -405,6 +434,11 @@ export function AdminPageShadCN() {
                       onClick={() => {
                         setEditingLeague(true);
                         setNewLeagueName(league.name || "");
+                        setScheduledDraftDate(
+                          league.scheduledDraftDate
+                            ? new Date(league.scheduledDraftDate).toISOString().slice(0, 16)
+                            : ""
+                        );
                       }}
                       className="gap-2"
                     >

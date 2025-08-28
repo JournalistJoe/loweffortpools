@@ -19,6 +19,7 @@ import { ChatPage } from "./pages/ChatPage";
 import { LeagueWrapper } from "./components/LeagueWrapper";
 import { ForgotPasswordPage } from "./pages/ForgotPasswordPage";
 import { PasswordResetPage } from "./pages/PasswordResetPage";
+import { EmailVerificationPage } from "./pages/EmailVerificationPage";
 import { Toaster } from "sonner";
 
 function SignInPage() {
@@ -118,6 +119,7 @@ function App() {
         {/* Public routes that work regardless of auth status */}
         <Route path="/forgot-password" element={<ForgotPasswordPage />} />
         <Route path="/reset-password" element={<PasswordResetPage />} />
+        <Route path="/verify-email" element={<EmailVerificationPage />} />
         
         {/* Protected routes */}
         <Route

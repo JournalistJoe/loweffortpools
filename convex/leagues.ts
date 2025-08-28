@@ -126,6 +126,7 @@ export const createLeague = mutation({
   args: {
     name: v.string(),
     seasonYear: v.number(),
+    scheduledDraftDate: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
     const userId = await getAuthUserId(ctx);
@@ -154,6 +155,7 @@ export const createLeague = mutation({
       adminUserId: userId,
       seasonYear: args.seasonYear,
       joinCode,
+      scheduledDraftDate: args.scheduledDraftDate,
     });
 
     await ctx.db.insert("activity", {
@@ -251,6 +253,7 @@ export const updateLeague = mutation({
   args: {
     leagueId: v.id("leagues"),
     name: v.string(),
+    scheduledDraftDate: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
     const userId = await getAuthUserId(ctx);
@@ -265,6 +268,7 @@ export const updateLeague = mutation({
 
     await ctx.db.patch(args.leagueId, {
       name: args.name,
+      scheduledDraftDate: args.scheduledDraftDate,
     });
 
     await ctx.db.insert("activity", {
