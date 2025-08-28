@@ -42,6 +42,12 @@ import {
   TestTube,
 } from "lucide-react";
 
+function formatLocalForDateTimeLocal(d: Date) {
+  const offset = d.getTimezoneOffset();
+  const localDate = new Date(d.getTime() - offset * 60 * 1000);
+  return localDate.toISOString().slice(0, 16);
+}
+
 export function AdminPageShadCN() {
   const { leagueId } = useParams<{ leagueId: string }>();
   const league = useQuery(
@@ -353,7 +359,7 @@ export function AdminPageShadCN() {
                       type="datetime-local"
                       value={scheduledDraftDate}
                       onChange={(e) => setScheduledDraftDate(e.target.value)}
-                      min={new Date().toISOString().slice(0, 16)}
+                      min={formatLocalForDateTimeLocal(new Date())}
                     />
                   ) : (
                     <p className="mt-2 text-sm text-foreground">
