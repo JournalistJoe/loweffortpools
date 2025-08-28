@@ -15,13 +15,26 @@ export function MobileSignInFormShadCN() {
   const [flow, setFlow] = useState<"signIn" | "signUp">("signIn");
   const [submitting, setSubmitting] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setSubmitting(true);
     const formData = new FormData(e.target as HTMLFormElement);
     formData.set("flow", flow);
 
-    void signIn("password", formData).catch((error) => {
+    try {
+      const result = await signIn("password", formData);
+      
+      // If signing up, the user won't be immediately authenticated
+      // because they need to verify their email first
+      if (flow === "signUp" && !result) {
+        toast.success("Account created! Check your email for a verification link to complete sign-up.", {
+          duration: 6000,
+        });
+        setSubmitting(false);
+      }
+      // If signing in successfully, the user will be redirected automatically
+      // so we don't need to show a toast message
+    } catch (error: any) {
       console.error("Auth error:", error);
       let toastTitle = "";
       if (error.message.includes("Invalid password")) {
@@ -37,7 +50,7 @@ export function MobileSignInFormShadCN() {
       }
       toast.error(toastTitle);
       setSubmitting(false);
-    });
+    }
   };
 
   return (

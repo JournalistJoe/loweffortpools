@@ -47,7 +47,9 @@ export function EmailVerificationPage() {
     try {
       await signIn("password", verificationFormData);
       setIsVerified(true);
-      toast.success("Email verified successfully! You are now signed in.");
+      toast.success("Email verified successfully! Welcome to LowEffort.bet!", {
+        duration: 4000,
+      });
       // Redirect to home page after a short delay
       setTimeout(() => {
         navigate("/");
