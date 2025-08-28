@@ -24,15 +24,19 @@ export function MobileSignInFormShadCN() {
     try {
       const result = await signIn("password", formData);
       
-      // If signing up, the user won't be immediately authenticated
-      // because they need to verify their email first
-      if (flow === "signUp" && !result) {
+      // Debug logging to understand what happens during sign-up/sign-in
+      console.log("Sign-in result:", { flow, result, typeof: typeof result });
+      
+      // For sign-up flow, always show toast since email verification is required
+      // The user won't be immediately authenticated and needs to verify their email
+      if (flow === "signUp") {
+        console.log("Showing sign-up success toast");
         toast.success("Account created! Check your email for a verification link to complete sign-up.", {
           duration: 6000,
         });
       }
-      // If signing in successfully, the user will be redirected automatically
-      // so we don't need to show a toast message
+      // For sign-in: if result is truthy, user is authenticated and will be redirected
+      // If result is falsy, an error should be thrown, so we don't need to handle it here
     } catch (error: unknown) {
       console.error("Auth error:", error);
       
