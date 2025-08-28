@@ -1,0 +1,309 @@
+import { useQuery, useMutation } from "convex/react";
+import { api } from "../../convex/_generated/api";
+import { useState, useEffect } from "react";
+import { toast } from "sonner";
+import { useParams } from "react-router-dom";
+import { MobileNavigationShadCN as Navigation } from "../components/MobileNavigationShadCN";
+import { ChatShadCN as Chat } from "../components/ChatShadCN";
+import { Button } from "../components/ui/button";
+import { Badge } from "../components/ui/badge";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "../components/ui/card";
+import { LogOut, Clock, Trophy, Users } from "lucide-react";
+
+export function DraftPageShadCN() {
+  const { leagueId } = useParams<{ leagueId: string }>();
+  const league = useQuery(
+    api.leagues.getLeague,
+    leagueId ? { leagueId: leagueId as any } : "skip",
+  );
+  const draftState = useQuery(
+    api.draft.getDraftState,
+    leagueId ? { leagueId: leagueId as any } : "skip",
+  );
+  const activity = useQuery(
+    api.draft.getActivity,
+    leagueId ? { leagueId: leagueId as any } : "skip",
+  );
+  const makePick = useMutation(api.draft.makePick);
+  const removeParticipant = useMutation(api.leagues.removeParticipant);
+
+  const [selectedTeam, setSelectedTeam] = useState<string | null>(null);
+  const [timeRemaining, setTimeRemaining] = useState<number | null>(null);
+
+  // Update timer
+  useEffect(() => {
+    if (draftState?.timeRemaining !== undefined) {
+      setTimeRemaining(draftState.timeRemaining);
+
+      const interval = setInterval(() => {
+        setTimeRemaining((prev) => {
+          if (prev === null || prev <= 0) return 0;
+          return prev - 1000;
+        });
+      }, 1000);
+
+      return () => clearInterval(interval);
+    }
+  }, [draftState?.timeRemaining]);
+
+  const handleMakePick = async () => {
+    if (!selectedTeam || !leagueId) return;
+
+    try {
+      await makePick({
+        leagueId: leagueId as any,
+        nflTeamId: selectedTeam as any,
+      });
+      setSelectedTeam(null);
+      toast.success("Pick made successfully!");
+    } catch (error) {
+      toast.error(String(error));
+    }
+  };
+
+  const handleLeaveLeague = async () => {
+    if (!league?.participant || !leagueId) return;
+    if (
+      !confirm(
+        "Are you sure you want to leave this league? This action cannot be undone.",
+      )
+    )
+      return;
+
+    try {
+      await removeParticipant({
+        leagueId: leagueId as any,
+        participantId: league.participant._id as any,
+      });
+      toast.success("Successfully left the league");
+      // Navigation will be handled by the context
+    } catch (error) {
+      toast.error(String(error));
+    }
+  };
+
+  if (!league || !draftState) {
+    return (
+      <div className="flex justify-center items-center min-h-96">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
+
+  const formatTime = (ms: number) => {
+    const minutes = Math.floor(ms / 60000);
+    const seconds = Math.floor((ms % 60000) / 1000);
+    return `${minutes}:${seconds.toString().padStart(2, "0")}`;
+  };
+
+  const isUserTurn =
+    draftState.currentParticipant?.userId === league.participant?.userId;
+
+  return (
+    <div>
+      <Navigation league={league} />
+      <div className="max-w-7xl mx-auto p-4 pb-20">
+        <div className="mb-6">
+          <div className="flex justify-between items-start">
+            <div>
+              <h1 className="text-3xl font-bold text-foreground">
+                Draft Board
+              </h1>
+            </div>
+            {league.isParticipant && league.status === "setup" && (
+              <Button
+                onClick={handleLeaveLeague}
+                variant="destructive"
+                size="sm"
+                className="gap-2"
+              >
+                <LogOut className="h-4 w-4" />
+                Leave League
+              </Button>
+            )}
+          </div>
+          <div className="mt-2 flex items-center space-x-4">
+            {draftState.league.status === "draft" &&
+              draftState.currentParticipant && (
+                <div className="flex items-center space-x-2">
+                  <span className="text-sm text-muted-foreground">
+                    Current Pick:
+                  </span>
+                  <span className="font-medium">
+                    {draftState.currentParticipant.displayName}
+                  </span>
+                  {timeRemaining !== null && (
+                    <Badge
+                      variant={
+                        timeRemaining < 30000 ? "destructive" : "secondary"
+                      }
+                      className="font-mono gap-1"
+                    >
+                      <Clock className="h-3 w-3" />
+                      {formatTime(timeRemaining)}
+                    </Badge>
+                  )}
+                </div>
+              )}
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+          {/* Draft Board */}
+          <div className="lg:col-span-2">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Trophy className="h-5 w-5" />
+                  Draft Results
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-8 gap-2 text-xs font-medium text-muted-foreground mb-2">
+                  {draftState.participants.map((p) => (
+                    <div key={p._id} className="text-center truncate">
+                      {p.displayName}
+                    </div>
+                  ))}
+                </div>
+
+                {[1, 2, 3, 4].map((round) => (
+                  <div key={round} className="mb-4">
+                    <div className="text-sm font-medium text-foreground mb-2">
+                      Round {round}
+                    </div>
+                    <div className="grid grid-cols-8 gap-2">
+                      {Array.from({ length: 8 }, (_, i) => {
+                        // Calculate pick number based on snake draft order
+                        let pickNumber;
+                        if (round % 2 === 1) {
+                          // Odd rounds: normal order (1-8, 17-24)
+                          pickNumber = (round - 1) * 8 + i + 1;
+                        } else {
+                          // Even rounds: reverse order (9-16, 25-32)
+                          pickNumber = (round - 1) * 8 + (8 - i);
+                        }
+                        const pick = draftState.picks.find(
+                          (p) => p.pickNumber === pickNumber,
+                        );
+                        const isEmpty = !pick;
+
+                        return (
+                          <div
+                            key={pickNumber}
+                            className={`p-2 text-xs text-center rounded border ${
+                              isEmpty
+                                ? "border-border bg-muted/20"
+                                : "border-primary/20 bg-primary/5"
+                            }`}
+                          >
+                            {pick ? (
+                              <div>
+                                <div className="font-medium text-primary truncate">
+                                  {pick.team?.abbrev || "???"}
+                                </div>
+                                <div className="text-xs text-muted-foreground truncate">
+                                  {pick.participant?.displayName}
+                                </div>
+                              </div>
+                            ) : (
+                              <div className="text-muted-foreground">
+                                #{pickNumber}
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                ))}
+              </CardContent>
+            </Card>
+
+            {/* Available Teams */}
+            {draftState.league.status === "draft" && (
+              <Card className="mt-6">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Users className="h-5 w-5" />
+                    Available Teams
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                    {draftState.availableTeams.map((team) => (
+                      <Button
+                        key={team._id}
+                        onClick={() => setSelectedTeam(team._id)}
+                        disabled={!isUserTurn}
+                        variant={
+                          selectedTeam === team._id ? "default" : "outline"
+                        }
+                        className="h-auto p-3 text-left justify-start"
+                      >
+                        <div>
+                          <div className="font-medium">{team.abbrev}</div>
+                          <div className="text-xs text-muted-foreground truncate">
+                            {team.name}
+                          </div>
+                        </div>
+                      </Button>
+                    ))}
+                  </div>
+
+                  {isUserTurn && selectedTeam && (
+                    <div className="mt-4 flex justify-center">
+                      <Button
+                        onClick={handleMakePick}
+                        size="lg"
+                        className="gap-2"
+                      >
+                        <Trophy className="h-4 w-4" />
+                        Make Pick
+                      </Button>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            )}
+          </div>
+
+          {/* Right Sidebar */}
+          <div className="lg:col-span-2 space-y-6">
+            {/* Chat */}
+            {(league.isParticipant || league.isAdmin) && (
+              <Chat leagueId={leagueId!} />
+            )}
+
+            {/* Activity Feed */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Activity</CardTitle>
+              </CardHeader>
+              <CardContent className="max-h-96 overflow-y-auto">
+                {activity?.map((item) => (
+                  <div
+                    key={item._id}
+                    className="mb-3 pb-3 border-b border-border last:border-b-0"
+                  >
+                    <div className="text-sm text-foreground">
+                      {item.message}
+                    </div>
+                    <div className="text-xs text-muted-foreground mt-1">
+                      {new Date(item.createdAt).toLocaleTimeString()}
+                    </div>
+                  </div>
+                ))}
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
