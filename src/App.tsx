@@ -35,7 +35,12 @@ function App() {
       <div className="flex justify-center items-center min-h-screen">
         <div className="w-full max-w-md p-8">
           <div className="text-center mb-8">
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">NFL Pool</h1>
+            <img 
+              src="/lowEffortLogo.png" 
+              alt="LowEffort.bet Logo" 
+              className="h-16 w-16 mx-auto mb-4"
+            />
+            <h1 className="text-3xl font-bold text-gray-900 mb-2">LowEffort.bet</h1>
             <p className="text-gray-600">Sign in to manage your leagues</p>
           </div>
           <MobileSignInFormShadCN />

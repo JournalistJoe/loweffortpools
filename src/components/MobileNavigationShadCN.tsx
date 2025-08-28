@@ -99,8 +99,8 @@ export function MobileNavigationShadCN({ league }: NavigationProps) {
                 to="/"
                 className="text-xl font-bold text-foreground hover:text-muted-foreground transition-colors flex items-center gap-2"
               >
-                <Home className="h-5 w-5" />
-                NFL Pool
+                <img src="/lowEffortLogo.png" alt="LowEffort.bet" className="h-6 w-6" />
+                LowEffort.bet
               </Link>
 
               <Separator orientation="vertical" className="h-6" />
@@ -148,8 +148,8 @@ export function MobileNavigationShadCN({ league }: NavigationProps) {
                 to="/"
                 className="text-xl font-bold text-foreground flex items-center gap-2"
               >
-                <Home className="h-5 w-5" />
-                NFL Pool
+                <img src="/lowEffortLogo.png" alt="LowEffort.bet" className="h-6 w-6" />
+                LowEffort.bet
               </Link>
               <div className="text-sm text-muted-foreground truncate mt-0.5">
                 {league.name || "Unnamed League"}

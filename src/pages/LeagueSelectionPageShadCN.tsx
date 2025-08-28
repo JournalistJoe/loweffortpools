@@ -126,9 +126,14 @@ export function LeagueSelectionPageShadCN() {
 
   return (
     <div className="max-w-6xl mx-auto p-6 pb-20">
-      <div className="mb-8">
+      <div className="mb-8 text-center">
+        <img 
+          src="/lowEffortLogo.png" 
+          alt="LowEffort.bet Logo" 
+          className="h-12 w-12 mx-auto mb-4"
+        />
         <h1 className="text-3xl font-bold text-foreground mb-2">
-          Your Leagues
+          LowEffort.bet
         </h1>
         <p className="text-muted-foreground">
           Select a league to manage or participate in
