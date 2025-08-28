@@ -24,19 +24,25 @@ export function EmailVerificationPage() {
     }
 
     setToken(tokenParam);
-    setEmail(decodeURIComponent(emailParam));
-  }, [searchParams]);
+    setEmail(emailParam);
+
+    // Remove sensitive parameters from URL to prevent exposure in history/screenshots
+    const newParams = new URLSearchParams(searchParams);
+    newParams.delete("token");
+    newParams.delete("email");
+    const newUrl = window.location.pathname + (newParams.toString() ? "?" + newParams.toString() : "");
+    navigate(newUrl, { replace: true });
+  }, [searchParams, navigate]);
 
   useEffect(() => {
     if (token && email && !isVerifying && !isVerified && !error) {
+      setIsVerifying(true);
       handleEmailVerification();
     }
   }, [token, email, isVerifying, isVerified, error]);
 
   const handleEmailVerification = async () => {
     if (!token || !email) return;
-
-    setIsVerifying(true);
     
     // Set up form data for email verification
     const verificationFormData = new FormData();
