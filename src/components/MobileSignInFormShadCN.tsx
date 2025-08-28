@@ -2,6 +2,7 @@
 import { useAuthActions } from "@convex-dev/auth/react";
 import { useState } from "react";
 import { toast } from "sonner";
+import { isValidJoinCode } from "../utils/joinCodeUtils";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
@@ -37,8 +38,8 @@ export function MobileSignInFormShadCN({ joinCode }: MobileSignInFormShadCNProps
     const email = formData.get("email") as string;
     formData.set("flow", flow);
     
-    // Add joinCode to the authentication request if present
-    if (joinCode) {
+    // Add joinCode to the authentication request if valid
+    if (joinCode && isValidJoinCode(joinCode)) {
       formData.set("joinCode", joinCode);
     }
 

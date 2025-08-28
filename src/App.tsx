@@ -2,6 +2,7 @@ import { useConvexAuth } from "convex/react";
 import { useQuery } from "convex/react";
 import { api } from "../convex/_generated/api";
 import { MobileSignInFormShadCN } from "./components/MobileSignInFormShadCN";
+import { normalizeJoinCode } from "./utils/joinCodeUtils";
 import {
   BrowserRouter as Router,
   Routes,
@@ -33,8 +34,8 @@ function SignInPage() {
   const searchParams = new URLSearchParams(location.search);
   const joinCode = searchParams.get("joinCode");
   
-  // Normalize joinCode: convert to uppercase and clamp to 6 characters
-  const normalizedJoinCode = joinCode ? joinCode.toUpperCase().slice(0, 6) : null;
+  // Normalize joinCode using NFKC normalization and strict validation
+  const normalizedJoinCode = normalizeJoinCode(joinCode);
 
   return (
     <div className="flex justify-center items-center min-h-screen bg-background">

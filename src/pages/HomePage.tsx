@@ -1,6 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { useTheme } from "../contexts/ThemeContext";
 import { Button } from "../components/ui/button";
+import { normalizeJoinCode } from "../utils/joinCodeUtils";
 import { Card, CardContent } from "../components/ui/card";
 import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
@@ -18,7 +19,7 @@ export function HomePage() {
   };
 
   const handleJoinLeague = () => {
-    const normalized = joinCode.trim().normalize('NFC');
+    const normalized = normalizeJoinCode(joinCode.trim());
     if (normalized) {
       navigate(`/signin?joinCode=${encodeURIComponent(normalized)}`);
     } else {
