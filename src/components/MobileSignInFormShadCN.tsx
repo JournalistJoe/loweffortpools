@@ -36,6 +36,11 @@ export function MobileSignInFormShadCN({ joinCode }: MobileSignInFormShadCNProps
     const formData = new FormData(e.target as HTMLFormElement);
     const email = formData.get("email") as string;
     formData.set("flow", flow);
+    
+    // Add joinCode to the authentication request if present
+    if (joinCode) {
+      formData.set("joinCode", joinCode);
+    }
 
     try {
       const result = await signIn("password", formData);

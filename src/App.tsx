@@ -32,6 +32,9 @@ function SignInPage() {
   const navigate = useNavigate();
   const searchParams = new URLSearchParams(location.search);
   const joinCode = searchParams.get("joinCode");
+  
+  // Normalize joinCode: convert to uppercase and clamp to 6 characters
+  const normalizedJoinCode = joinCode ? joinCode.toUpperCase().slice(0, 6) : null;
 
   return (
     <div className="flex justify-center items-center min-h-screen bg-background">
@@ -49,10 +52,10 @@ function SignInPage() {
           </button>
           <h1 className="text-3xl font-bold text-foreground mb-2">LowEffort.bet</h1>
           <p className="text-muted-foreground">
-            {joinCode ? `Join league with code: ${joinCode}` : "Sign in to manage your leagues"}
+            {normalizedJoinCode ? `Join league with code: ${normalizedJoinCode}` : "Sign in to manage your leagues"}
           </p>
         </div>
-        <MobileSignInFormShadCN joinCode={joinCode} />
+        <MobileSignInFormShadCN joinCode={normalizedJoinCode} />
       </div>
     </div>
   );
@@ -138,7 +141,7 @@ function App() {
           <Route path="/forgot-password" element={<ForgotPasswordPage />} />
           <Route path="/reset-password" element={<PasswordResetPage />} />
           <Route path="/verify-email" element={<EmailVerificationPage />} />
-          <Route path="/signin" element={<SignInPage />} />
+          <Route path="/signin" element={isAuthenticated ? <Navigate to="/" replace /> : <SignInPage />} />
           <Route path="/terms" element={<TermsOfServicePage />} />
           
           {/* Homepage for unauthenticated users, protected routes for authenticated */}

@@ -5,6 +5,8 @@ import { Card, CardContent } from "../components/ui/card";
 import { Separator } from "../components/ui/separator";
 import { ArrowLeft, Sun, Moon } from "lucide-react";
 
+const TERMS_LAST_UPDATED = '2025-08-28';
+
 export function TermsOfServicePage() {
   const navigate = useNavigate();
   const { theme, toggleTheme } = useTheme();
@@ -59,7 +61,7 @@ export function TermsOfServicePage() {
                     LowEffort.bet Terms of Service & Privacy Policy
                   </h1>
                   <p className="text-sm text-muted-foreground italic">
-                    *Last Updated: Because lawyers made us put a date*
+                    Last Updated: {TERMS_LAST_UPDATED}
                   </p>
                 </div>
 
@@ -237,7 +239,11 @@ export function TermsOfServicePage() {
                     <div className="space-y-4">
                       <h4 className="text-xl font-semibold text-foreground">Kids</h4>
                       <p className="text-muted-foreground">
-                        Don't use this if you're under 18. Go play actual sports or something.
+                        Don't use this if you're under 18. Go play actual sports or something. 
+                        This service is not intended for children under 13, and we do not knowingly collect 
+                        personal information from children under 13. If you are a parent and believe we have 
+                        collected information from your child, please contact us at support@loweffort.bet 
+                        so we can delete it.
                       </p>
                     </div>
 

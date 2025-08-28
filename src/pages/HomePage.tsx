@@ -18,8 +18,9 @@ export function HomePage() {
   };
 
   const handleJoinLeague = () => {
-    if (joinCode.trim()) {
-      navigate(`/signin?joinCode=${joinCode.trim()}`);
+    const normalized = joinCode.trim().normalize('NFC');
+    if (normalized) {
+      navigate(`/signin?joinCode=${encodeURIComponent(normalized)}`);
     } else {
       navigate("/signin");
     }
