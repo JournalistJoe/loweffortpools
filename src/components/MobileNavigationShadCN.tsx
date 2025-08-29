@@ -111,6 +111,22 @@ export function MobileNavigationShadCN({ league }: NavigationProps) {
   };
 
   const navItems = getNavItems();
+  
+  const getBottomNavItems = () => {
+    // For bottom navigation, replace "My Team" with personalized team name
+    // and exclude Chat (keep it in hamburger menu only)
+    return navItems.map(item => {
+      if (item.name === "My Team" && league.participant) {
+        return {
+          ...item,
+          name: league.participant.displayName
+        };
+      }
+      return item;
+    }).filter(item => item.name !== "Chat"); // Remove Chat from bottom nav
+  };
+
+  const bottomNavItems = getBottomNavItems();
 
   return (
     <>
@@ -244,7 +260,7 @@ export function MobileNavigationShadCN({ league }: NavigationProps) {
         {/* Bottom Tab Navigation for Main Actions */}
         <div className="fixed bottom-0 left-0 right-0 bg-background border-t px-2 py-2 z-50">
           <div className="flex justify-around items-center max-w-lg mx-auto">
-            {navItems.slice(0, 4).map((item) => {
+            {bottomNavItems.slice(0, 4).map((item) => {
               const IconComponent = item.icon;
               return (
                 <Button
@@ -264,7 +280,7 @@ export function MobileNavigationShadCN({ league }: NavigationProps) {
               );
             })}
 
-            {navItems.length > 4 && (
+            {bottomNavItems.length > 4 && (
               <Button
                 variant="ghost"
                 size="sm"
