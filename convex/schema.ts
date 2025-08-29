@@ -98,6 +98,8 @@ const applicationTables = {
     type: v.union(
       v.literal("league_created"),
       v.literal("participant_added"),
+      v.literal("spectator_joined"),
+      v.literal("spectator_left"),
       v.literal("draft_started"),
       v.literal("draft_pick"),
       v.literal("draft_completed"),

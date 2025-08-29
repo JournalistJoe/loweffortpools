@@ -93,7 +93,7 @@ export function AdminPageShadCN() {
   const updateLeague = useMutation(api.leagues.updateLeague);
   const deleteLeague = useMutation(api.leagues.deleteLeague);
   const regenerateJoinCode = useMutation(api.leagues.regenerateJoinCode);
-  const leaveAsSpectator = useMutation(api.spectators.leaveAsSpectator);
+  const removeSpectator = useMutation(api.spectators.removeSpectator);
 
 
   const handleStartDraft = async () => {
@@ -843,7 +843,10 @@ export function AdminPageShadCN() {
                         onClick={async () => {
                           if (confirm(`Remove ${spectator.displayName} as spectator?`)) {
                             try {
-                              await leaveAsSpectator({ leagueId: leagueId as any });
+                              await removeSpectator({ 
+                                leagueId: leagueId as any,
+                                spectatorId: spectator._id as any
+                              });
                               toast.success("Spectator removed");
                             } catch (error) {
                               toast.error(String(error));
