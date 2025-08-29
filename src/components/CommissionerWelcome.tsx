@@ -62,7 +62,11 @@ export function CommissionerWelcome({ league, currentUser }: CommissionerWelcome
   const handleSetDraftDate = () => {
     if (!showDraftDateInput) {
       setScheduledDraftDate(league.scheduledDraftDate 
-        ? new Date(league.scheduledDraftDate).toISOString().slice(0, 16)
+        ? (() => {
+            const date = new Date(league.scheduledDraftDate);
+            const localDate = new Date(date.getTime() - date.getTimezoneOffset() * 60000);
+            return localDate.toISOString().slice(0, 16);
+          })()
         : defaultDraftDate
       );
       setShowDraftDateInput(true);

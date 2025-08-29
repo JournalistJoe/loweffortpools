@@ -306,15 +306,19 @@ export const createLeague = mutation({
     const user = await ctx.db.get(userId);
 
     // Build display name with proper normalization and limits
-    const rawName = args.teamName || user?.name || user?.email || "Admin";
-    const normalizedName = rawName
+    const candidates = [args.teamName, user?.name, user?.email, "Admin"];
+    const firstNonEmpty = candidates.find(
+      (val) => typeof val === "string" && val.trim().length > 0
+    ) as string;
+    const normalizedName = firstNonEmpty
       .trim()
-      .replace(/\s+/g, ' '); // Collapse multiple whitespace to single space
+      .replace(/\s+/g, " ") // Collapse multiple whitespace to single space
+      .normalize("NFKC");   // Unicode normalize to reduce confusables
 
-    // Safely truncate to 50 characters without breaking multi-byte characters
-    const truncatedName = normalizedName.length > 50 
-      ? Array.from(normalizedName).slice(0, 50).join('') 
-      : normalizedName;
+    // Safely truncate to 50 code points
+    const MAX_DISPLAY_NAME_LENGTH = 50;
+    const codepoints = Array.from(normalizedName);
+    const truncatedName = codepoints.slice(0, MAX_DISPLAY_NAME_LENGTH).join("");
 
     // Final safety check to ensure non-empty
     const displayName = truncatedName || "Admin";
