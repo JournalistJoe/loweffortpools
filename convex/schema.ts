@@ -117,6 +117,15 @@ const applicationTables = {
   })
     .index("by_ran_at", ["ranAt"])
     .index("by_type", ["type"]),
+
+  rateLimits: defineTable({
+    key: v.string(), // userId for authenticated users, "anonymous:{joinCode}" for others
+    attempts: v.number(),
+    windowStart: v.number(),
+    expiresAt: v.number(),
+  })
+    .index("by_key", ["key"])
+    .index("by_expires_at", ["expiresAt"]),
 };
 
 export default defineSchema({

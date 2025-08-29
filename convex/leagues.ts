@@ -12,6 +12,64 @@ function generateJoinCode(): string {
   return result;
 }
 
+// Rate limiting helper function
+async function checkRateLimit(ctx: any, userId: string, operation: string = "autoJoinLeague") {
+  const RATE_LIMIT_WINDOW = 60 * 1000; // 1 minute
+  const MAX_ATTEMPTS = 5;
+  const now = Date.now();
+  
+  const key = `${operation}:${userId}`;
+  
+  // Clean up expired entries
+  const expiredEntries = await ctx.db
+    .query("rateLimits")
+    .withIndex("by_expires_at", (q: any) => q.lt("expiresAt", now))
+    .collect();
+  
+  for (const entry of expiredEntries) {
+    await ctx.db.delete(entry._id);
+  }
+  
+  // Get current rate limit entry
+  const rateLimitEntry = await ctx.db
+    .query("rateLimits")
+    .withIndex("by_key", (q: any) => q.eq("key", key))
+    .first();
+  
+  if (!rateLimitEntry) {
+    // First attempt - create new entry
+    await ctx.db.insert("rateLimits", {
+      key,
+      attempts: 1,
+      windowStart: now,
+      expiresAt: now + RATE_LIMIT_WINDOW,
+    });
+    return;
+  }
+  
+  const windowAge = now - rateLimitEntry.windowStart;
+  
+  if (windowAge >= RATE_LIMIT_WINDOW) {
+    // Reset window
+    await ctx.db.patch(rateLimitEntry._id, {
+      attempts: 1,
+      windowStart: now,
+      expiresAt: now + RATE_LIMIT_WINDOW,
+    });
+    return;
+  }
+  
+  // Check if limit exceeded
+  if (rateLimitEntry.attempts >= MAX_ATTEMPTS) {
+    throw new Error("Too many attempts, try again later");
+  }
+  
+  // Increment attempts
+  await ctx.db.patch(rateLimitEntry._id, {
+    attempts: rateLimitEntry.attempts + 1,
+  });
+}
+
 export const getUserLeagues = query({
   args: {},
   handler: async (ctx) => {
@@ -168,10 +226,29 @@ export const createLeague = mutation({
       scheduledDraftDate: args.scheduledDraftDate,
     });
 
+    // Get the user info to create display name
+    const user = await ctx.db.get(userId);
+    const displayName = user?.name || user?.email || "Admin";
+
+    // Auto-add the league creator as a participant with draft position 1
+    await ctx.db.insert("participants", {
+      leagueId,
+      userId,
+      displayName: displayName,
+      draftPosition: 1,
+    });
+
     await ctx.db.insert("activity", {
       leagueId,
       type: "league_created",
       message: `League "${args.name}" created for ${args.seasonYear} season`,
+      createdAt: Date.now(),
+    });
+
+    await ctx.db.insert("activity", {
+      leagueId,
+      type: "participant_added",
+      message: `${displayName} joined the league (Draft Position 1)`,
       createdAt: Date.now(),
     });
 
@@ -256,6 +333,83 @@ export const joinLeague = mutation({
     });
 
     return { leagueId: league._id, participantId };
+  },
+});
+
+export const adminJoinOwnLeague = mutation({
+  args: {
+    leagueId: v.id("leagues"),
+    displayName: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) throw new Error("Must be logged in");
+
+    if (!args.displayName.trim()) {
+      throw new Error("Display name is required");
+    }
+
+    const league = await ctx.db.get(args.leagueId);
+    if (!league) throw new Error("League not found");
+
+    // Verify user is the admin of this league
+    if (league.adminUserId !== userId) {
+      throw new Error("Only the league admin can use this feature");
+    }
+
+    if (league.status !== "setup") {
+      throw new Error("Cannot join league - draft has already started");
+    }
+
+    // Check if admin is already a participant
+    const existingParticipant = await ctx.db
+      .query("participants")
+      .withIndex("by_league_and_user", (q) =>
+        q.eq("leagueId", args.leagueId).eq("userId", userId),
+      )
+      .first();
+
+    if (existingParticipant) {
+      throw new Error("You are already a participant in this league");
+    }
+
+    // Check if league is full
+    const participants = await ctx.db
+      .query("participants")
+      .withIndex("by_league", (q) => q.eq("leagueId", args.leagueId))
+      .collect();
+
+    if (participants.length >= 8) {
+      throw new Error("League is full");
+    }
+
+    // Find next available draft position
+    const takenPositions = new Set(participants.map((p) => p.draftPosition));
+    let draftPosition = 1;
+    while (takenPositions.has(draftPosition) && draftPosition <= 8) {
+      draftPosition++;
+    }
+
+    if (draftPosition > 8) {
+      throw new Error("No available draft positions");
+    }
+
+    const participantId = await ctx.db.insert("participants", {
+      leagueId: args.leagueId,
+      userId,
+      displayName: args.displayName.trim(),
+      draftPosition,
+    });
+
+    await ctx.db.insert("activity", {
+      leagueId: args.leagueId,
+      type: "participant_added",
+      message: `${args.displayName.trim()} joined the league as admin (Draft Position ${draftPosition})`,
+      createdAt: Date.now(),
+      participantId,
+    });
+
+    return { participantId, draftPosition };
   },
 });
 
@@ -509,6 +663,57 @@ export const removeParticipant = mutation({
   },
 });
 
+export const updateParticipantDisplayName = mutation({
+  args: {
+    leagueId: v.id("leagues"),
+    participantId: v.id("participants"),
+    newDisplayName: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const currentUserId = await getAuthUserId(ctx);
+    if (!currentUserId) throw new Error("Must be logged in");
+
+    if (!args.newDisplayName.trim()) {
+      throw new Error("Display name cannot be empty");
+    }
+
+    const league = await ctx.db.get(args.leagueId);
+    if (!league) throw new Error("League not found");
+
+    const participant = await ctx.db.get(args.participantId);
+    if (!participant || participant.leagueId !== args.leagueId) {
+      throw new Error("Participant not found");
+    }
+
+    // Allow admin or the participant themselves to update display name
+    if (
+      league.adminUserId !== currentUserId &&
+      participant.userId !== currentUserId
+    ) {
+      throw new Error("Only admin or the participant can update display name");
+    }
+
+    if (league.status !== "setup") {
+      throw new Error("Can only update display name during setup");
+    }
+
+    const oldDisplayName = participant.displayName;
+    await ctx.db.patch(args.participantId, {
+      displayName: args.newDisplayName.trim(),
+    });
+
+    await ctx.db.insert("activity", {
+      leagueId: args.leagueId,
+      type: "participant_added", // Reusing type for simplicity
+      message: `${oldDisplayName} changed team name to ${args.newDisplayName.trim()}`,
+      createdAt: Date.now(),
+      participantId: args.participantId,
+    });
+
+    return true;
+  },
+});
+
 export const updateParticipantPosition = mutation({
   args: {
     leagueId: v.id("leagues"),
@@ -627,6 +832,62 @@ export const reorderParticipants = mutation({
       leagueId: args.leagueId,
       type: "participant_added", // Reusing type for simplicity
       message: "Participant draft order updated",
+      createdAt: Date.now(),
+    });
+
+    return true;
+  },
+});
+
+export const randomizeParticipantOrder = mutation({
+  args: {
+    leagueId: v.id("leagues"),
+  },
+  handler: async (ctx, args) => {
+    const currentUserId = await getAuthUserId(ctx);
+    if (!currentUserId) throw new Error("Must be logged in");
+
+    const league = await ctx.db.get(args.leagueId);
+    if (!league) throw new Error("League not found");
+
+    if (league.adminUserId !== currentUserId) {
+      throw new Error("Only admin can randomize participant order");
+    }
+
+    if (league.status !== "setup") {
+      throw new Error("Can only randomize order during setup");
+    }
+
+    // Get all participants for this league
+    const participants = await ctx.db
+      .query("participants")
+      .withIndex("by_league", (q) => q.eq("leagueId", args.leagueId))
+      .collect();
+
+    if (participants.length === 0) {
+      throw new Error("No participants to randomize");
+    }
+
+    // Create array of positions and shuffle them
+    const positions = Array.from({ length: participants.length }, (_, i) => i + 1);
+    
+    // Fisher-Yates shuffle algorithm
+    for (let i = positions.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [positions[i], positions[j]] = [positions[j], positions[i]];
+    }
+
+    // Update all participants with new randomized positions
+    for (let i = 0; i < participants.length; i++) {
+      await ctx.db.patch(participants[i]._id, {
+        draftPosition: positions[i],
+      });
+    }
+
+    await ctx.db.insert("activity", {
+      leagueId: args.leagueId,
+      type: "participant_added", // Reusing type for simplicity
+      message: "Draft order has been randomized",
       createdAt: Date.now(),
     });
 
@@ -812,6 +1073,9 @@ export const autoJoinLeague = mutation({
     const userId = await getAuthUserId(ctx);
     if (!userId) throw new Error("Must be logged in");
 
+    // Apply rate limiting
+    await checkRateLimit(ctx, userId);
+
     const league = await ctx.db
       .query("leagues")
       .withIndex("by_join_code", (q) =>
@@ -854,12 +1118,9 @@ export const autoJoinLeague = mutation({
       throw new Error("League is full");
     }
 
-    // Generate default team name using user email prefix
-    const user = await ctx.db.get(userId);
-    const userEmail = user?.email || "";
-    const emailPrefix = userEmail.split("@")[0] || "Player";
+    // Generate default team name using team number
     const teamNumber = participants.length + 1;
-    const defaultDisplayName = `${emailPrefix}'s Team`;
+    const defaultDisplayName = `Team ${teamNumber}`;
 
     // Find next available draft position
     const takenPositions = new Set(participants.map((p) => p.draftPosition));

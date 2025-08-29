@@ -20,6 +20,7 @@ import { LeaderboardPage } from "./pages/LeaderboardPage";
 import { TeamPage } from "./pages/TeamPage";
 import { SchedulePage } from "./pages/SchedulePage";
 import { ChatPage } from "./pages/ChatPage";
+import { ParticipantsPage } from "./pages/ParticipantsPage";
 import { LeagueWrapper } from "./components/LeagueWrapper";
 import { ForgotPasswordPage } from "./pages/ForgotPasswordPage";
 import { PasswordResetPage } from "./pages/PasswordResetPage";
@@ -113,6 +114,14 @@ function AuthenticatedRoutes() {
             element={
               <LeagueWrapper>
                 <ChatPage />
+              </LeagueWrapper>
+            }
+          />
+          <Route
+            path="/league/:leagueId/participants"
+            element={
+              <LeagueWrapper>
+                <ParticipantsPage />
               </LeagueWrapper>
             }
           />

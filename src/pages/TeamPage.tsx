@@ -1,13 +1,22 @@
-import { useQuery } from "convex/react";
+import { useQuery, useMutation } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import { useParams } from "react-router-dom";
 import { MobileNavigationShadCN as Navigation } from "../components/MobileNavigationShadCN";
+import { useState } from "react";
+import { Button } from "../components/ui/button";
+import { Input } from "../components/ui/input";
+import { Label } from "../components/ui/label";
+import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
+import { Edit, Save, X } from "lucide-react";
 
 export function TeamPage() {
   const { leagueId, participantId } = useParams<{
     leagueId: string;
     participantId: string;
   }>();
+  const [isEditingName, setIsEditingName] = useState(false);
+  const [newTeamName, setNewTeamName] = useState("");
+  
   const league = useQuery(
     api.leagues.getLeague,
     leagueId ? { leagueId: leagueId as any } : "skip",
@@ -16,6 +25,33 @@ export function TeamPage() {
     api.scoring.getParticipantTeams,
     participantId ? { participantId: participantId as any } : "skip",
   );
+  const updateDisplayName = useMutation(api.leagues.updateParticipantDisplayName);
+
+  const handleEditName = () => {
+    setNewTeamName(teamData?.participant.displayName || "");
+    setIsEditingName(true);
+  };
+
+  const handleSaveName = async () => {
+    if (!leagueId || !participantId || !newTeamName.trim()) return;
+    
+    try {
+      await updateDisplayName({
+        leagueId: leagueId as any,
+        participantId: participantId as any,
+        newDisplayName: newTeamName.trim(),
+      });
+      setIsEditingName(false);
+    } catch (error) {
+      console.error("Failed to update team name:", error);
+      alert("Failed to update team name. Please try again.");
+    }
+  };
+
+  const handleCancelEdit = () => {
+    setIsEditingName(false);
+    setNewTeamName("");
+  };
 
   if (!league || !teamData) {
     return (
@@ -34,22 +70,77 @@ export function TeamPage() {
     <div>
       <Navigation league={league} />
       <div className="max-w-6xl mx-auto p-4 pb-20">
-        <div className="mb-6">
-          <h1 className="text-3xl font-bold text-gray-900">
-            {teamData.participant.displayName}'s Teams
-          </h1>
-          <div className="mt-2 flex items-center space-x-4">
-            <span className="text-lg text-gray-600">
-              Draft Position: {teamData.participant.draftPosition}
-            </span>
-            <span className="text-lg font-semibold text-blue-600">
-              Total Wins: {totalWins}
-            </span>
+        {/* Team Settings Section for Setup Phase */}
+        {league.status === "setup" && (
+          <Card className="mb-6">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                Team Settings
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="team-name">Team Name</Label>
+                {isEditingName ? (
+                  <div className="flex gap-2 items-center">
+                    <Input
+                      id="team-name"
+                      value={newTeamName}
+                      onChange={(e) => setNewTeamName(e.target.value)}
+                      placeholder="Enter your team name"
+                      className="flex-1"
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") handleSaveName();
+                        if (e.key === "Escape") handleCancelEdit();
+                      }}
+                    />
+                    <Button size="sm" onClick={handleSaveName}>
+                      <Save className="h-4 w-4" />
+                    </Button>
+                    <Button size="sm" variant="outline" onClick={handleCancelEdit}>
+                      <X className="h-4 w-4" />
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-2">
+                    <span className="font-medium text-lg">
+                      {teamData.participant.displayName}
+                    </span>
+                    <Button size="sm" variant="outline" onClick={handleEditName}>
+                      <Edit className="h-4 w-4" />
+                      Edit
+                    </Button>
+                  </div>
+                )}
+              </div>
+              <div className="text-sm text-muted-foreground">
+                <span>Draft Position: {teamData.participant.draftPosition}</span>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+        
+        {/* Team Data Section for Post-Draft */}
+        {league.status !== "setup" && (
+          <div className="mb-6">
+            <h1 className="text-3xl font-bold text-gray-900">
+              {teamData.participant.displayName}'s Teams
+            </h1>
+            <div className="mt-2 flex items-center space-x-4">
+              <span className="text-lg text-gray-600">
+                Draft Position: {teamData.participant.draftPosition}
+              </span>
+              <span className="text-lg font-semibold text-blue-600">
+                Total Wins: {totalWins}
+              </span>
+            </div>
           </div>
-        </div>
+        )}
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {teamData.teams.map((teamInfo) => (
+        {/* Teams Grid - Only show after draft */}
+        {league.status !== "setup" && teamData.teams.length > 0 && (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {teamData.teams.map((teamInfo) => (
             <div key={teamInfo.team._id} className="bg-white rounded-lg shadow">
               <div className="p-6">
                 <div className="flex items-center justify-between mb-4">
@@ -123,7 +214,19 @@ export function TeamPage() {
               </div>
             </div>
           ))}
-        </div>
+          </div>
+        )}
+        
+        {/* Setup phase message */}
+        {league.status === "setup" && (
+          <Card>
+            <CardContent className="pt-6 text-center">
+              <p className="text-muted-foreground">
+                Your teams will appear here after the draft is completed.
+              </p>
+            </CardContent>
+          </Card>
+        )}
       </div>
     </div>
   );

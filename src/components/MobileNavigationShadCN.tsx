@@ -43,7 +43,13 @@ export function MobileNavigationShadCN({ league }: NavigationProps) {
 
     // Show different tabs based on league status
     if (league.status === "setup") {
-      // Setup phase - no additional tabs
+      // Setup phase - show participants tab
+      items.push({
+        name: "Participants",
+        href: `/league/${leagueId}/participants`,
+        current: location.pathname.includes("/participants"),
+        icon: Users,
+      });
     } else if (league.status === "draft") {
       items.unshift({
         name: "Draft",
