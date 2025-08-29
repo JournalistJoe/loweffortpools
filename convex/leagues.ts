@@ -304,7 +304,20 @@ export const createLeague = mutation({
 
     // Get the user info to create display name
     const user = await ctx.db.get(userId);
-    const displayName = args.teamName?.trim() || user?.name || user?.email || "Admin";
+
+    // Build display name with proper normalization and limits
+    const rawName = args.teamName || user?.name || user?.email || "Admin";
+    const normalizedName = rawName
+      .trim()
+      .replace(/\s+/g, ' '); // Collapse multiple whitespace to single space
+
+    // Safely truncate to 50 characters without breaking multi-byte characters
+    const truncatedName = normalizedName.length > 50 
+      ? Array.from(normalizedName).slice(0, 50).join('') 
+      : normalizedName;
+
+    // Final safety check to ensure non-empty
+    const displayName = truncatedName || "Admin";
 
     // Auto-add the league creator as a participant with draft position 1
     await ctx.db.insert("participants", {
