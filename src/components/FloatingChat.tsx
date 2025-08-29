@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { FloatingChatContent } from "./FloatingChatContent";
 import { Button } from "./ui/button";
@@ -16,6 +16,23 @@ export function FloatingChat({ league }: FloatingChatProps) {
   const { leagueId } = useParams<{ leagueId: string }>();
   const [isOpen, setIsOpen] = useState(false);
 
+  // Handle escape key to close chat
+  useEffect(() => {
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape' && isOpen) {
+        setIsOpen(false);
+      }
+    };
+
+    if (isOpen) {
+      document.addEventListener('keydown', handleEscape);
+    }
+
+    return () => {
+      document.removeEventListener('keydown', handleEscape);
+    };
+  }, [isOpen]);
+
   // Only show for participants and admins
   if (!league.isParticipant && !league.isAdmin) {
     return null;
@@ -31,10 +48,12 @@ export function FloatingChat({ league }: FloatingChatProps) {
       {/* Floating Chat Container */}
       {isOpen ? (
         <div className="bg-white shadow-lg border flex flex-col z-50
-                        fixed inset-0 top-16 
-                        md:fixed md:bottom-4 md:right-4 md:w-80 md:h-96 md:rounded-lg md:inset-auto md:top-auto md:left-auto">
+                        fixed top-16 bottom-0 left-0 right-0 
+                        md:top-auto md:bottom-4 md:right-4 md:left-auto md:w-80 md:h-96 md:rounded-lg">
             {/* Header */}
-            <div className="flex items-center justify-between p-3 border-b bg-primary text-primary-foreground md:rounded-t-lg">
+            <div className="flex items-center justify-between p-3 border-b bg-primary text-primary-foreground md:rounded-t-lg relative">
+              {/* Mobile close indicator */}
+              <div className="absolute top-1 left-1/2 transform -translate-x-1/2 w-8 h-1 bg-primary-foreground/30 rounded-full md:hidden"></div>
               <div className="flex items-center gap-2">
                 <MessageCircle className="h-4 w-4" />
                 <span className="font-medium">League Chat</span>
@@ -43,9 +62,9 @@ export function FloatingChat({ league }: FloatingChatProps) {
                 variant="ghost"
                 size="sm"
                 onClick={() => setIsOpen(false)}
-                className="h-6 w-6 p-0 text-primary-foreground hover:bg-primary/80"
+                className="h-8 w-8 p-0 text-primary-foreground hover:bg-primary/80 md:h-6 md:w-6"
               >
-                <X className="h-4 w-4" />
+                <X className="h-5 w-5 md:h-4 md:w-4" />
               </Button>
             </div>
 
@@ -65,6 +84,7 @@ export function FloatingChat({ league }: FloatingChatProps) {
           </Button>
         </div>
       )}
+
 
     </>
   );
