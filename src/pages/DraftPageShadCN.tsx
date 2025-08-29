@@ -157,20 +157,23 @@ export function DraftPageShadCN() {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="grid grid-cols-8 gap-2 text-xs font-medium text-muted-foreground mb-2">
+                <div className="grid grid-cols-9 gap-2 text-xs font-medium text-muted-foreground mb-2">
+                  <div></div> {/* Empty space for Round column */}
                   {draftState.participants.map((p) => (
-                    <div key={p._id} className="text-center truncate">
-                      {p.displayName}
+                    <div key={p._id} className="text-center truncate h-8 flex items-center justify-center sm:h-auto">
+                      <span className="sm:inline block transform -rotate-90 sm:rotate-0 whitespace-nowrap">
+                        {p.displayName}
+                      </span>
                     </div>
                   ))}
                 </div>
 
                 {[1, 2, 3, 4].map((round) => (
                   <div key={round} className="mb-4">
-                    <div className="text-sm font-medium text-foreground mb-2">
-                      Round {round}
-                    </div>
-                    <div className="grid grid-cols-8 gap-2">
+                    <div className="grid grid-cols-9 gap-2 items-center">
+                      <div className="text-sm font-medium text-foreground">
+                        {round}
+                      </div>
                       {Array.from({ length: 8 }, (_, i) => {
                         // Calculate pick number based on snake draft order
                         let pickNumber;
