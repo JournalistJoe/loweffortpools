@@ -260,6 +260,7 @@ export const createLeague = mutation({
     name: v.string(),
     seasonYear: v.number(),
     scheduledDraftDate: v.optional(v.number()),
+    teamName: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     const userId = await getAuthUserId(ctx);
@@ -303,7 +304,7 @@ export const createLeague = mutation({
 
     // Get the user info to create display name
     const user = await ctx.db.get(userId);
-    const displayName = user?.name || user?.email || "Admin";
+    const displayName = args.teamName?.trim() || user?.name || user?.email || "Admin";
 
     // Auto-add the league creator as a participant with draft position 1
     await ctx.db.insert("participants", {

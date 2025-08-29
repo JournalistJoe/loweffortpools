@@ -13,6 +13,7 @@ export function MobileLeagueForm({ onLeagueSelected }: MobileLeagueFormProps) {
   // Create League State
   const [leagueName, setLeagueName] = useState("");
   const [seasonYear, setSeasonYear] = useState(2025);
+  const [teamName, setTeamName] = useState("");
   const [isCreating, setIsCreating] = useState(false);
 
   // Join League State
@@ -38,9 +39,11 @@ export function MobileLeagueForm({ onLeagueSelected }: MobileLeagueFormProps) {
       const leagueId = await createLeague({
         name: leagueName.trim(),
         seasonYear,
+        teamName: teamName.trim() || undefined,
       });
       toast.success("League created successfully!");
       setLeagueName("");
+      setTeamName("");
       onLeagueSelected(leagueId);
     } catch (error) {
       toast.error(String(error));
@@ -145,6 +148,23 @@ export function MobileLeagueForm({ onLeagueSelected }: MobileLeagueFormProps) {
                 <option value={2025}>2025</option>
                 <option value={2026}>2026</option>
               </select>
+            </div>
+
+            <div>
+              <label className="block text-base font-medium text-blue-900 mb-2">
+                Your Team Name (Optional)
+              </label>
+              <input
+                type="text"
+                value={teamName}
+                onChange={(e) => setTeamName(e.target.value)}
+                placeholder="e.g., The Champions"
+                className="w-full px-4 py-4 border border-blue-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base min-h-[44px]"
+                maxLength={50}
+              />
+              <p className="text-sm text-blue-600 mt-1">
+                If left blank, your email will be used as your team name.
+              </p>
             </div>
 
             <button

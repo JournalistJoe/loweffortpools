@@ -52,6 +52,7 @@ export function LeagueSelectionPageShadCN() {
   const [leagueName, setLeagueName] = useState("");
   const [seasonYear, setSeasonYear] = useState("2025");
   const [scheduledDraftDate, setScheduledDraftDate] = useState("");
+  const [teamName, setTeamName] = useState("");
   const [isCreating, setIsCreating] = useState(false);
   const [joinCode, setJoinCode] = useState("");
   const [displayName, setDisplayName] = useState("");
@@ -159,11 +160,13 @@ export function LeagueSelectionPageShadCN() {
         name: leagueName.trim(),
         seasonYear: parseInt(seasonYear),
         scheduledDraftDate: scheduledDraftMs,
+        teamName: teamName.trim() || undefined,
       });
       toast.success("League created successfully!");
       setShowCreateForm(false);
       setLeagueName("");
       setScheduledDraftDate("");
+      setTeamName("");
       setSelectedLeagueId(leagueId);
     } catch (error) {
       toast.error(String(error));
@@ -242,11 +245,14 @@ export function LeagueSelectionPageShadCN() {
               size="icon"
               onClick={toggleTheme}
               className="h-9 w-9"
+              aria-label={theme === "light" ? "Switch to dark theme" : "Switch to light theme"}
+              aria-pressed={theme === "dark"}
+              title={theme === "light" ? "Switch to dark theme" : "Switch to light theme"}
             >
               {theme === "light" ? (
-                <Moon className="h-4 w-4" />
+                <Moon className="h-4 w-4" aria-hidden="true" />
               ) : (
-                <Sun className="h-4 w-4" />
+                <Sun className="h-4 w-4" aria-hidden="true" />
               )}
             </Button>
             {currentUser?.isSuperuser && (
@@ -385,6 +391,20 @@ export function LeagueSelectionPageShadCN() {
                 </div>
 
                 <div>
+                  <Label htmlFor="team-name">Your Team Name (Optional)</Label>
+                  <Input
+                    id="team-name"
+                    type="text"
+                    value={teamName}
+                    onChange={(e) => setTeamName(e.target.value)}
+                    placeholder="e.g., The Champions"
+                  />
+                  <p className="text-xs text-muted-foreground mt-1">
+                    If left blank, your email will be used as your team name.
+                  </p>
+                </div>
+
+                <div>
                   <Label htmlFor="draft-date">Scheduled Draft Date (Optional)</Label>
                   <Input
                     id="draft-date"
@@ -414,6 +434,7 @@ export function LeagueSelectionPageShadCN() {
                       setShowCreateForm(false);
                       setLeagueName("");
                       setScheduledDraftDate("");
+                      setTeamName("");
                     }}
                   >
                     Cancel
