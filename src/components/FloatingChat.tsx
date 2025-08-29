@@ -29,11 +29,12 @@ export function FloatingChat({ league }: FloatingChatProps) {
   return (
     <>
       {/* Floating Chat Container */}
-      <div className="fixed bottom-20 right-4 md:bottom-4 z-50">
-        {isOpen ? (
-          <div className="bg-white rounded-lg shadow-lg border w-80 h-96 flex flex-col">
+      {isOpen ? (
+        <div className="bg-white shadow-lg border flex flex-col z-50
+                        fixed inset-0 top-16 
+                        md:fixed md:bottom-4 md:right-4 md:w-80 md:h-96 md:rounded-lg md:inset-auto md:top-auto md:left-auto">
             {/* Header */}
-            <div className="flex items-center justify-between p-3 border-b bg-primary text-primary-foreground rounded-t-lg">
+            <div className="flex items-center justify-between p-3 border-b bg-primary text-primary-foreground md:rounded-t-lg">
               <div className="flex items-center gap-2">
                 <MessageCircle className="h-4 w-4" />
                 <span className="font-medium">League Chat</span>
@@ -48,12 +49,13 @@ export function FloatingChat({ league }: FloatingChatProps) {
               </Button>
             </div>
 
-            {/* Chat Content */}
-            <div className="flex-1 overflow-hidden">
-              <FloatingChatContent leagueId={leagueId} />
-            </div>
+          {/* Chat Content */}
+          <div className="flex-1 overflow-hidden">
+            <FloatingChatContent leagueId={leagueId} />
           </div>
-        ) : (
+        </div>
+      ) : (
+        <div className="fixed bottom-20 right-4 md:bottom-4 z-50">
           <Button
             onClick={() => setIsOpen(true)}
             size="lg"
@@ -61,16 +63,9 @@ export function FloatingChat({ league }: FloatingChatProps) {
           >
             <MessageCircle className="h-5 w-5" />
           </Button>
-        )}
-      </div>
-
-      {/* Backdrop for mobile */}
-      {isOpen && (
-        <div
-          className="fixed inset-0 bg-black/20 z-40 md:hidden"
-          onClick={() => setIsOpen(false)}
-        />
+        </div>
       )}
+
     </>
   );
 }
