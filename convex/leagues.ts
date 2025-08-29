@@ -2,6 +2,9 @@ import { v } from "convex/values";
 import { query, mutation, internalMutation } from "./_generated/server";
 import { getAuthUserId } from "@convex-dev/auth/server";
 
+// Constants
+const MAX_PARTICIPANTS = 8;
+
 // Generate a random 6-character join code
 function generateJoinCode(): string {
   const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
@@ -106,18 +109,18 @@ async function joinParticipant(
     .withIndex("by_league", (q: any) => q.eq("leagueId", args.leagueId))
     .collect();
 
-  if (participants.length >= 8) {
+  if (participants.length >= MAX_PARTICIPANTS) {
     throw new Error("League is full");
   }
 
   // Find next available draft position
   const takenPositions = new Set(participants.map((p: any) => p.draftPosition));
   let draftPosition = 1;
-  while (takenPositions.has(draftPosition) && draftPosition <= 8) {
+  while (takenPositions.has(draftPosition) && draftPosition <= MAX_PARTICIPANTS) {
     draftPosition++;
   }
 
-  if (draftPosition > 8) {
+  if (draftPosition > MAX_PARTICIPANTS) {
     throw new Error("No available draft positions");
   }
 
@@ -247,7 +250,7 @@ export const getLeagueByJoinCode = query({
     return {
       ...league,
       participantCount: participants.length,
-      canJoin: participants.length < 8 && league.status === "setup",
+      canJoin: participants.length < MAX_PARTICIPANTS && league.status === "setup",
     };
   },
 });
@@ -731,8 +734,8 @@ export const updateParticipantPosition = mutation({
       throw new Error("Participant not found");
     }
 
-    if (args.newDraftPosition < 1 || args.newDraftPosition > 8) {
-      throw new Error("Draft position must be between 1 and 8");
+    if (args.newDraftPosition < 1 || args.newDraftPosition > MAX_PARTICIPANTS) {
+      throw new Error(`Draft position must be between 1 and ${MAX_PARTICIPANTS}`);
     }
 
     // Check if new position is taken by someone else
@@ -799,7 +802,7 @@ export const reorderParticipants = mutation({
       }
     }
 
-    // Validate positions are 1-8 and unique
+    // Validate positions are 1-MAX_PARTICIPANTS and unique
     const positions = args.participantOrders.map((o) => o.draftPosition);
     const uniquePositions = new Set(positions);
     if (uniquePositions.size !== positions.length) {
@@ -807,8 +810,8 @@ export const reorderParticipants = mutation({
     }
 
     for (const position of positions) {
-      if (position < 1 || position > 8) {
-        throw new Error("Draft positions must be between 1 and 8");
+      if (position < 1 || position > MAX_PARTICIPANTS) {
+        throw new Error(`Draft positions must be between 1 and ${MAX_PARTICIPANTS}`);
       }
     }
 
@@ -937,14 +940,14 @@ export const startDraft = mutation({
       throw new Error("League must be in setup status to start draft");
     }
 
-    // Check that we have exactly 8 participants
+    // Check that we have exactly the required number of participants
     const participants = await ctx.db
       .query("participants")
       .withIndex("by_league", (q) => q.eq("leagueId", args.leagueId))
       .collect();
 
-    if (participants.length !== 8) {
-      throw new Error("Must have exactly 8 participants to start draft");
+    if (participants.length !== MAX_PARTICIPANTS) {
+      throw new Error(`Must have exactly ${MAX_PARTICIPANTS} participants to start draft`);
     }
 
     const now = Date.now();
