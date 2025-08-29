@@ -1,6 +1,8 @@
 import { useQuery, useMutation } from "convex/react";
 import { api } from "../../convex/_generated/api";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
+import { useLocation } from "react-router-dom";
+import { normalizeJoinCode } from "../utils/joinCodeUtils";
 import { toast } from "sonner";
 import { useLeagueContext } from "../contexts/LeagueContext";
 import { Button } from "../components/ui/button";
@@ -35,6 +37,7 @@ import { DraftCountdown } from "../components/DraftCountdown";
 export function LeagueSelectionPageShadCN() {
   const leagues = useQuery(api.leagues.getUserLeagues);
   const { setSelectedLeagueId } = useLeagueContext();
+  const location = useLocation();
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [showJoinForm, setShowJoinForm] = useState(false);
   const [leagueName, setLeagueName] = useState("");
@@ -58,6 +61,40 @@ export function LeagueSelectionPageShadCN() {
     const localTime = new Date(now.getTime() - (now.getTimezoneOffset() * 60000));
     return localTime.toISOString().slice(0, 16);
   }, []);
+
+  // Handle joinCode from URL or sessionStorage after authentication
+  useEffect(() => {
+    // Check URL parameters first
+    const searchParams = new URLSearchParams(location.search);
+    const urlJoinCode = searchParams.get("joinCode");
+    
+    // Check sessionStorage as fallback
+    const storedJoinCode = sessionStorage.getItem("pendingJoinCode");
+    
+    // Use URL joinCode if present, otherwise use stored joinCode
+    const pendingJoinCode = normalizeJoinCode(urlJoinCode) || normalizeJoinCode(storedJoinCode);
+    
+    if (pendingJoinCode) {
+      // Pre-fill the join form with the code
+      setJoinCode(pendingJoinCode);
+      setShowJoinForm(true);
+      
+      // Clear from sessionStorage to avoid reusing
+      sessionStorage.removeItem("pendingJoinCode");
+      
+      // Clear from URL to avoid reusing on refresh
+      if (urlJoinCode) {
+        const newUrl = new URL(window.location.href);
+        newUrl.searchParams.delete("joinCode");
+        window.history.replaceState({}, "", newUrl.toString());
+      }
+      
+      // Show helpful toast
+      toast.info(`Ready to join league with code: ${pendingJoinCode}. Please enter your team name.`, {
+        duration: 5000,
+      });
+    }
+  }, [location.search]);
 
   const handleCreateLeague = async () => {
     if (!leagueName.trim()) {

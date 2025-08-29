@@ -38,8 +38,9 @@ export function MobileSignInFormShadCN({ joinCode }: MobileSignInFormShadCNProps
     const email = formData.get("email") as string;
     formData.set("flow", flow);
     
-    // Add joinCode to the authentication request if valid
+    // Store joinCode in sessionStorage to persist through auth redirect
     if (joinCode && isValidJoinCode(joinCode)) {
+      sessionStorage.setItem("pendingJoinCode", joinCode);
       formData.set("joinCode", joinCode);
     }
 

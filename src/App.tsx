@@ -142,7 +142,25 @@ function App() {
           <Route path="/forgot-password" element={<ForgotPasswordPage />} />
           <Route path="/reset-password" element={<PasswordResetPage />} />
           <Route path="/verify-email" element={<EmailVerificationPage />} />
-          <Route path="/signin" element={isAuthenticated ? <Navigate to="/" replace /> : <SignInPage />} />
+          <Route 
+            path="/signin" 
+            element={
+              isAuthenticated ? (
+                <Navigate 
+                  to={(() => {
+                    // Preserve joinCode in redirect if present
+                    const params = new URLSearchParams(window.location.search);
+                    const joinCode = params.get("joinCode");
+                    const normalizedJoinCode = normalizeJoinCode(joinCode);
+                    return normalizedJoinCode ? `/?joinCode=${normalizedJoinCode}` : "/";
+                  })()} 
+                  replace 
+                />
+              ) : (
+                <SignInPage />
+              )
+            } 
+          />
           <Route path="/terms" element={<TermsOfServicePage />} />
           
           {/* Homepage for unauthenticated users, protected routes for authenticated */}
