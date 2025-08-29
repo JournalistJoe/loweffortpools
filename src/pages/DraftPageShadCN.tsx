@@ -13,6 +13,7 @@ import {
   CardTitle,
 } from "../components/ui/card";
 import { LogOut, Clock, Trophy, Users } from "lucide-react";
+import { CommissionerWelcome } from "../components/CommissionerWelcome";
 
 export function DraftPageShadCN() {
   const { leagueId } = useParams<{ leagueId: string }>();
@@ -20,6 +21,7 @@ export function DraftPageShadCN() {
     api.leagues.getLeague,
     leagueId ? { leagueId: leagueId as any } : "skip",
   );
+  const currentUser = useQuery(api.users.getCurrentUser);
   const draftState = useQuery(
     api.draft.getDraftState,
     leagueId ? { leagueId: leagueId as any } : "skip",
@@ -82,10 +84,21 @@ export function DraftPageShadCN() {
     }
   };
 
-  if (!league || !draftState) {
+  if (!league || !draftState || !currentUser) {
     return (
       <div className="flex justify-center items-center min-h-96">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
+
+  const isCommissionerAlone = league.isAdmin && draftState.participants.length === 1;
+
+  if (isCommissionerAlone) {
+    return (
+      <div>
+        <Navigation league={league} />
+        <CommissionerWelcome league={league} currentUser={currentUser} />
       </div>
     );
   }
