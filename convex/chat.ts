@@ -28,14 +28,21 @@ export const getMessages = query({
       throw new Error("Access denied - must be league admin or participant");
     }
 
-    const limit = args.limit || 50;
+    // Sanitize and clamp the limit to prevent unbounded reads
+    const requested = Number(args.limit);
+    const defaultLimit = 50;
+    const maxLimit = 500;
+    const sanitizedLimit = isNaN(requested) 
+      ? defaultLimit 
+      : Math.floor(Math.max(1, Math.min(requested, maxLimit)));
+      
     const messages = await ctx.db
       .query("chatMessages")
       .withIndex("by_league_and_created", (q) =>
         q.eq("leagueId", args.leagueId),
       )
       .order("desc")
-      .take(limit);
+      .take(sanitizedLimit);
 
     // Enrich messages with user data
     const enrichedMessages = await Promise.all(
@@ -52,13 +59,12 @@ export const getMessages = query({
           ...message,
           user: {
             _id: user?._id,
-            name: user?.name || user?.email || "Anonymous",
-            email: user?.email,
+            name: user?.name || "Anonymous",
+            // email field removed to prevent PII exposure
           },
           displayName:
             userParticipant?.displayName ||
             user?.name ||
-            user?.email ||
             "Anonymous",
           isAdmin: league.adminUserId === message.userId,
         };
@@ -170,7 +176,13 @@ export const getCombinedFeed = query({
       throw new Error("Access denied - must be league admin or participant");
     }
 
-    const limit = args.limit || 100;
+    // Sanitize and clamp the limit to prevent unbounded reads
+    const requested = Number(args.limit);
+    const defaultLimit = 100;
+    const maxLimit = 500;
+    const sanitizedLimit = isNaN(requested) 
+      ? defaultLimit 
+      : Math.floor(Math.max(1, Math.min(requested, maxLimit)));
     
     // Fetch chat messages
     const messages = await ctx.db
@@ -179,7 +191,7 @@ export const getCombinedFeed = query({
         q.eq("leagueId", args.leagueId),
       )
       .order("desc")
-      .take(limit);
+      .take(sanitizedLimit);
 
     // Fetch activities
     const activities = await ctx.db
@@ -188,7 +200,7 @@ export const getCombinedFeed = query({
         q.eq("leagueId", args.leagueId),
       )
       .order("desc")
-      .take(limit);
+      .take(sanitizedLimit);
 
     // Combine and enrich messages
     const enrichedMessages = await Promise.all(
@@ -206,13 +218,12 @@ export const getCombinedFeed = query({
           itemType: "message" as const,
           user: {
             _id: user?._id,
-            name: user?.name || user?.email || "Anonymous",
-            email: user?.email,
+            name: user?.name || "Anonymous",
+            // email field removed to prevent PII exposure
           },
           displayName:
             userParticipant?.displayName ||
             user?.name ||
-            user?.email ||
             "Anonymous",
           isAdmin: league.adminUserId === message.userId,
           timestamp: message.createdAt,
@@ -230,7 +241,7 @@ export const getCombinedFeed = query({
     // Combine and sort by timestamp
     const combinedFeed = [...enrichedMessages, ...activityItems]
       .sort((a, b) => b.timestamp - a.timestamp)
-      .slice(0, limit);
+      .slice(0, sanitizedLimit);
 
     // Return in chronological order (oldest first)
     return combinedFeed.reverse();
