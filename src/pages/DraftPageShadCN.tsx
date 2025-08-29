@@ -254,7 +254,7 @@ export function DraftPageShadCN() {
             </Card>
 
             {/* Available Teams */}
-            {draftState.league.status === "draft" && (
+            {(draftState.league.status === "draft" || draftState.league.status === "setup") && (
               <Card className="mt-6">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
@@ -268,7 +268,7 @@ export function DraftPageShadCN() {
                       <Button
                         key={team._id}
                         onClick={() => setSelectedTeam(team._id)}
-                        disabled={!isUserTurn}
+                        disabled={!isUserTurn || draftState.league.status === "setup"}
                         variant={
                           selectedTeam === team._id ? "default" : "outline"
                         }
@@ -305,7 +305,7 @@ export function DraftPageShadCN() {
                     ))}
                   </div>
 
-                  {isUserTurn && selectedTeam && (
+                  {isUserTurn && selectedTeam && draftState.league.status === "draft" && (
                     <div className="mt-4 flex justify-center">
                       <Button
                         onClick={handleMakePick}
