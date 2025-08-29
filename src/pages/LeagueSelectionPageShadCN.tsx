@@ -33,14 +33,18 @@ import {
   UserCheck,
   Eye,
   Settings,
+  Sun,
+  Moon,
 } from "lucide-react";
 import { DraftCountdown } from "../components/DraftCountdown";
+import { EmptyLeaguesState } from "../components/EmptyLeaguesState";
+import { SignOutButton } from "../SignOutButton";
 
 export function LeagueSelectionPageShadCN() {
   const leagues = useQuery(api.leagues.getUserLeagues);
   const currentUser = useQuery(api.users.getCurrentUser);
   const { setSelectedLeagueId } = useLeagueContext();
-  const { theme } = useTheme();
+  const { theme, toggleTheme } = useTheme();
   const location = useLocation();
   const navigate = useNavigate();
   const [showCreateForm, setShowCreateForm] = useState(false);
@@ -220,31 +224,49 @@ export function LeagueSelectionPageShadCN() {
   }
 
   return (
-    <div className="max-w-6xl mx-auto p-6 pb-20">
-      <div className="mb-8 text-center">
-        <img 
-          src={theme === "dark" ? "/lowEffortLogo-darkmode.png" : "/lowEffortLogo.png"} 
-          alt="LowEffort.bet Logo" 
-          className="h-12 w-12 mx-auto mb-4"
-        />
-        <h1 className="text-3xl font-bold text-foreground mb-2">
-          LowEffort.bet
-        </h1>
-        <p className="text-muted-foreground">
-          Select a league to manage or participate in
-        </p>
-        {currentUser?.isSuperuser && (
-          <Button
-            onClick={() => navigate("/system-admin")}
-            variant="outline"
-            size="sm"
-            className="gap-2 mt-4"
-          >
-            <Settings className="h-4 w-4" />
-            System Administration
-          </Button>
-        )}
-      </div>
+    <div className="min-h-screen bg-background">
+      {/* Header */}
+      <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+        <div className="container flex h-16 items-center justify-between">
+          <div className="flex items-center space-x-2">
+            <img 
+              src={theme === "dark" ? "/lowEffortLogo-darkmode.png" : "/lowEffortLogo.png"}
+              alt="LowEffort.bet Logo" 
+              className="h-8 w-8"
+            />
+            <span className="text-xl font-bold">LowEffort.bet</span>
+          </div>
+          <div className="flex items-center space-x-2">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={toggleTheme}
+              className="h-9 w-9"
+            >
+              {theme === "light" ? (
+                <Moon className="h-4 w-4" />
+              ) : (
+                <Sun className="h-4 w-4" />
+              )}
+            </Button>
+            {currentUser?.isSuperuser && (
+              <Button
+                onClick={() => navigate("/system-admin")}
+                variant="ghost"
+                size="sm"
+                className="gap-2"
+              >
+                <Settings className="h-4 w-4" />
+                System Admin
+              </Button>
+            )}
+            <SignOutButton />
+          </div>
+        </div>
+      </header>
+
+      {/* Main Content */}
+      <main className="max-w-6xl mx-auto p-6 pb-20">
 
       {leagues.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
@@ -308,22 +330,17 @@ export function LeagueSelectionPageShadCN() {
           ))}
         </div>
       ) : (
-        <div className="text-center py-12 mb-8">
-          <Trophy className="h-16 w-16 mx-auto text-muted-foreground mb-4" />
-          <h2 className="text-xl font-semibold text-foreground mb-2">
-            No leagues found
-          </h2>
-          <p className="text-muted-foreground mb-6">
-            Create your first league or join an existing one with a join code.
-          </p>
-        </div>
+        <EmptyLeaguesState 
+          onCreateLeague={() => setShowCreateForm(true)}
+          onJoinLeague={() => setShowJoinForm(true)}
+        />
       )}
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Create League Section */}
-        <Card className="border-primary/20 bg-primary/5">
+        <Card className="border-green-200 bg-green-50 dark:border-green-800 dark:bg-green-950/20">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-primary">
+            <CardTitle className="flex items-center gap-2 text-green-700 dark:text-green-400">
               <Plus className="h-5 w-5" />
               Create New League
             </CardTitle>
@@ -331,12 +348,12 @@ export function LeagueSelectionPageShadCN() {
           <CardContent>
             {!showCreateForm ? (
               <div className="space-y-4">
-                <p className="text-sm text-muted-foreground">
+                <p className="text-sm text-green-700 dark:text-green-300">
                   Start a new NFL pool league and invite your friends to join.
                 </p>
                 <Button
                   onClick={() => setShowCreateForm(true)}
-                  className="w-full"
+                  className="w-full bg-green-600 hover:bg-green-700 dark:bg-green-700 dark:hover:bg-green-600"
                 >
                   Create League
                 </Button>
@@ -387,7 +404,7 @@ export function LeagueSelectionPageShadCN() {
                   <Button
                     onClick={handleCreateLeague}
                     disabled={isCreating || !leagueName.trim()}
-                    className="flex-1"
+                    className="flex-1 bg-green-600 hover:bg-green-700 dark:bg-green-700 dark:hover:bg-green-600"
                   >
                     {isCreating ? "Creating..." : "Create League"}
                   </Button>
@@ -408,9 +425,9 @@ export function LeagueSelectionPageShadCN() {
         </Card>
 
         {/* Join League Section */}
-        <Card className="border-green-200 bg-green-50">
+        <Card className="border-primary/20 bg-primary/5">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-green-700">
+            <CardTitle className="flex items-center gap-2 text-primary">
               <Users className="h-5 w-5" />
               Join Existing League
             </CardTitle>
@@ -418,14 +435,14 @@ export function LeagueSelectionPageShadCN() {
           <CardContent>
             {!showJoinForm ? (
               <div className="space-y-4">
-                <p className="text-sm text-green-700">
+                <p className="text-sm text-muted-foreground">
                   Join a league using a 6-character join code from the league
                   admin.
                 </p>
                 <Button
                   onClick={() => setShowJoinForm(true)}
                   variant="default"
-                  className="w-full bg-green-600 hover:bg-green-700"
+                  className="w-full"
                 >
                   Join League
                 </Button>
@@ -489,7 +506,7 @@ export function LeagueSelectionPageShadCN() {
                       (leagueByJoinCode && !leagueByJoinCode.canJoin) ||
                       false
                     }
-                    className="flex-1 bg-green-600 hover:bg-green-700"
+                    className="flex-1"
                   >
                     {isJoining ? "Joining..." : "Join League"}
                   </Button>
@@ -509,6 +526,46 @@ export function LeagueSelectionPageShadCN() {
           </CardContent>
         </Card>
       </div>
+      </main>
+
+      {/* Footer */}
+      <footer className="border-t py-8 px-4">
+        <div className="container text-left md:text-center">
+          <div className="space-y-4">
+            <div className="flex flex-col sm:flex-row gap-4 justify-center items-start sm:items-center text-sm text-muted-foreground">
+              <button
+                onClick={() => navigate("/terms")}
+                className="text-primary hover:underline"
+              >
+                Terms of Service & Privacy Policy
+              </button>
+            </div>
+            
+            <div className="text-xs text-muted-foreground space-y-2">
+              <p>
+                Created & Maintained by{" "}
+                <a 
+                  href="https://LongHairedFreakyPeople.com" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="text-primary hover:underline"
+                >
+                  Long Haired Freaky People
+                </a>
+              </p>
+              <p>
+                Contact:{" "}
+                <a 
+                  href="mailto:Joey@LHFP.help"
+                  className="text-primary hover:underline"
+                >
+                  Joey@LHFP.help
+                </a>
+              </p>
+            </div>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 }
