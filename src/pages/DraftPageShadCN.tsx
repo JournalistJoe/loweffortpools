@@ -157,10 +157,10 @@ export function DraftPageShadCN() {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="grid grid-cols-9 gap-3 text-xs font-medium text-muted-foreground mb-2">
-                  <div className="w-8"></div> {/* Narrower space for Round column */}
-                  {draftState.participants.map((p) => (
-                    <div key={p._id} className="text-center h-20 sm:h-auto sm:py-4 flex items-center justify-center overflow-visible">
+                <div className="grid gap-0 text-xs font-medium text-muted-foreground" style={{ gridTemplateColumns: '1.5rem repeat(8, 1fr)' }}>
+                  <div className="border-r border-b border-gray-300"></div> {/* Thin round column header */}
+                  {draftState.participants.map((p, index) => (
+                    <div key={p._id} className={`text-center h-20 sm:h-auto sm:py-4 flex items-center justify-center overflow-visible border-b border-gray-300 ${index < draftState.participants.length - 1 ? 'border-r border-gray-300' : ''}`}>
                       <span className="sm:inline block transform -rotate-90 sm:rotate-0 break-words text-center leading-tight">
                         {p.displayName}
                       </span>
@@ -168,13 +168,12 @@ export function DraftPageShadCN() {
                   ))}
                 </div>
 
-                {[1, 2, 3, 4].map((round) => (
-                  <div key={round} className="mb-4">
-                    <div className="grid grid-cols-9 gap-3 items-center">
-                      <div className="text-sm font-medium text-foreground text-center w-8">
-                        {round}
-                      </div>
-                      {Array.from({ length: 8 }, (_, i) => {
+                {[1, 2, 3, 4].map((round, roundIndex) => (
+                  <div key={round} className="grid gap-0 items-stretch" style={{ gridTemplateColumns: '1.5rem repeat(8, 1fr)' }}>
+                    <div className={`h-full text-xs font-medium text-foreground flex items-center justify-center border-r border-gray-300 ${roundIndex < 3 ? 'border-b border-gray-300' : ''}`}>
+                      {round}
+                    </div>
+                    {Array.from({ length: 8 }, (_, i) => {
                         // Calculate pick number based on snake draft order
                         let pickNumber;
                         if (round % 2 === 1) {
@@ -192,10 +191,10 @@ export function DraftPageShadCN() {
                         return (
                           <div
                             key={pickNumber}
-                            className={`aspect-square p-2 text-xs rounded border flex items-center justify-center relative group overflow-hidden ${
+                            className={`aspect-square p-2 text-xs flex items-center justify-center relative group overflow-hidden ${i < 7 ? 'border-r border-gray-300' : ''} ${roundIndex < 3 ? 'border-b border-gray-300' : ''} ${
                               isEmpty
-                                ? "border-border bg-muted/20"
-                                : "border-primary/20 bg-primary/5"
+                                ? "bg-muted/20"
+                                : "bg-primary/5"
                             }`}
                             title={pick ? `${pick.team?.fullName || pick.team?.name} - ${pick.participant?.displayName}` : `Pick #${pickNumber}`}
                           >
@@ -235,7 +234,6 @@ export function DraftPageShadCN() {
                           </div>
                         );
                       })}
-                    </div>
                   </div>
                 ))}
               </CardContent>
