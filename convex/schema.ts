@@ -33,9 +33,11 @@ const applicationTables = {
     draftStartedAt: v.optional(v.number()),
     currentPickStartedAt: v.optional(v.number()),
     scheduledDraftDate: v.optional(v.number()),
+    draftPickTimeLimit: v.optional(v.number()), // Time limit in milliseconds, defaults to 180000 (3 minutes)
   })
     .index("by_admin", ["adminUserId"])
-    .index("by_join_code", ["joinCode"]),
+    .index("by_join_code", ["joinCode"])
+    .index("by_status", ["status"]),
 
   participants: defineTable({
     leagueId: v.id("leagues"),

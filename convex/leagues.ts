@@ -302,6 +302,7 @@ export const createLeague = mutation({
     seasonYear: v.number(),
     scheduledDraftDate: v.optional(v.number()),
     teamName: v.optional(v.string()),
+    draftPickTimeLimit: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
     const userId = await getAuthUserId(ctx);
@@ -334,6 +335,13 @@ export const createLeague = mutation({
       }
     }
 
+    // Validate draftPickTimeLimit if provided
+    if (args.draftPickTimeLimit !== undefined) {
+      if (!Number.isFinite(args.draftPickTimeLimit) || args.draftPickTimeLimit < 30000 || args.draftPickTimeLimit > 600000) {
+        throw new Error("Draft pick time limit must be between 30 seconds and 10 minutes");
+      }
+    }
+
     const leagueId = await ctx.db.insert("leagues", {
       name: args.name,
       status: "setup",
@@ -341,6 +349,7 @@ export const createLeague = mutation({
       seasonYear: args.seasonYear,
       joinCode,
       scheduledDraftDate: args.scheduledDraftDate,
+      draftPickTimeLimit: args.draftPickTimeLimit || 180000, // Default to 3 minutes
     });
 
     // Get the user info to create display name
@@ -471,6 +480,7 @@ export const updateLeague = mutation({
     leagueId: v.id("leagues"),
     name: v.string(),
     scheduledDraftDate: v.optional(v.number()),
+    draftPickTimeLimit: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
     const userId = await getAuthUserId(ctx);
@@ -493,9 +503,17 @@ export const updateLeague = mutation({
       }
     }
 
+    // Validate draftPickTimeLimit if provided
+    if (args.draftPickTimeLimit !== undefined) {
+      if (!Number.isFinite(args.draftPickTimeLimit) || args.draftPickTimeLimit < 30000 || args.draftPickTimeLimit > 600000) {
+        throw new Error("Draft pick time limit must be between 30 seconds and 10 minutes");
+      }
+    }
+
     await ctx.db.patch(args.leagueId, {
       name: args.name,
       scheduledDraftDate: args.scheduledDraftDate,
+      draftPickTimeLimit: args.draftPickTimeLimit,
     });
 
     await ctx.db.insert("activity", {

@@ -75,6 +75,7 @@ export function AdminPageShadCN() {
   const [editingLeague, setEditingLeague] = useState(false);
   const [newLeagueName, setNewLeagueName] = useState("");
   const [scheduledDraftDate, setScheduledDraftDate] = useState("");
+  const [draftPickTimeLimit, setDraftPickTimeLimit] = useState("180");
 
   const startDraft = useMutation(api.leagues.startDraft);
   const addParticipant = useMutation(api.leagues.addParticipant);
@@ -229,6 +230,7 @@ export function AdminPageShadCN() {
         leagueId: leagueId as any,
         name: newLeagueName.trim(),
         scheduledDraftDate: scheduledDraftDate ? new Date(scheduledDraftDate).getTime() : undefined,
+        draftPickTimeLimit: parseInt(draftPickTimeLimit) * 1000, // Convert seconds to milliseconds
       });
       toast.success("League updated successfully");
       setEditingLeague(false);
@@ -395,6 +397,43 @@ export function AdminPageShadCN() {
                   </p>
                 </div>
               </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label>Draft Pick Time Limit</Label>
+                  {editingLeague ? (
+                    <Select value={draftPickTimeLimit} onValueChange={setDraftPickTimeLimit}>
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="30">30 seconds</SelectItem>
+                        <SelectItem value="60">1 minute</SelectItem>
+                        <SelectItem value="120">2 minutes</SelectItem>
+                        <SelectItem value="180">3 minutes (default)</SelectItem>
+                        <SelectItem value="300">5 minutes</SelectItem>
+                        <SelectItem value="600">10 minutes</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  ) : (
+                    <p className="mt-2 text-sm text-foreground">
+                      {(() => {
+                        const totalSeconds = (league.draftPickTimeLimit || 180000) / 1000;
+                        const minutes = Math.floor(totalSeconds / 60);
+                        const seconds = totalSeconds % 60;
+                        
+                        if (minutes > 0 && seconds > 0) {
+                          return `${minutes} minute${minutes !== 1 ? 's' : ''} ${seconds} second${seconds !== 1 ? 's' : ''}`;
+                        } else if (minutes > 0) {
+                          return `${minutes} minute${minutes !== 1 ? 's' : ''}`;
+                        } else {
+                          return `${seconds} second${seconds !== 1 ? 's' : ''}`;
+                        }
+                      })()}
+                    </p>
+                  )}
+                </div>
+                <div></div>
+              </div>
 
               {/* Join Code Section */}
               <div>
@@ -464,6 +503,7 @@ export function AdminPageShadCN() {
                             ? new Date(league.scheduledDraftDate).toISOString().slice(0, 16)
                             : ""
                         );
+                        setDraftPickTimeLimit(String((league.draftPickTimeLimit || 180000) / 1000));
                       }}
                       className="gap-2"
                     >

@@ -62,7 +62,8 @@ export const getDraftState = query({
 
       if (league.currentPickStartedAt) {
         const elapsed = Date.now() - league.currentPickStartedAt;
-        timeRemaining = Math.max(0, 180000 - elapsed); // 3 minutes = 180000ms
+        const pickTimeLimit = league.draftPickTimeLimit || 180000; // Default to 3 minutes if not set
+        timeRemaining = Math.max(0, pickTimeLimit - elapsed);
       }
     }
 
@@ -218,11 +219,10 @@ export const checkAndMakeAutoPick = internalMutation({
     // Find all leagues in draft status
     const draftingLeagues = await ctx.db
       .query("leagues")
-      .filter((q) => q.eq(q.field("status"), "draft"))
+      .withIndex("by_status", (q) => q.eq("status", "draft"))
       .collect();
 
     const now = Date.now();
-    const PICK_TIME_LIMIT = 180000; // 3 minutes in milliseconds
 
     for (const league of draftingLeagues) {
       if (
@@ -233,8 +233,9 @@ export const checkAndMakeAutoPick = internalMutation({
         continue; // Skip leagues that aren't actively drafting
       }
 
+      const pickTimeLimit = league.draftPickTimeLimit || 180000; // Default to 3 minutes if not set
       const elapsed = now - league.currentPickStartedAt;
-      if (elapsed < PICK_TIME_LIMIT) {
+      if (elapsed < pickTimeLimit) {
         continue; // Pick hasn't expired yet
       }
 
