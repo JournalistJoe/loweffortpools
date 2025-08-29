@@ -12,7 +12,7 @@ import {
   CardHeader,
   CardTitle,
 } from "../components/ui/card";
-import { LogOut, Clock, Trophy, Users } from "lucide-react";
+import { Clock, Trophy, Users } from "lucide-react";
 import { CommissionerWelcome } from "../components/CommissionerWelcome";
 
 export function DraftPageShadCN() {
@@ -27,7 +27,6 @@ export function DraftPageShadCN() {
     leagueId ? { leagueId: leagueId as any } : "skip",
   );
   const makePick = useMutation(api.draft.makePick);
-  const removeParticipant = useMutation(api.leagues.removeParticipant);
 
   const [selectedTeam, setSelectedTeam] = useState<string | null>(null);
   const [timeRemaining, setTimeRemaining] = useState<number | null>(null);
@@ -63,26 +62,6 @@ export function DraftPageShadCN() {
     }
   };
 
-  const handleLeaveLeague = async () => {
-    if (!league?.participant || !leagueId) return;
-    if (
-      !confirm(
-        "Are you sure you want to leave this league? This action cannot be undone.",
-      )
-    )
-      return;
-
-    try {
-      await removeParticipant({
-        leagueId: leagueId as any,
-        participantId: league.participant._id as any,
-      });
-      toast.success("Successfully left the league");
-      // Navigation will be handled by the context
-    } catch (error) {
-      toast.error(String(error));
-    }
-  };
 
   if (!league || !draftState || !currentUser) {
     return (
@@ -124,17 +103,6 @@ export function DraftPageShadCN() {
                 Draft Board
               </h1>
             </div>
-            {league.isParticipant && league.status === "setup" && (
-              <Button
-                onClick={handleLeaveLeague}
-                variant="destructive"
-                size="sm"
-                className="gap-2"
-              >
-                <LogOut className="h-4 w-4" />
-                Leave League
-              </Button>
-            )}
           </div>
           <div className="mt-2 flex items-center space-x-4">
             {draftState.league.status === "draft" &&

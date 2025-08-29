@@ -2,6 +2,9 @@ import { Link, useParams, useNavigate } from "react-router-dom";
 import { SignOutButtonShadCN } from "../SignOutButtonShadCN";
 import { useState } from "react";
 import { useTheme } from "../contexts/ThemeContext";
+import { useMutation } from "convex/react";
+import { api } from "../../convex/_generated/api";
+import { toast } from "sonner";
 import { Button } from "./ui/button";
 import {
   Sheet,
@@ -20,6 +23,7 @@ import {
   Settings,
   Home,
   User,
+  LogOut,
 } from "lucide-react";
 import { ThemeToggle } from "./ThemeToggle";
 import { DraftCountdown } from "./DraftCountdown";
@@ -44,6 +48,28 @@ export function MobileNavigationShadCN({ league }: NavigationProps) {
   const { theme } = useTheme();
   const navigate = useNavigate();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const removeParticipant = useMutation(api.leagues.removeParticipant);
+
+  const handleLeaveLeague = async () => {
+    if (!league?.participant || !leagueId) return;
+    if (
+      !confirm(
+        "Are you sure you want to leave this league? This action cannot be undone.",
+      )
+    )
+      return;
+
+    try {
+      await removeParticipant({
+        leagueId: leagueId as any,
+        participantId: league.participant._id as any,
+      });
+      toast.success("Successfully left the league");
+      // Navigation will be handled by the context
+    } catch (error) {
+      toast.error(String(error));
+    }
+  };
 
   const getNavItems = () => {
     const items = [];
@@ -176,6 +202,18 @@ export function MobileNavigationShadCN({ league }: NavigationProps) {
                 );
               })}
 
+              {league.isParticipant && league.status === "setup" && (
+                <Button
+                  onClick={handleLeaveLeague}
+                  variant="destructive"
+                  size="sm"
+                  className="gap-2"
+                >
+                  <LogOut className="h-4 w-4" />
+                  Leave League
+                </Button>
+              )}
+
               <ThemeToggle />
               <SignOutButtonShadCN />
             </div>
@@ -242,6 +280,20 @@ export function MobileNavigationShadCN({ league }: NavigationProps) {
                       </Button>
                     );
                   })}
+
+                  {league.isParticipant && league.status === "setup" && (
+                    <Button
+                      onClick={() => {
+                        handleLeaveLeague();
+                        setIsMobileMenuOpen(false);
+                      }}
+                      variant="destructive"
+                      className="w-full justify-start gap-3 h-12"
+                    >
+                      <LogOut className="h-4 w-4" />
+                      Leave League
+                    </Button>
+                  )}
 
                   <Separator className="my-4" />
 
