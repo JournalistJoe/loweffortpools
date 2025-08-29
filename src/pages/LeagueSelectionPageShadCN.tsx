@@ -50,6 +50,7 @@ export function LeagueSelectionPageShadCN() {
 
   const createLeague = useMutation(api.leagues.createLeague);
   const joinLeague = useMutation(api.leagues.joinLeague);
+  const autoJoinLeague = useMutation(api.leagues.autoJoinLeague);
   const leagueByJoinCode = useQuery(
     api.leagues.getLeagueByJoinCode,
     joinCode.length === 6 ? { joinCode } : "skip",
@@ -75,26 +76,56 @@ export function LeagueSelectionPageShadCN() {
     const pendingJoinCode = normalizeJoinCode(urlJoinCode) || normalizeJoinCode(storedJoinCode);
     
     if (pendingJoinCode) {
-      // Pre-fill the join form with the code
-      setJoinCode(pendingJoinCode);
-      setShowJoinForm(true);
-      
-      // Clear from sessionStorage to avoid reusing
+      // Clear from sessionStorage and URL immediately to avoid reusing
       sessionStorage.removeItem("pendingJoinCode");
-      
-      // Clear from URL to avoid reusing on refresh
       if (urlJoinCode) {
         const newUrl = new URL(window.location.href);
         newUrl.searchParams.delete("joinCode");
         window.history.replaceState({}, "", newUrl.toString());
       }
       
-      // Show helpful toast
-      toast.info(`Ready to join league with code: ${pendingJoinCode}. Please enter your team name.`, {
-        duration: 5000,
-      });
+      // Automatically join the league with default team name
+      handleAutoJoin(pendingJoinCode);
     }
   }, [location.search]);
+
+  const handleAutoJoin = async (joinCode: string) => {
+    setIsJoining(true);
+    toast.info(`Joining league with code: ${joinCode}...`, {
+      duration: 2000,
+    });
+    
+    try {
+      const result = await autoJoinLeague({ joinCode });
+      
+      if (result.success) {
+        if (result.alreadyJoined) {
+          toast.info("You're already a member of this league!");
+        } else {
+          toast.success(`Successfully joined the league as "${result.displayName}"! You can edit your team name later.`, {
+            duration: 4000,
+          });
+        }
+        
+        // Navigate to the league page
+        setSelectedLeagueId(result.leagueId);
+      } else {
+        toast.error("Failed to join league automatically. Please try again manually.");
+        // Fallback: show join form
+        setJoinCode(joinCode);
+        setShowJoinForm(true);
+      }
+    } catch (error) {
+      console.error("Auto-join error:", error);
+      toast.error(String(error));
+      // Fallback: show join form with pre-filled code
+      setJoinCode(joinCode);
+      setShowJoinForm(true);
+      toast.info("Please enter your team name to complete joining the league.");
+    } finally {
+      setIsJoining(false);
+    }
+  };
 
   const handleCreateLeague = async () => {
     if (!leagueName.trim()) {

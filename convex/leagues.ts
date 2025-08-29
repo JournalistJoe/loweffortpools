@@ -802,3 +802,97 @@ export const migrateJoinCodes = mutation({
     return { updated };
   },
 });
+
+// Auto-join league with default team name after authentication
+export const autoJoinLeague = mutation({
+  args: {
+    joinCode: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) throw new Error("Must be logged in");
+
+    const league = await ctx.db
+      .query("leagues")
+      .withIndex("by_join_code", (q) =>
+        q.eq("joinCode", args.joinCode.toUpperCase()),
+      )
+      .first();
+
+    if (!league) {
+      throw new Error("Invalid join code");
+    }
+
+    if (league.status !== "setup") {
+      throw new Error("Cannot join league - draft has already started");
+    }
+
+    // Check if user is already a participant
+    const existingParticipant = await ctx.db
+      .query("participants")
+      .withIndex("by_league_and_user", (q) =>
+        q.eq("leagueId", league._id).eq("userId", userId),
+      )
+      .first();
+
+    if (existingParticipant) {
+      return { 
+        success: true, 
+        alreadyJoined: true, 
+        leagueId: league._id, 
+        participantId: existingParticipant._id 
+      };
+    }
+
+    // Check if league is full
+    const participants = await ctx.db
+      .query("participants")
+      .withIndex("by_league", (q) => q.eq("leagueId", league._id))
+      .collect();
+
+    if (participants.length >= 8) {
+      throw new Error("League is full");
+    }
+
+    // Generate default team name using user email prefix
+    const user = await ctx.db.get(userId);
+    const userEmail = user?.email || "";
+    const emailPrefix = userEmail.split("@")[0] || "Player";
+    const teamNumber = participants.length + 1;
+    const defaultDisplayName = `${emailPrefix}'s Team`;
+
+    // Find next available draft position
+    const takenPositions = new Set(participants.map((p) => p.draftPosition));
+    let draftPosition = 1;
+    while (takenPositions.has(draftPosition) && draftPosition <= 8) {
+      draftPosition++;
+    }
+
+    if (draftPosition > 8) {
+      throw new Error("No available draft positions");
+    }
+
+    const participantId = await ctx.db.insert("participants", {
+      leagueId: league._id,
+      userId,
+      displayName: defaultDisplayName,
+      draftPosition,
+    });
+
+    await ctx.db.insert("activity", {
+      leagueId: league._id,
+      type: "participant_added",
+      message: `${defaultDisplayName} joined the league (Draft Position ${draftPosition})`,
+      createdAt: Date.now(),
+      participantId,
+    });
+
+    return { 
+      success: true, 
+      alreadyJoined: false, 
+      leagueId: league._id, 
+      participantId,
+      displayName: defaultDisplayName 
+    };
+  },
+});
