@@ -70,6 +70,78 @@ async function checkRateLimit(ctx: any, userId: string, operation: string = "aut
   });
 }
 
+// Shared helper for joining a participant to a league
+async function joinParticipant(
+  ctx: any,
+  args: {
+    leagueId: any,
+    userId: string,
+    displayName: string,
+    activityMessageSuffix?: string,
+    returnExistingParticipant?: boolean
+  }
+): Promise<{ participantId: any, draftPosition: number, wasExisting?: boolean }> {
+  // Check if user is already a participant
+  const existingParticipant = await ctx.db
+    .query("participants")
+    .withIndex("by_league_and_user", (q: any) =>
+      q.eq("leagueId", args.leagueId).eq("userId", args.userId),
+    )
+    .first();
+
+  if (existingParticipant) {
+    if (args.returnExistingParticipant) {
+      return { 
+        participantId: existingParticipant._id,
+        draftPosition: existingParticipant.draftPosition,
+        wasExisting: true
+      };
+    }
+    throw new Error("You are already a participant in this league");
+  }
+
+  // Check if league is full
+  const participants = await ctx.db
+    .query("participants")
+    .withIndex("by_league", (q: any) => q.eq("leagueId", args.leagueId))
+    .collect();
+
+  if (participants.length >= 8) {
+    throw new Error("League is full");
+  }
+
+  // Find next available draft position
+  const takenPositions = new Set(participants.map((p: any) => p.draftPosition));
+  let draftPosition = 1;
+  while (takenPositions.has(draftPosition) && draftPosition <= 8) {
+    draftPosition++;
+  }
+
+  if (draftPosition > 8) {
+    throw new Error("No available draft positions");
+  }
+
+  // Insert participant
+  const participantId = await ctx.db.insert("participants", {
+    leagueId: args.leagueId,
+    userId: args.userId,
+    displayName: args.displayName,
+    draftPosition,
+  });
+
+  // Create activity log
+  const messageSuffix = args.activityMessageSuffix || "";
+  await ctx.db.insert("activity", {
+    leagueId: args.leagueId,
+    type: "participant_added",
+    message: `${args.displayName} joined the league${messageSuffix} (Draft Position ${draftPosition})`,
+    createdAt: Date.now(),
+    participantId,
+  });
+
+  return { participantId, draftPosition };
+}
+
 export const getUserLeagues = query({
   args: {},
   handler: async (ctx) => {
@@ -284,52 +356,11 @@ export const joinLeague = mutation({
       throw new Error("Cannot join league - draft has already started");
     }
 
-    // Check if user is already a participant
-    const existingParticipant = await ctx.db
-      .query("participants")
-      .withIndex("by_league_and_user", (q) =>
-        q.eq("leagueId", league._id).eq("userId", userId),
-      )
-      .first();
-
-    if (existingParticipant) {
-      throw new Error("You are already a participant in this league");
-    }
-
-    // Check if league is full
-    const participants = await ctx.db
-      .query("participants")
-      .withIndex("by_league", (q) => q.eq("leagueId", league._id))
-      .collect();
-
-    if (participants.length >= 8) {
-      throw new Error("League is full");
-    }
-
-    // Find next available draft position
-    const takenPositions = new Set(participants.map((p) => p.draftPosition));
-    let draftPosition = 1;
-    while (takenPositions.has(draftPosition) && draftPosition <= 8) {
-      draftPosition++;
-    }
-
-    if (draftPosition > 8) {
-      throw new Error("No available draft positions");
-    }
-
-    const participantId = await ctx.db.insert("participants", {
+    // Use helper to join participant
+    const { participantId } = await joinParticipant(ctx, {
       leagueId: league._id,
       userId,
       displayName: args.displayName.trim(),
-      draftPosition,
-    });
-
-    await ctx.db.insert("activity", {
-      leagueId: league._id,
-      type: "participant_added",
-      message: `${args.displayName.trim()} joined the league (Draft Position ${draftPosition})`,
-      createdAt: Date.now(),
-      participantId,
     });
 
     return { leagueId: league._id, participantId };
@@ -361,52 +392,12 @@ export const adminJoinOwnLeague = mutation({
       throw new Error("Cannot join league - draft has already started");
     }
 
-    // Check if admin is already a participant
-    const existingParticipant = await ctx.db
-      .query("participants")
-      .withIndex("by_league_and_user", (q) =>
-        q.eq("leagueId", args.leagueId).eq("userId", userId),
-      )
-      .first();
-
-    if (existingParticipant) {
-      throw new Error("You are already a participant in this league");
-    }
-
-    // Check if league is full
-    const participants = await ctx.db
-      .query("participants")
-      .withIndex("by_league", (q) => q.eq("leagueId", args.leagueId))
-      .collect();
-
-    if (participants.length >= 8) {
-      throw new Error("League is full");
-    }
-
-    // Find next available draft position
-    const takenPositions = new Set(participants.map((p) => p.draftPosition));
-    let draftPosition = 1;
-    while (takenPositions.has(draftPosition) && draftPosition <= 8) {
-      draftPosition++;
-    }
-
-    if (draftPosition > 8) {
-      throw new Error("No available draft positions");
-    }
-
-    const participantId = await ctx.db.insert("participants", {
+    // Use helper to join participant
+    const { participantId, draftPosition } = await joinParticipant(ctx, {
       leagueId: args.leagueId,
       userId,
       displayName: args.displayName.trim(),
-      draftPosition,
-    });
-
-    await ctx.db.insert("activity", {
-      leagueId: args.leagueId,
-      type: "participant_added",
-      message: `${args.displayName.trim()} joined the league as admin (Draft Position ${draftPosition})`,
-      createdAt: Date.now(),
-      participantId,
+      activityMessageSuffix: " as admin",
     });
 
     return { participantId, draftPosition };
@@ -1091,62 +1082,32 @@ export const autoJoinLeague = mutation({
       throw new Error("Cannot join league - draft has already started");
     }
 
-    // Check if user is already a participant
-    const existingParticipant = await ctx.db
-      .query("participants")
-      .withIndex("by_league_and_user", (q) =>
-        q.eq("leagueId", league._id).eq("userId", userId),
-      )
-      .first();
-
-    if (existingParticipant) {
-      return { 
-        success: true, 
-        alreadyJoined: true, 
-        leagueId: league._id, 
-        participantId: existingParticipant._id 
-      };
-    }
-
-    // Check if league is full
+    // Get current participants count to generate display name
     const participants = await ctx.db
       .query("participants")
-      .withIndex("by_league", (q) => q.eq("leagueId", league._id))
+      .withIndex("by_league", (q: any) => q.eq("leagueId", league._id))
       .collect();
-
-    if (participants.length >= 8) {
-      throw new Error("League is full");
-    }
 
     // Generate default team name using team number
     const teamNumber = participants.length + 1;
     const defaultDisplayName = `Team ${teamNumber}`;
 
-    // Find next available draft position
-    const takenPositions = new Set(participants.map((p) => p.draftPosition));
-    let draftPosition = 1;
-    while (takenPositions.has(draftPosition) && draftPosition <= 8) {
-      draftPosition++;
-    }
-
-    if (draftPosition > 8) {
-      throw new Error("No available draft positions");
-    }
-
-    const participantId = await ctx.db.insert("participants", {
+    // Use helper to join participant (handles existing participant case)
+    const { participantId, wasExisting } = await joinParticipant(ctx, {
       leagueId: league._id,
       userId,
       displayName: defaultDisplayName,
-      draftPosition,
+      returnExistingParticipant: true,
     });
 
-    await ctx.db.insert("activity", {
-      leagueId: league._id,
-      type: "participant_added",
-      message: `${defaultDisplayName} joined the league (Draft Position ${draftPosition})`,
-      createdAt: Date.now(),
-      participantId,
-    });
+    if (wasExisting) {
+      return { 
+        success: true, 
+        alreadyJoined: true, 
+        leagueId: league._id, 
+        participantId 
+      };
+    }
 
     return { 
       success: true, 

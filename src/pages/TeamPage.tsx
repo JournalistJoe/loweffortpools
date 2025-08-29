@@ -26,6 +26,7 @@ export function TeamPage() {
     participantId ? { participantId: participantId as any } : "skip",
   );
   const updateDisplayName = useMutation(api.leagues.updateParticipantDisplayName);
+  const currentUser = useQuery(api.auth.loggedInUser);
 
   const handleEditName = () => {
     setNewTeamName(teamData?.participant.displayName || "");
@@ -66,12 +67,18 @@ export function TeamPage() {
     0,
   );
 
+  // Check if current user can edit this participant
+  const canEditParticipant = currentUser && teamData && (
+    currentUser._id === teamData.participant.userId || 
+    currentUser._id === league.adminUserId
+  );
+
   return (
     <div>
       <Navigation league={league} />
       <div className="max-w-6xl mx-auto p-4 pb-20">
         {/* Team Settings Section for Setup Phase */}
-        {league.status === "setup" && (
+        {league.status === "setup" && canEditParticipant && (
           <Card className="mb-6">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">

@@ -1,5 +1,6 @@
 import { v } from "convex/values";
 import { query } from "./_generated/server";
+import { getAuthUserId } from "@convex-dev/auth/server";
 
 export const getLeaderboard = query({
   args: {
@@ -87,11 +88,19 @@ export const getParticipantTeams = query({
     participantId: v.id("participants"),
   },
   handler: async (ctx, args) => {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) throw new Error("Must be logged in");
+
     const participant = await ctx.db.get(args.participantId);
     if (!participant) return null;
 
     const league = await ctx.db.get(participant.leagueId);
     if (!league) return null;
+
+    // Only allow the participant owner or league admin to view participant teams
+    if (participant.userId !== userId && league.adminUserId !== userId) {
+      throw new Error("Not authorized to view this participant's teams");
+    }
 
     const picks = await ctx.db
       .query("draftPicks")
