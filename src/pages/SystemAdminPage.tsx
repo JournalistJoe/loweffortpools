@@ -50,6 +50,11 @@ export function SystemAdminPage() {
   const manualResync = useMutation(api.nflData.manualResync);
   const createTestLeague = useMutation(api.testLeague.createTestLeague);
 
+  // Show loading state while currentUser is undefined
+  if (currentUser === undefined) {
+    return null; // or a loading spinner if preferred
+  }
+
   // Check if user is superuser
   if (!currentUser?.isSuperuser) {
     return (
@@ -81,10 +86,16 @@ export function SystemAdminPage() {
   };
 
   const handleManualResync = async () => {
+    const weekNumber = parseInt(syncWeek, 10);
+    if (!Number.isFinite(weekNumber) || weekNumber < 1 || weekNumber > 18) {
+      toast.error("Week must be a valid number between 1 and 18");
+      return;
+    }
+
     setIsResyncing(true);
     try {
-      await manualResync({ week: parseInt(syncWeek) });
-      toast.success(`Resynced week ${syncWeek} game data for all leagues`);
+      await manualResync({ week: weekNumber });
+      toast.success(`Resynced week ${weekNumber} game data for all leagues`);
       setShowResyncDialog(false);
     } catch (error) {
       toast.error(String(error));

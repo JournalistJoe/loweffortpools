@@ -275,8 +275,12 @@ export const processESPNData = internalMutation({
 export const updateTeamLogos = mutation({
   args: {},
   handler: async (ctx) => {
-    // For CLI usage, we'll skip the superuser check since it's admin tooling
-    // In production, you'd want to add auth checks here
+    // Check if user is a superuser
+    const userId = await getAuthUserId(ctx);
+    if (!userId) throw new Error("Must be logged in");
+    
+    const user = await ctx.db.get(userId);
+    if (!user?.isSuperuser) throw new Error("Must be a superuser to update team logos");
     
     const teams = await ctx.db.query("nflTeams").collect();
     let updated = 0;
