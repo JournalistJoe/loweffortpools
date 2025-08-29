@@ -1,5 +1,5 @@
 import { v } from "convex/values";
-import { query, mutation } from "./_generated/server";
+import { query, mutation, internalMutation } from "./_generated/server";
 import { getAuthUserId } from "@convex-dev/auth/server";
 
 // Snake draft order calculation
@@ -209,5 +209,122 @@ export const getActivity = query({
       .take(50);
 
     return activities;
+  },
+});
+
+export const checkAndMakeAutoPick = internalMutation({
+  args: {},
+  handler: async (ctx) => {
+    // Find all leagues in draft status
+    const draftingLeagues = await ctx.db
+      .query("leagues")
+      .filter((q) => q.eq(q.field("status"), "draft"))
+      .collect();
+
+    const now = Date.now();
+    const PICK_TIME_LIMIT = 180000; // 3 minutes in milliseconds
+
+    for (const league of draftingLeagues) {
+      if (
+        league.currentPickIndex === undefined ||
+        league.currentPickIndex >= 32 ||
+        !league.currentPickStartedAt
+      ) {
+        continue; // Skip leagues that aren't actively drafting
+      }
+
+      const elapsed = now - league.currentPickStartedAt;
+      if (elapsed < PICK_TIME_LIMIT) {
+        continue; // Pick hasn't expired yet
+      }
+
+      // Find current participant
+      const currentDraftPosition = getParticipantForPick(league.currentPickIndex);
+      const participants = await ctx.db
+        .query("participants")
+        .withIndex("by_league", (q) => q.eq("leagueId", league._id))
+        .collect();
+      
+      const currentParticipant = participants.find(
+        (p) => p.draftPosition === currentDraftPosition,
+      );
+
+      if (!currentParticipant) {
+        continue; // No current participant found
+      }
+
+      // Get available teams
+      const picks = await ctx.db
+        .query("draftPicks")
+        .withIndex("by_league", (q) => q.eq("leagueId", league._id))
+        .collect();
+
+      const nflTeams = await ctx.db
+        .query("nflTeams")
+        .withIndex("by_season", (q) => q.eq("seasonYear", league.seasonYear))
+        .collect();
+
+      const pickedTeamIds = new Set(picks.map((p) => p.nflTeamId));
+      const availableTeams = nflTeams.filter(
+        (team) => !pickedTeamIds.has(team._id),
+      );
+
+      if (availableTeams.length === 0) {
+        continue; // No teams available
+      }
+
+      // Select random team
+      const randomIndex = Math.floor(Math.random() * availableTeams.length);
+      const selectedTeam = availableTeams[randomIndex];
+
+      // Make the pick
+      const round = Math.floor(league.currentPickIndex / 8) + 1;
+      const pickNumber = league.currentPickIndex + 1;
+
+      await ctx.db.insert("draftPicks", {
+        leagueId: league._id,
+        round,
+        pickNumber,
+        participantId: currentParticipant._id,
+        nflTeamId: selectedTeam._id,
+        pickedAt: now,
+      });
+
+      // Update league state
+      const nextPickIndex = league.currentPickIndex + 1;
+      const isDraftComplete = nextPickIndex >= 32;
+
+      if (isDraftComplete) {
+        await ctx.db.patch(league._id, {
+          status: "live",
+          currentPickIndex: undefined,
+          currentPickStartedAt: undefined,
+        });
+
+        await ctx.db.insert("activity", {
+          leagueId: league._id,
+          type: "draft_completed",
+          message: "Draft completed! League is now live.",
+          createdAt: now,
+        });
+      } else {
+        await ctx.db.patch(league._id, {
+          currentPickIndex: nextPickIndex,
+          currentPickStartedAt: now,
+        });
+      }
+
+      // Log auto-pick activity
+      await ctx.db.insert("activity", {
+        leagueId: league._id,
+        type: "draft_autopick",
+        message: `Time expired! ${currentParticipant.displayName} was automatically assigned ${selectedTeam.fullName}`,
+        createdAt: now,
+        participantId: currentParticipant._id,
+        nflTeamId: selectedTeam._id,
+      });
+    }
+
+    return true;
   },
 });

@@ -11,6 +11,9 @@ crons.cron("nightly sync", "0 11 * * *", internal.crons.nightlySync, {});
 // Weekly finalize at Tuesday 03:15 PT (11:15 UTC)
 crons.cron("weekly finalize", "15 11 * * 2", internal.crons.weeklyFinalize, {});
 
+// Check for expired draft picks every minute
+crons.cron("draft autopick", "* * * * *", internal.draft.checkAndMakeAutoPick, {});
+
 export default crons;
 
 export const nightlySync = internalAction({

@@ -102,6 +102,7 @@ const applicationTables = {
       v.literal("spectator_left"),
       v.literal("draft_started"),
       v.literal("draft_pick"),
+      v.literal("draft_autopick"),
       v.literal("draft_completed"),
     ),
     message: v.string(),
