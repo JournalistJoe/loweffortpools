@@ -16,7 +16,6 @@ import {
   Users,
   Trophy,
   Calendar,
-  MessageCircle,
   Settings,
   Home,
   User,
@@ -87,16 +86,6 @@ export function MobileNavigationShadCN({ league }: NavigationProps) {
       });
     }
 
-    // Chat tab (always available for participants and admins)
-    if (league.isParticipant || league.isAdmin) {
-      items.push({
-        name: "Chat",
-        href: `/league/${leagueId}/chat`,
-        current: location.pathname.includes("/chat"),
-        icon: MessageCircle,
-      });
-    }
-
     // Admin tab (always last if user is admin)
     if (league.isAdmin) {
       items.push({
@@ -114,7 +103,6 @@ export function MobileNavigationShadCN({ league }: NavigationProps) {
   
   const getBottomNavItems = () => {
     // For bottom navigation, replace "My Team" with personalized team name
-    // and exclude Chat (keep it in hamburger menu only)
     return navItems.map(item => {
       if (item.name === "My Team" && league.participant) {
         return {
@@ -123,7 +111,7 @@ export function MobileNavigationShadCN({ league }: NavigationProps) {
         };
       }
       return item;
-    }).filter(item => item.name !== "Chat"); // Remove Chat from bottom nav
+    });
   };
 
   const bottomNavItems = getBottomNavItems();

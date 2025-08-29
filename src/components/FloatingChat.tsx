@@ -29,7 +29,7 @@ export function FloatingChat({ league }: FloatingChatProps) {
   return (
     <>
       {/* Floating Chat Container */}
-      <div className="fixed bottom-4 right-4 z-50">
+      <div className="fixed bottom-20 right-4 md:bottom-4 z-50">
         {isOpen ? (
           <div className="bg-white rounded-lg shadow-lg border w-80 h-96 flex flex-col">
             {/* Header */}

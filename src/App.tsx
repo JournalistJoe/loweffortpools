@@ -19,7 +19,6 @@ import { AdminPageShadCN as AdminPage } from "./pages/AdminPageShadCN";
 import { LeaderboardPage } from "./pages/LeaderboardPage";
 import { TeamPage } from "./pages/TeamPage";
 import { SchedulePage } from "./pages/SchedulePage";
-import { ChatPage } from "./pages/ChatPage";
 import { ParticipantsPage } from "./pages/ParticipantsPage";
 import { LeagueWrapper } from "./components/LeagueWrapper";
 import { ForgotPasswordPage } from "./pages/ForgotPasswordPage";
@@ -106,14 +105,6 @@ function AuthenticatedRoutes() {
             element={
               <LeagueWrapper>
                 <SchedulePage />
-              </LeagueWrapper>
-            }
-          />
-          <Route
-            path="/league/:leagueId/chat"
-            element={
-              <LeagueWrapper>
-                <ChatPage />
               </LeagueWrapper>
             }
           />
