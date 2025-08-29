@@ -119,7 +119,7 @@ export function MobileNavigationShadCN({ league }: NavigationProps) {
   return (
     <>
       {/* Desktop Navigation */}
-      <nav className="bg-background border-b md:block hidden">
+      <nav className="bg-background border-b md:block hidden sticky top-0 z-40">
         <div className="max-w-7xl mx-auto px-4">
           <div className="flex justify-between h-16">
             <div className="flex items-center space-x-8">
@@ -178,7 +178,7 @@ export function MobileNavigationShadCN({ league }: NavigationProps) {
       {/* Mobile Navigation */}
       <div className="md:hidden">
         {/* Mobile Header */}
-        <div className="bg-background border-b">
+        <div className="bg-background border-b sticky top-0 z-40">
           <div className="px-4 py-3 flex items-center justify-between">
             <div className="flex-1 min-w-0">
               <Link
@@ -260,7 +260,7 @@ export function MobileNavigationShadCN({ league }: NavigationProps) {
                 >
                   <Link to={item.href}>
                     <IconComponent className="h-4 w-4" />
-                    <span className="text-xs font-medium truncate">
+                    <span className="text-xs font-medium whitespace-nowrap overflow-hidden text-ellipsis">
                       {item.name}
                     </span>
                   </Link>
