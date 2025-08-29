@@ -143,3 +143,96 @@ export const deleteMessage = mutation({
     return true;
   },
 });
+
+export const getCombinedFeed = query({
+  args: {
+    leagueId: v.id("leagues"),
+    limit: v.optional(v.number()),
+  },
+  handler: async (ctx, args) => {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) throw new Error("Must be logged in");
+
+    // Verify user has access to this league
+    const league = await ctx.db.get(args.leagueId);
+    if (!league) throw new Error("League not found");
+
+    // Check if user is admin or participant
+    const isAdmin = league.adminUserId === userId;
+    const participant = await ctx.db
+      .query("participants")
+      .withIndex("by_league_and_user", (q) =>
+        q.eq("leagueId", args.leagueId).eq("userId", userId),
+      )
+      .first();
+
+    if (!isAdmin && !participant) {
+      throw new Error("Access denied - must be league admin or participant");
+    }
+
+    const limit = args.limit || 100;
+    
+    // Fetch chat messages
+    const messages = await ctx.db
+      .query("chatMessages")
+      .withIndex("by_league_and_created", (q) =>
+        q.eq("leagueId", args.leagueId),
+      )
+      .order("desc")
+      .take(limit);
+
+    // Fetch activities
+    const activities = await ctx.db
+      .query("activity")
+      .withIndex("by_league_and_created", (q) =>
+        q.eq("leagueId", args.leagueId),
+      )
+      .order("desc")
+      .take(limit);
+
+    // Combine and enrich messages
+    const enrichedMessages = await Promise.all(
+      messages.map(async (message) => {
+        const user = await ctx.db.get(message.userId);
+        const userParticipant = await ctx.db
+          .query("participants")
+          .withIndex("by_league_and_user", (q) =>
+            q.eq("leagueId", args.leagueId).eq("userId", message.userId),
+          )
+          .first();
+
+        return {
+          ...message,
+          itemType: "message" as const,
+          user: {
+            _id: user?._id,
+            name: user?.name || user?.email || "Anonymous",
+            email: user?.email,
+          },
+          displayName:
+            userParticipant?.displayName ||
+            user?.name ||
+            user?.email ||
+            "Anonymous",
+          isAdmin: league.adminUserId === message.userId,
+          timestamp: message.createdAt,
+        };
+      }),
+    );
+
+    // Format activities as feed items
+    const activityItems = activities.map((activity) => ({
+      ...activity,
+      itemType: "activity" as const,
+      timestamp: activity.createdAt,
+    }));
+
+    // Combine and sort by timestamp
+    const combinedFeed = [...enrichedMessages, ...activityItems]
+      .sort((a, b) => b.timestamp - a.timestamp)
+      .slice(0, limit);
+
+    // Return in chronological order (oldest first)
+    return combinedFeed.reverse();
+  },
+});

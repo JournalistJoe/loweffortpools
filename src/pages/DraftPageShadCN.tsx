@@ -24,10 +24,6 @@ export function DraftPageShadCN() {
     api.draft.getDraftState,
     leagueId ? { leagueId: leagueId as any } : "skip",
   );
-  const activity = useQuery(
-    api.draft.getActivity,
-    leagueId ? { leagueId: leagueId as any } : "skip",
-  );
   const makePick = useMutation(api.draft.makePick);
   const removeParticipant = useMutation(api.leagues.removeParticipant);
 
@@ -152,9 +148,7 @@ export function DraftPageShadCN() {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-          {/* Draft Board */}
-          <div className="lg:col-span-2">
+        <div className="space-y-6">
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
@@ -270,33 +264,6 @@ export function DraftPageShadCN() {
                 </CardContent>
               </Card>
             )}
-          </div>
-
-          {/* Right Sidebar */}
-          <div className="lg:col-span-2 space-y-6">
-
-            {/* Activity Feed */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Activity</CardTitle>
-              </CardHeader>
-              <CardContent className="max-h-96 overflow-y-auto">
-                {activity?.map((item) => (
-                  <div
-                    key={item._id}
-                    className="mb-3 pb-3 border-b border-border last:border-b-0"
-                  >
-                    <div className="text-sm text-foreground">
-                      {item.message}
-                    </div>
-                    <div className="text-xs text-muted-foreground mt-1">
-                      {new Date(item.createdAt).toLocaleTimeString()}
-                    </div>
-                  </div>
-                ))}
-              </CardContent>
-            </Card>
-          </div>
         </div>
       </div>
     </div>

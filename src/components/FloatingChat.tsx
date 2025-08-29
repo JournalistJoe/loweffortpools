@@ -56,7 +56,7 @@ export function FloatingChat({ league }: FloatingChatProps) {
               <div className="absolute top-1 left-1/2 transform -translate-x-1/2 w-8 h-1 bg-primary-foreground/30 rounded-full md:hidden"></div>
               <div className="flex items-center gap-2">
                 <MessageCircle className="h-4 w-4" />
-                <span className="font-medium">League Chat</span>
+                <span className="font-medium">League Feed</span>
               </div>
               <Button
                 variant="ghost"
