@@ -14,6 +14,7 @@ import {
 } from "../components/ui/card";
 import { Clock, Trophy, Users } from "lucide-react";
 import { CommissionerWelcome } from "../components/CommissionerWelcome";
+import { PartialLeagueWelcome } from "../components/PartialLeagueWelcome";
 
 export function DraftPageShadCN() {
   const { leagueId } = useParams<{ leagueId: string }>();
@@ -72,6 +73,7 @@ export function DraftPageShadCN() {
   }
 
   const isCommissionerAlone = league.isAdmin && draftState.participants.length === 1;
+  const isPartialLeague = draftState.participants.length >= 2 && draftState.participants.length < 8;
   const numParticipants = draftState.participants.length;
 
   if (isCommissionerAlone) {
@@ -79,6 +81,19 @@ export function DraftPageShadCN() {
       <div>
         <Navigation league={league} />
         <CommissionerWelcome league={league} currentUser={currentUser} />
+      </div>
+    );
+  }
+
+  if (isPartialLeague) {
+    return (
+      <div>
+        <Navigation league={league} />
+        <PartialLeagueWelcome 
+          league={league} 
+          currentUser={currentUser} 
+          participants={draftState.participants} 
+        />
       </div>
     );
   }
