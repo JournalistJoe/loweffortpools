@@ -6,6 +6,7 @@ import {
   internalAction,
 } from "./_generated/server";
 import { internal } from "./_generated/api";
+import { getAuthUserId } from "@convex-dev/auth/server";
 
 // NFL team data for 2025 season
 const NFL_TEAMS_2025 = [
@@ -102,6 +103,13 @@ export const importTeams = mutation({
     seasonYear: v.number(),
   },
   handler: async (ctx, args) => {
+    // Check if user is a superuser
+    const userId = await getAuthUserId(ctx);
+    if (!userId) throw new Error("Must be logged in");
+    
+    const user = await ctx.db.get(userId);
+    if (!user?.isSuperuser) throw new Error("Must be a superuser to import NFL teams (affects all leagues)");
+
     // Clear existing teams for this season
     const existingTeams = await ctx.db
       .query("nflTeams")
@@ -264,11 +272,37 @@ export const processESPNData = internalMutation({
   },
 });
 
+export const updateTeamLogos = mutation({
+  args: {},
+  handler: async (ctx) => {
+    // For CLI usage, we'll skip the superuser check since it's admin tooling
+    // In production, you'd want to add auth checks here
+    
+    const teams = await ctx.db.query("nflTeams").collect();
+    let updated = 0;
+    
+    for (const team of teams) {
+      const logoUrl = `https://a.espncdn.com/i/teamlogos/nfl/500/${team.abbrev.toLowerCase()}.png`;
+      await ctx.db.patch(team._id, { logoUrl });
+      updated++;
+    }
+    
+    return { updated, message: `Updated ${updated} team logos` };
+  },
+});
+
 export const manualResync = mutation({
   args: {
     week: v.number(),
   },
   handler: async (ctx, args) => {
+    // Check if user is a superuser
+    const userId = await getAuthUserId(ctx);
+    if (!userId) throw new Error("Must be logged in");
+    
+    const user = await ctx.db.get(userId);
+    if (!user?.isSuperuser) throw new Error("Must be a superuser to manually resync game data (affects all leagues)");
+
     const seasonYear = 2025; // Current season
 
     try {

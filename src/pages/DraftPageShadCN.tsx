@@ -158,10 +158,10 @@ export function DraftPageShadCN() {
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-9 gap-3 text-xs font-medium text-muted-foreground mb-2">
-                  <div></div> {/* Empty space for Round column */}
+                  <div className="w-8"></div> {/* Narrower space for Round column */}
                   {draftState.participants.map((p) => (
-                    <div key={p._id} className="text-center h-16 flex items-center justify-center sm:h-auto overflow-visible">
-                      <span className="sm:inline block transform -rotate-90 sm:rotate-0 whitespace-nowrap">
+                    <div key={p._id} className="text-center h-20 sm:h-auto sm:py-4 flex items-center justify-center overflow-visible">
+                      <span className="sm:inline block transform -rotate-90 sm:rotate-0 break-words text-center leading-tight">
                         {p.displayName}
                       </span>
                     </div>
@@ -171,7 +171,7 @@ export function DraftPageShadCN() {
                 {[1, 2, 3, 4].map((round) => (
                   <div key={round} className="mb-4">
                     <div className="grid grid-cols-9 gap-3 items-center">
-                      <div className="text-sm font-medium text-foreground">
+                      <div className="text-sm font-medium text-foreground text-center w-8">
                         {round}
                       </div>
                       {Array.from({ length: 8 }, (_, i) => {

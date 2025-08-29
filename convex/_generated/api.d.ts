@@ -24,6 +24,7 @@ import type * as nflData from "../nflData.js";
 import type * as router from "../router.js";
 import type * as scoring from "../scoring.js";
 import type * as testLeague from "../testLeague.js";
+import type * as users from "../users.js";
 
 /**
  * A utility for referencing Convex functions in your app's API.
@@ -45,6 +46,7 @@ declare const fullApi: ApiFromModules<{
   router: typeof router;
   scoring: typeof scoring;
   testLeague: typeof testLeague;
+  users: typeof users;
 }>;
 export declare const api: FilterApi<
   typeof fullApi,

@@ -3,6 +3,21 @@ import { v } from "convex/values";
 import { authTables } from "@convex-dev/auth/server";
 
 const applicationTables = {
+  // Extend the users table with additional fields
+  users: defineTable({
+    name: v.optional(v.string()),
+    email: v.optional(v.string()),
+    emailVerified: v.optional(v.number()),
+    emailVerificationTime: v.optional(v.number()),
+    phone: v.optional(v.string()),
+    phoneVerified: v.optional(v.number()),
+    isAnonymous: v.optional(v.boolean()),
+    image: v.optional(v.string()),
+    isSuperuser: v.optional(v.boolean()), // Add superuser field
+  })
+    .index("email", ["email"])
+    .index("phone", ["phone"]),
+
   leagues: defineTable({
     name: v.string(),
     status: v.union(
@@ -132,4 +147,5 @@ const applicationTables = {
 export default defineSchema({
   ...authTables,
   ...applicationTables,
+  // Override users table to include our additional fields
 });

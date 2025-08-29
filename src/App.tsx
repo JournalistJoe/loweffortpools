@@ -16,6 +16,7 @@ import { ThemeProvider } from "./contexts/ThemeContext";
 import { LeagueSelectionPageShadCN as LeagueSelectionPage } from "./pages/LeagueSelectionPageShadCN";
 import { DraftPageShadCN as DraftPage } from "./pages/DraftPageShadCN";
 import { AdminPageShadCN as AdminPage } from "./pages/AdminPageShadCN";
+import { SystemAdminPage } from "./pages/SystemAdminPage";
 import { LeaderboardPage } from "./pages/LeaderboardPage";
 import { TeamPage } from "./pages/TeamPage";
 import { SchedulePage } from "./pages/SchedulePage";
@@ -68,6 +69,7 @@ function AuthenticatedRoutes() {
       <LeagueProvider>
         <Routes>
           <Route path="/" element={<LeagueSelectionPage />} />
+          <Route path="/system-admin" element={<SystemAdminPage />} />
           <Route
             path="/league/:leagueId/draft"
             element={

@@ -1,7 +1,7 @@
 import { useQuery, useMutation } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import { useState, useMemo, useEffect } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { normalizeJoinCode } from "../utils/joinCodeUtils";
 import { toast } from "sonner";
 import { useLeagueContext } from "../contexts/LeagueContext";
@@ -31,13 +31,16 @@ import {
   Calendar,
   UserCheck,
   Eye,
+  Settings,
 } from "lucide-react";
 import { DraftCountdown } from "../components/DraftCountdown";
 
 export function LeagueSelectionPageShadCN() {
   const leagues = useQuery(api.leagues.getUserLeagues);
+  const currentUser = useQuery(api.users.getCurrentUser);
   const { setSelectedLeagueId } = useLeagueContext();
   const location = useLocation();
+  const navigate = useNavigate();
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [showJoinForm, setShowJoinForm] = useState(false);
   const [leagueName, setLeagueName] = useState("");
@@ -228,6 +231,17 @@ export function LeagueSelectionPageShadCN() {
         <p className="text-muted-foreground">
           Select a league to manage or participate in
         </p>
+        {currentUser?.isSuperuser && (
+          <Button
+            onClick={() => navigate("/system-admin")}
+            variant="outline"
+            size="sm"
+            className="gap-2 mt-4"
+          >
+            <Settings className="h-4 w-4" />
+            System Administration
+          </Button>
+        )}
       </div>
 
       {leagues.length > 0 ? (

@@ -26,8 +26,6 @@ import {
   Settings,
   Copy,
   RotateCcw,
-  Download,
-  RefreshCw,
   UserPlus,
   Edit,
   Save,
@@ -36,10 +34,8 @@ import {
   Play,
   Code2,
   Users,
-  Database,
   Trophy,
   Shield,
-  TestTube,
   Shuffle,
 } from "lucide-react";
 
@@ -60,10 +56,6 @@ export function AdminPageShadCN() {
     leagueId ? { leagueId: leagueId as any } : "skip",
   );
   const allUsers = useQuery(api.leagues.getAllUsers);
-  const [isImporting, setIsImporting] = useState(false);
-  const [syncWeek, setSyncWeek] = useState("1");
-  const [isResyncing, setIsResyncing] = useState(false);
-  const [isCreatingTestLeague, setIsCreatingTestLeague] = useState(false);
   const [showAddParticipant, setShowAddParticipant] = useState(false);
   const [selectedUserId, setSelectedUserId] = useState("");
   const [displayName, setDisplayName] = useState("");
@@ -80,9 +72,7 @@ export function AdminPageShadCN() {
   const [newLeagueName, setNewLeagueName] = useState("");
   const [scheduledDraftDate, setScheduledDraftDate] = useState("");
 
-  const importTeams = useMutation(api.nflData.importTeams);
   const startDraft = useMutation(api.leagues.startDraft);
-  const manualResync = useMutation(api.nflData.manualResync);
   const addParticipant = useMutation(api.leagues.addParticipant);
   const removeParticipant = useMutation(api.leagues.removeParticipant);
   const updateParticipantPosition = useMutation(
@@ -99,21 +89,7 @@ export function AdminPageShadCN() {
   const updateLeague = useMutation(api.leagues.updateLeague);
   const deleteLeague = useMutation(api.leagues.deleteLeague);
   const regenerateJoinCode = useMutation(api.leagues.regenerateJoinCode);
-  const createTestLeague = useMutation(api.testLeague.createTestLeague);
 
-  const handleImportTeams = async () => {
-    setIsImporting(true);
-    try {
-      const result = await importTeams({
-        seasonYear: league?.seasonYear || 2025,
-      });
-      toast.success(`Imported ${result.imported} NFL teams`);
-    } catch (error) {
-      toast.error(String(error));
-    } finally {
-      setIsImporting(false);
-    }
-  };
 
   const handleStartDraft = async () => {
     if (!leagueId) return;
@@ -125,31 +101,7 @@ export function AdminPageShadCN() {
     }
   };
 
-  const handleManualResync = async () => {
-    setIsResyncing(true);
-    try {
-      await manualResync({ week: parseInt(syncWeek) });
-      toast.success(`Resynced week ${syncWeek} successfully`);
-    } catch (error) {
-      toast.error(String(error));
-    } finally {
-      setIsResyncing(false);
-    }
-  };
 
-  const handleCreateTestLeague = async () => {
-    setIsCreatingTestLeague(true);
-    try {
-      const result = await createTestLeague({});
-      toast.success(result.message);
-      // Navigate to the new test league (optional)
-      // window.location.href = `/leagues/${result.leagueId}`;
-    } catch (error) {
-      toast.error(String(error));
-    } finally {
-      setIsCreatingTestLeague(false);
-    }
-  };
 
   const handleAddParticipant = async () => {
     if (!leagueId || !selectedUserId || !displayName) return;
@@ -529,81 +481,6 @@ export function AdminPageShadCN() {
             </CardContent>
           </Card>
 
-          {/* Data Management */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Database className="h-5 w-5" />
-                Data Management
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div>
-                <Button
-                  onClick={handleImportTeams}
-                  disabled={isImporting}
-                  className="gap-2"
-                >
-                  <Download className="h-4 w-4" />
-                  {isImporting
-                    ? "Importing..."
-                    : `Import NFL Teams (${league.seasonYear})`}
-                </Button>
-                <p className="text-sm text-muted-foreground mt-1">
-                  Import all 32 NFL teams for the {league.seasonYear} season
-                </p>
-              </div>
-
-              <Separator />
-
-              <div className="flex items-end gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="sync-week">Week to Resync</Label>
-                  <Select value={syncWeek} onValueChange={setSyncWeek}>
-                    <SelectTrigger className="w-24">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {Array.from({ length: 18 }, (_, i) => (
-                        <SelectItem key={i + 1} value={(i + 1).toString()}>
-                          {i + 1}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <Button
-                  onClick={handleManualResync}
-                  disabled={isResyncing}
-                  className="gap-2"
-                >
-                  <RefreshCw className="h-4 w-4" />
-                  {isResyncing ? "Resyncing..." : "Manual Resync"}
-                </Button>
-              </div>
-              <p className="text-sm text-muted-foreground">
-                Manually sync game results for a specific week
-              </p>
-
-              <Separator />
-
-              <div>
-                <Button
-                  onClick={handleCreateTestLeague}
-                  disabled={isCreatingTestLeague}
-                  variant="outline"
-                  className="gap-2"
-                >
-                  <TestTube className="h-4 w-4" />
-                  {isCreatingTestLeague ? "Creating..." : "Create Test League"}
-                </Button>
-                <p className="text-sm text-muted-foreground mt-1">
-                  Generate a complete test league with 8 participants and
-                  finished draft for testing
-                </p>
-              </div>
-            </CardContent>
-          </Card>
 
           {/* Participant Management */}
           <Card>
