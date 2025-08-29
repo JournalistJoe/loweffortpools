@@ -157,10 +157,10 @@ export function DraftPageShadCN() {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="grid grid-cols-9 gap-2 text-xs font-medium text-muted-foreground mb-2">
+                <div className="grid grid-cols-9 gap-3 text-xs font-medium text-muted-foreground mb-2">
                   <div></div> {/* Empty space for Round column */}
                   {draftState.participants.map((p) => (
-                    <div key={p._id} className="text-center truncate h-8 flex items-center justify-center sm:h-auto">
+                    <div key={p._id} className="text-center h-16 flex items-center justify-center sm:h-auto overflow-visible">
                       <span className="sm:inline block transform -rotate-90 sm:rotate-0 whitespace-nowrap">
                         {p.displayName}
                       </span>
@@ -170,7 +170,7 @@ export function DraftPageShadCN() {
 
                 {[1, 2, 3, 4].map((round) => (
                   <div key={round} className="mb-4">
-                    <div className="grid grid-cols-9 gap-2 items-center">
+                    <div className="grid grid-cols-9 gap-3 items-center">
                       <div className="text-sm font-medium text-foreground">
                         {round}
                       </div>
@@ -192,23 +192,43 @@ export function DraftPageShadCN() {
                         return (
                           <div
                             key={pickNumber}
-                            className={`p-2 text-xs text-center rounded border ${
+                            className={`aspect-square p-2 text-xs rounded border flex items-center justify-center relative group overflow-hidden ${
                               isEmpty
                                 ? "border-border bg-muted/20"
                                 : "border-primary/20 bg-primary/5"
                             }`}
+                            title={pick ? `${pick.team?.fullName || pick.team?.name} - ${pick.participant?.displayName}` : `Pick #${pickNumber}`}
                           >
                             {pick ? (
-                              <div>
-                                <div className="font-medium text-primary truncate">
+                              <div className="w-full h-full flex items-center justify-center">
+                                {pick.team?.logoUrl ? (
+                                  <img
+                                    src={pick.team.logoUrl}
+                                    alt={`${pick.team.abbrev} logo`}
+                                    className="w-8 h-8 sm:w-10 sm:h-10 object-contain"
+                                    onError={(e) => {
+                                      const target = e.target as HTMLImageElement;
+                                      target.style.display = 'none';
+                                      const fallback = target.nextElementSibling as HTMLElement;
+                                      if (fallback) fallback.style.display = 'block';
+                                    }}
+                                  />
+                                ) : null}
+                                <div
+                                  className="font-medium text-primary text-center"
+                                  style={{ display: pick.team?.logoUrl ? 'none' : 'block' }}
+                                >
                                   {pick.team?.abbrev || "???"}
                                 </div>
-                                <div className="text-xs text-muted-foreground truncate">
-                                  {pick.participant?.displayName}
+                                <div className="absolute inset-0 bg-black/80 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                  <div className="text-white text-center">
+                                    <div className="font-medium">{pick.team?.abbrev}</div>
+                                    <div className="text-xs mt-1">{pick.participant?.displayName}</div>
+                                  </div>
                                 </div>
                               </div>
                             ) : (
-                              <div className="text-muted-foreground">
+                              <div className="text-muted-foreground font-medium">
                                 #{pickNumber}
                               </div>
                             )}
@@ -240,9 +260,30 @@ export function DraftPageShadCN() {
                         variant={
                           selectedTeam === team._id ? "default" : "outline"
                         }
-                        className="h-auto p-3 text-left justify-start"
+                        className="h-auto p-3 text-left justify-start gap-3"
                       >
-                        <div>
+                        <div className="flex-shrink-0">
+                          {team.logoUrl ? (
+                            <img
+                              src={team.logoUrl}
+                              alt={`${team.abbrev} logo`}
+                              className="w-8 h-8 object-contain"
+                              onError={(e) => {
+                                const target = e.target as HTMLImageElement;
+                                target.style.display = 'none';
+                                const fallback = target.nextElementSibling as HTMLElement;
+                                if (fallback) fallback.style.display = 'block';
+                              }}
+                            />
+                          ) : null}
+                          <div
+                            className="w-8 h-8 flex items-center justify-center font-bold text-sm"
+                            style={{ display: team.logoUrl ? 'none' : 'flex' }}
+                          >
+                            {team.abbrev}
+                          </div>
+                        </div>
+                        <div className="min-w-0 flex-1">
                           <div className="font-medium">{team.abbrev}</div>
                           <div className="text-xs text-muted-foreground truncate">
                             {team.name}

@@ -186,7 +186,25 @@ export function MobileDraftBoardShadCN({
                         <div className="text-right">
                           {pick ? (
                             <div className="flex items-center gap-2">
-                              <CheckCircle className="h-4 w-4 text-primary" />
+                              {pick.team?.logoUrl ? (
+                                <img
+                                  src={pick.team.logoUrl}
+                                  alt={`${pick.team.abbrev} logo`}
+                                  className="w-6 h-6 object-contain"
+                                  onError={(e) => {
+                                    const target = e.target as HTMLImageElement;
+                                    target.style.display = 'none';
+                                    const fallback = target.nextElementSibling as HTMLElement;
+                                    if (fallback) fallback.style.display = 'flex';
+                                  }}
+                                />
+                              ) : null}
+                              <div
+                                className="w-6 h-6 flex items-center justify-center"
+                                style={{ display: pick.team?.logoUrl ? 'none' : 'flex' }}
+                              >
+                                <CheckCircle className="h-4 w-4 text-primary" />
+                              </div>
                               <div>
                                 <p className="font-bold text-foreground">
                                   {pick.team?.abbrev || "???"}
@@ -244,11 +262,34 @@ export function MobileDraftBoardShadCN({
                       }
                       className="w-full h-auto p-4 justify-between"
                     >
-                      <div className="text-left">
-                        <p className="font-semibold">{team.abbrev}</p>
-                        <p className="text-sm text-muted-foreground">
-                          {team.name}
-                        </p>
+                      <div className="flex items-center gap-3 text-left">
+                        <div className="flex-shrink-0">
+                          {team.logoUrl ? (
+                            <img
+                              src={team.logoUrl}
+                              alt={`${team.abbrev} logo`}
+                              className="w-8 h-8 object-contain"
+                              onError={(e) => {
+                                const target = e.target as HTMLImageElement;
+                                target.style.display = 'none';
+                                const fallback = target.nextElementSibling as HTMLElement;
+                                if (fallback) fallback.style.display = 'flex';
+                              }}
+                            />
+                          ) : null}
+                          <div
+                            className="w-8 h-8 flex items-center justify-center font-bold text-sm"
+                            style={{ display: team.logoUrl ? 'none' : 'flex' }}
+                          >
+                            {team.abbrev}
+                          </div>
+                        </div>
+                        <div>
+                          <p className="font-semibold">{team.abbrev}</p>
+                          <p className="text-sm text-muted-foreground">
+                            {team.name}
+                          </p>
+                        </div>
                       </div>
                       {selectedTeam === team._id && (
                         <CheckCircle className="h-4 w-4" />

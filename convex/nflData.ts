@@ -9,83 +9,92 @@ import { internal } from "./_generated/api";
 
 // NFL team data for 2025 season
 const NFL_TEAMS_2025 = [
-  { espnId: 1, abbrev: "ATL", name: "Falcons", fullName: "Atlanta Falcons" },
-  { espnId: 2, abbrev: "BUF", name: "Bills", fullName: "Buffalo Bills" },
-  { espnId: 3, abbrev: "CHI", name: "Bears", fullName: "Chicago Bears" },
-  { espnId: 4, abbrev: "CIN", name: "Bengals", fullName: "Cincinnati Bengals" },
-  { espnId: 5, abbrev: "CLE", name: "Browns", fullName: "Cleveland Browns" },
-  { espnId: 6, abbrev: "DAL", name: "Cowboys", fullName: "Dallas Cowboys" },
-  { espnId: 7, abbrev: "DEN", name: "Broncos", fullName: "Denver Broncos" },
-  { espnId: 8, abbrev: "DET", name: "Lions", fullName: "Detroit Lions" },
-  { espnId: 9, abbrev: "GB", name: "Packers", fullName: "Green Bay Packers" },
-  { espnId: 10, abbrev: "TEN", name: "Titans", fullName: "Tennessee Titans" },
-  { espnId: 11, abbrev: "IND", name: "Colts", fullName: "Indianapolis Colts" },
-  { espnId: 12, abbrev: "KC", name: "Chiefs", fullName: "Kansas City Chiefs" },
-  { espnId: 13, abbrev: "LV", name: "Raiders", fullName: "Las Vegas Raiders" },
-  { espnId: 14, abbrev: "LAR", name: "Rams", fullName: "Los Angeles Rams" },
-  { espnId: 15, abbrev: "MIA", name: "Dolphins", fullName: "Miami Dolphins" },
-  { espnId: 16, abbrev: "MIN", name: "Vikings", fullName: "Minnesota Vikings" },
+  { espnId: 1, abbrev: "ATL", name: "Falcons", fullName: "Atlanta Falcons", logoUrl: "https://a.espncdn.com/i/teamlogos/nfl/500/atl.png" },
+  { espnId: 2, abbrev: "BUF", name: "Bills", fullName: "Buffalo Bills", logoUrl: "https://a.espncdn.com/i/teamlogos/nfl/500/buf.png" },
+  { espnId: 3, abbrev: "CHI", name: "Bears", fullName: "Chicago Bears", logoUrl: "https://a.espncdn.com/i/teamlogos/nfl/500/chi.png" },
+  { espnId: 4, abbrev: "CIN", name: "Bengals", fullName: "Cincinnati Bengals", logoUrl: "https://a.espncdn.com/i/teamlogos/nfl/500/cin.png" },
+  { espnId: 5, abbrev: "CLE", name: "Browns", fullName: "Cleveland Browns", logoUrl: "https://a.espncdn.com/i/teamlogos/nfl/500/cle.png" },
+  { espnId: 6, abbrev: "DAL", name: "Cowboys", fullName: "Dallas Cowboys", logoUrl: "https://a.espncdn.com/i/teamlogos/nfl/500/dal.png" },
+  { espnId: 7, abbrev: "DEN", name: "Broncos", fullName: "Denver Broncos", logoUrl: "https://a.espncdn.com/i/teamlogos/nfl/500/den.png" },
+  { espnId: 8, abbrev: "DET", name: "Lions", fullName: "Detroit Lions", logoUrl: "https://a.espncdn.com/i/teamlogos/nfl/500/det.png" },
+  { espnId: 9, abbrev: "GB", name: "Packers", fullName: "Green Bay Packers", logoUrl: "https://a.espncdn.com/i/teamlogos/nfl/500/gb.png" },
+  { espnId: 10, abbrev: "TEN", name: "Titans", fullName: "Tennessee Titans", logoUrl: "https://a.espncdn.com/i/teamlogos/nfl/500/ten.png" },
+  { espnId: 11, abbrev: "IND", name: "Colts", fullName: "Indianapolis Colts", logoUrl: "https://a.espncdn.com/i/teamlogos/nfl/500/ind.png" },
+  { espnId: 12, abbrev: "KC", name: "Chiefs", fullName: "Kansas City Chiefs", logoUrl: "https://a.espncdn.com/i/teamlogos/nfl/500/kc.png" },
+  { espnId: 13, abbrev: "LV", name: "Raiders", fullName: "Las Vegas Raiders", logoUrl: "https://a.espncdn.com/i/teamlogos/nfl/500/lv.png" },
+  { espnId: 14, abbrev: "LAR", name: "Rams", fullName: "Los Angeles Rams", logoUrl: "https://a.espncdn.com/i/teamlogos/nfl/500/lar.png" },
+  { espnId: 15, abbrev: "MIA", name: "Dolphins", fullName: "Miami Dolphins", logoUrl: "https://a.espncdn.com/i/teamlogos/nfl/500/mia.png" },
+  { espnId: 16, abbrev: "MIN", name: "Vikings", fullName: "Minnesota Vikings", logoUrl: "https://a.espncdn.com/i/teamlogos/nfl/500/min.png" },
   {
     espnId: 17,
     abbrev: "NE",
     name: "Patriots",
     fullName: "New England Patriots",
+    logoUrl: "https://a.espncdn.com/i/teamlogos/nfl/500/ne.png"
   },
-  { espnId: 18, abbrev: "NO", name: "Saints", fullName: "New Orleans Saints" },
-  { espnId: 19, abbrev: "NYG", name: "Giants", fullName: "New York Giants" },
-  { espnId: 20, abbrev: "NYJ", name: "Jets", fullName: "New York Jets" },
+  { espnId: 18, abbrev: "NO", name: "Saints", fullName: "New Orleans Saints", logoUrl: "https://a.espncdn.com/i/teamlogos/nfl/500/no.png" },
+  { espnId: 19, abbrev: "NYG", name: "Giants", fullName: "New York Giants", logoUrl: "https://a.espncdn.com/i/teamlogos/nfl/500/nyg.png" },
+  { espnId: 20, abbrev: "NYJ", name: "Jets", fullName: "New York Jets", logoUrl: "https://a.espncdn.com/i/teamlogos/nfl/500/nyj.png" },
   {
     espnId: 21,
     abbrev: "PHI",
     name: "Eagles",
     fullName: "Philadelphia Eagles",
+    logoUrl: "https://a.espncdn.com/i/teamlogos/nfl/500/phi.png"
   },
   {
     espnId: 22,
     abbrev: "ARI",
     name: "Cardinals",
     fullName: "Arizona Cardinals",
+    logoUrl: "https://a.espncdn.com/i/teamlogos/nfl/500/ari.png"
   },
   {
     espnId: 23,
     abbrev: "PIT",
     name: "Steelers",
     fullName: "Pittsburgh Steelers",
+    logoUrl: "https://a.espncdn.com/i/teamlogos/nfl/500/pit.png"
   },
   {
     espnId: 24,
     abbrev: "LAC",
     name: "Chargers",
     fullName: "Los Angeles Chargers",
+    logoUrl: "https://a.espncdn.com/i/teamlogos/nfl/500/lac.png"
   },
-  { espnId: 25, abbrev: "SF", name: "49ers", fullName: "San Francisco 49ers" },
-  { espnId: 26, abbrev: "SEA", name: "Seahawks", fullName: "Seattle Seahawks" },
+  { espnId: 25, abbrev: "SF", name: "49ers", fullName: "San Francisco 49ers", logoUrl: "https://a.espncdn.com/i/teamlogos/nfl/500/sf.png" },
+  { espnId: 26, abbrev: "SEA", name: "Seahawks", fullName: "Seattle Seahawks", logoUrl: "https://a.espncdn.com/i/teamlogos/nfl/500/sea.png" },
   {
     espnId: 27,
     abbrev: "TB",
     name: "Buccaneers",
     fullName: "Tampa Bay Buccaneers",
+    logoUrl: "https://a.espncdn.com/i/teamlogos/nfl/500/tb.png"
   },
   {
     espnId: 28,
     abbrev: "WAS",
     name: "Commanders",
     fullName: "Washington Commanders",
+    logoUrl: "https://a.espncdn.com/i/teamlogos/nfl/500/wsh.png"
   },
   {
     espnId: 29,
     abbrev: "CAR",
     name: "Panthers",
     fullName: "Carolina Panthers",
+    logoUrl: "https://a.espncdn.com/i/teamlogos/nfl/500/car.png"
   },
   {
     espnId: 30,
     abbrev: "JAX",
     name: "Jaguars",
     fullName: "Jacksonville Jaguars",
+    logoUrl: "https://a.espncdn.com/i/teamlogos/nfl/500/jax.png"
   },
-  { espnId: 33, abbrev: "BAL", name: "Ravens", fullName: "Baltimore Ravens" },
-  { espnId: 34, abbrev: "HOU", name: "Texans", fullName: "Houston Texans" },
+  { espnId: 33, abbrev: "BAL", name: "Ravens", fullName: "Baltimore Ravens", logoUrl: "https://a.espncdn.com/i/teamlogos/nfl/500/bal.png" },
+  { espnId: 34, abbrev: "HOU", name: "Texans", fullName: "Houston Texans", logoUrl: "https://a.espncdn.com/i/teamlogos/nfl/500/hou.png" },
 ];
 
 export const importTeams = mutation({

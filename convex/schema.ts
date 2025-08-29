@@ -39,6 +39,7 @@ const applicationTables = {
     name: v.string(),
     fullName: v.string(),
     seasonYear: v.number(),
+    logoUrl: v.optional(v.string()),
   })
     .index("by_season", ["seasonYear"])
     .index("by_espn_id", ["espnId"]),
