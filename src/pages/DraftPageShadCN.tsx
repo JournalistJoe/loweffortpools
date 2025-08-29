@@ -4,7 +4,6 @@ import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { useParams } from "react-router-dom";
 import { MobileNavigationShadCN as Navigation } from "../components/MobileNavigationShadCN";
-import { ChatShadCN as Chat } from "../components/ChatShadCN";
 import { Button } from "../components/ui/button";
 import { Badge } from "../components/ui/badge";
 import {
@@ -275,10 +274,6 @@ export function DraftPageShadCN() {
 
           {/* Right Sidebar */}
           <div className="lg:col-span-2 space-y-6">
-            {/* Chat */}
-            {(league.isParticipant || league.isAdmin) && (
-              <Chat leagueId={leagueId!} />
-            )}
 
             {/* Activity Feed */}
             <Card>

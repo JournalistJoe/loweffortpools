@@ -4,7 +4,6 @@ import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { useParams } from "react-router-dom";
 import { MobileNavigationShadCN as Navigation } from "../components/MobileNavigationShadCN";
-import { ChatShadCN as Chat } from "../components/ChatShadCN";
 
 export function DraftPage() {
   const { leagueId } = useParams<{ leagueId: string }>();
@@ -248,10 +247,6 @@ export function DraftPage() {
 
           {/* Right Sidebar */}
           <div className="lg:col-span-2 space-y-6">
-            {/* Chat */}
-            {(league.isParticipant || league.isAdmin) && (
-              <Chat leagueId={leagueId!} />
-            )}
 
             {/* Activity Feed */}
             <div className="bg-white rounded-lg shadow">
