@@ -19,6 +19,7 @@ import {
   MessageCircle,
   Settings,
   Home,
+  User,
 } from "lucide-react";
 import { ThemeToggle } from "./ThemeToggle";
 import { DraftCountdown } from "./DraftCountdown";
@@ -31,6 +32,10 @@ interface NavigationProps {
     isAdmin: boolean;
     isParticipant: boolean;
     scheduledDraftDate?: number;
+    participant?: {
+      _id: string;
+      displayName: string;
+    };
   };
 }
 
@@ -69,6 +74,16 @@ export function MobileNavigationShadCN({ league }: NavigationProps) {
         href: `/league/${leagueId}/schedule`,
         current: location.pathname.includes("/schedule"),
         icon: Calendar,
+      });
+    }
+
+    // My Team tab (only available for participants)
+    if (league.isParticipant && league.participant) {
+      items.push({
+        name: "My Team",
+        href: `/league/${leagueId}/team/${league.participant._id}`,
+        current: location.pathname.includes("/team/"),
+        icon: User,
       });
     }
 
