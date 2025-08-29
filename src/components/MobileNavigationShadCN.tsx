@@ -35,8 +35,13 @@ interface NavigationProps {
     status: string;
     isAdmin: boolean;
     isParticipant: boolean;
+    isSpectator?: boolean;
     scheduledDraftDate?: number;
     participant?: {
+      _id: string;
+      displayName: string;
+    };
+    spectator?: {
       _id: string;
       displayName: string;
     };

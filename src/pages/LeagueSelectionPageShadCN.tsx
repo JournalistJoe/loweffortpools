@@ -61,6 +61,7 @@ export function LeagueSelectionPageShadCN() {
   const createLeague = useMutation(api.leagues.createLeague);
   const joinLeague = useMutation(api.leagues.joinLeague);
   const autoJoinLeague = useMutation(api.leagues.autoJoinLeague);
+  const joinAsSpectator = useMutation(api.spectators.joinAsSpectator);
   const leagueByJoinCode = useQuery(
     api.leagues.getLeagueByJoinCode,
     joinCode.length === 6 ? { joinCode } : "skip",
@@ -189,6 +190,30 @@ export function LeagueSelectionPageShadCN() {
         displayName: displayName.trim(),
       });
       toast.success("Successfully joined league!");
+      setShowJoinForm(false);
+      setJoinCode("");
+      setDisplayName("");
+      setSelectedLeagueId(result.leagueId);
+    } catch (error) {
+      toast.error(String(error));
+    } finally {
+      setIsJoining(false);
+    }
+  };
+
+  const handleJoinAsSpectator = async () => {
+    if (!joinCode.trim() || !displayName.trim()) {
+      toast.error("Please enter both join code and display name");
+      return;
+    }
+
+    setIsJoining(true);
+    try {
+      const result = await joinAsSpectator({
+        joinCode: joinCode.trim().toUpperCase(),
+        displayName: displayName.trim(),
+      });
+      toast.success("Successfully joined league as spectator!");
       setShowJoinForm(false);
       setJoinCode("");
       setDisplayName("");
@@ -495,10 +520,10 @@ export function LeagueSelectionPageShadCN() {
                         {leagueByJoinCode.participantCount}/8 participants
                       </p>
                       {!leagueByJoinCode.canJoin && (
-                        <p className="text-sm text-destructive mt-1">
+                        <p className="text-sm text-muted-foreground mt-1">
                           {leagueByJoinCode.participantCount >= 8
-                            ? "League is full"
-                            : "Draft has already started"}
+                            ? "League is full - you can join as a spectator"
+                            : "Draft has already started - you can join as a spectator"}
                         </p>
                       )}
                     </CardContent>
@@ -506,32 +531,48 @@ export function LeagueSelectionPageShadCN() {
                 )}
 
                 <div>
-                  <Label htmlFor="team-name">Your Team Name</Label>
+                  <Label htmlFor="team-name">
+                    {leagueByJoinCode && !leagueByJoinCode.canJoin ? "Your Display Name" : "Your Team Name"}
+                  </Label>
                   <Input
                     id="team-name"
                     type="text"
                     value={displayName}
                     onChange={(e) => setDisplayName(e.target.value)}
-                    placeholder="e.g., John's Team"
+                    placeholder={leagueByJoinCode && !leagueByJoinCode.canJoin ? "e.g., John" : "e.g., John's Team"}
                   />
                 </div>
 
                 <Separator />
 
                 <div className="flex gap-3">
-                  <Button
-                    onClick={handleJoinLeague}
-                    disabled={
-                      isJoining ||
-                      !joinCode.trim() ||
-                      !displayName.trim() ||
-                      (leagueByJoinCode && !leagueByJoinCode.canJoin) ||
-                      false
-                    }
-                    className="flex-1"
-                  >
-                    {isJoining ? "Joining..." : "Join League"}
-                  </Button>
+                  {leagueByJoinCode && !leagueByJoinCode.canJoin ? (
+                    <Button
+                      onClick={handleJoinAsSpectator}
+                      disabled={
+                        isJoining ||
+                        !joinCode.trim() ||
+                        !displayName.trim()
+                      }
+                      className="flex-1 bg-blue-600 hover:bg-blue-700"
+                    >
+                      <Eye className="h-4 w-4 mr-2" />
+                      {isJoining ? "Joining..." : "Join as Spectator"}
+                    </Button>
+                  ) : (
+                    <Button
+                      onClick={handleJoinLeague}
+                      disabled={
+                        isJoining ||
+                        !joinCode.trim() ||
+                        !displayName.trim() ||
+                        (leagueByJoinCode && !leagueByJoinCode.canJoin)
+                      }
+                      className="flex-1"
+                    >
+                      {isJoining ? "Joining..." : "Join League"}
+                    </Button>
+                  )}
                   <Button
                     variant="outline"
                     onClick={() => {

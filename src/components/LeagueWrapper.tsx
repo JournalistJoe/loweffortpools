@@ -18,7 +18,7 @@ export function LeagueWrapper({ children }: LeagueWrapperProps) {
   return (
     <>
       {children}
-      {league && <FloatingChat league={league} />}
+      {league && <FloatingChat league={league} isSpectator={league.isSpectator} />}
     </>
   );
 }

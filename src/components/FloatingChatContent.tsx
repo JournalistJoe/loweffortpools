@@ -7,7 +7,7 @@ import { Input } from "./ui/input";
 import { ScrollArea } from "./ui/scroll-area";
 import { Avatar, AvatarFallback } from "./ui/avatar";
 import { Badge } from "./ui/badge";
-import { Send, Trash2, Crown, Activity, Users, Trophy, Clock, LogOut } from "lucide-react";
+import { Send, Trash2, Crown, Activity, Users, Trophy, Clock, LogOut, Eye } from "lucide-react";
 
 interface FloatingChatContentProps {
   leagueId: string;
@@ -160,6 +160,9 @@ export function FloatingChatContent({ leagueId }: FloatingChatContentProps) {
                           </span>
                           {item.isAdmin && (
                             <Crown className="h-3 w-3 text-amber-500" />
+                          )}
+                          {item.isSpectator && (
+                            <Eye className="h-3 w-3 text-blue-500" />
                           )}
                           <span className="text-xs text-muted-foreground">
                             {formatTime(item.timestamp)}

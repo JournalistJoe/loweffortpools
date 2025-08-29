@@ -55,6 +55,10 @@ export function AdminPageShadCN() {
     api.leagues.getParticipants,
     leagueId ? { leagueId: leagueId as any } : "skip",
   );
+  const spectators = useQuery(
+    api.spectators.getSpectators,
+    leagueId ? { leagueId: leagueId as any } : "skip",
+  );
   const allUsers = useQuery(api.leagues.getAllUsers);
   const [showAddParticipant, setShowAddParticipant] = useState(false);
   const [selectedUserId, setSelectedUserId] = useState("");
@@ -89,6 +93,7 @@ export function AdminPageShadCN() {
   const updateLeague = useMutation(api.leagues.updateLeague);
   const deleteLeague = useMutation(api.leagues.deleteLeague);
   const regenerateJoinCode = useMutation(api.leagues.regenerateJoinCode);
+  const leaveAsSpectator = useMutation(api.spectators.leaveAsSpectator);
 
 
   const handleStartDraft = async () => {
@@ -809,6 +814,54 @@ export function AdminPageShadCN() {
                     </div>
                   </CardContent>
                 </Card>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Spectators */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Users className="h-5 w-5" />
+                Spectators ({spectators?.length || 0})
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              {spectators && spectators.length > 0 ? (
+                <div className="space-y-3">
+                  {spectators.map((spectator) => (
+                    <div key={spectator._id} className="flex items-center justify-between p-3 bg-muted rounded-lg">
+                      <div className="flex items-center gap-3">
+                        <div className="h-8 w-8 rounded-full bg-blue-100 dark:bg-blue-900 flex items-center justify-center">
+                          <Users className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                        </div>
+                        <span className="font-medium">{spectator.displayName}</span>
+                      </div>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={async () => {
+                          if (confirm(`Remove ${spectator.displayName} as spectator?`)) {
+                            try {
+                              await leaveAsSpectator({ leagueId: leagueId as any });
+                              toast.success("Spectator removed");
+                            } catch (error) {
+                              toast.error(String(error));
+                            }
+                          }
+                        }}
+                        className="gap-1 text-destructive hover:text-destructive"
+                      >
+                        <Trash2 className="h-3 w-3" />
+                        Remove
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-sm text-muted-foreground text-center py-4">
+                  No spectators yet. Users can join as spectators when the league is full.
+                </p>
               )}
             </CardContent>
           </Card>

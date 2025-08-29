@@ -15,7 +15,7 @@ export const getMessages = query({
     const league = await ctx.db.get(args.leagueId);
     if (!league) throw new Error("League not found");
 
-    // Check if user is admin or participant
+    // Check if user is admin, participant, or spectator
     const isAdmin = league.adminUserId === userId;
     const participant = await ctx.db
       .query("participants")
@@ -23,9 +23,16 @@ export const getMessages = query({
         q.eq("leagueId", args.leagueId).eq("userId", userId),
       )
       .first();
+    
+    const spectator = await ctx.db
+      .query("spectators")
+      .withIndex("by_league_and_user", (q) =>
+        q.eq("leagueId", args.leagueId).eq("userId", userId),
+      )
+      .first();
 
-    if (!isAdmin && !participant) {
-      throw new Error("Access denied - must be league admin or participant");
+    if (!isAdmin && !participant && !spectator) {
+      throw new Error("Access denied - must be league admin, participant, or spectator");
     }
 
     // Sanitize and clamp the limit to prevent unbounded reads
@@ -54,6 +61,13 @@ export const getMessages = query({
             q.eq("leagueId", args.leagueId).eq("userId", message.userId),
           )
           .first();
+        
+        const userSpectator = await ctx.db
+          .query("spectators")
+          .withIndex("by_league_and_user", (q) =>
+            q.eq("leagueId", args.leagueId).eq("userId", message.userId),
+          )
+          .first();
 
         return {
           ...message,
@@ -64,9 +78,11 @@ export const getMessages = query({
           },
           displayName:
             userParticipant?.displayName ||
+            userSpectator?.displayName ||
             user?.name ||
             "Anonymous",
           isAdmin: league.adminUserId === message.userId,
+          isSpectator: !!userSpectator,
         };
       }),
     );
@@ -89,7 +105,7 @@ export const sendMessage = mutation({
     const league = await ctx.db.get(args.leagueId);
     if (!league) throw new Error("League not found");
 
-    // Check if user is admin or participant
+    // Check if user is admin, participant, or spectator
     const isAdmin = league.adminUserId === userId;
     const participant = await ctx.db
       .query("participants")
@@ -97,9 +113,16 @@ export const sendMessage = mutation({
         q.eq("leagueId", args.leagueId).eq("userId", userId),
       )
       .first();
+    
+    const spectator = await ctx.db
+      .query("spectators")
+      .withIndex("by_league_and_user", (q) =>
+        q.eq("leagueId", args.leagueId).eq("userId", userId),
+      )
+      .first();
 
-    if (!isAdmin && !participant) {
-      throw new Error("Access denied - must be league admin or participant");
+    if (!isAdmin && !participant && !spectator) {
+      throw new Error("Access denied - must be league admin, participant, or spectator");
     }
 
     // Validate message
@@ -163,7 +186,7 @@ export const getCombinedFeed = query({
     const league = await ctx.db.get(args.leagueId);
     if (!league) throw new Error("League not found");
 
-    // Check if user is admin or participant
+    // Check if user is admin, participant, or spectator
     const isAdmin = league.adminUserId === userId;
     const participant = await ctx.db
       .query("participants")
@@ -171,9 +194,16 @@ export const getCombinedFeed = query({
         q.eq("leagueId", args.leagueId).eq("userId", userId),
       )
       .first();
+    
+    const spectator = await ctx.db
+      .query("spectators")
+      .withIndex("by_league_and_user", (q) =>
+        q.eq("leagueId", args.leagueId).eq("userId", userId),
+      )
+      .first();
 
-    if (!isAdmin && !participant) {
-      throw new Error("Access denied - must be league admin or participant");
+    if (!isAdmin && !participant && !spectator) {
+      throw new Error("Access denied - must be league admin, participant, or spectator");
     }
 
     // Sanitize and clamp the limit to prevent unbounded reads
@@ -212,6 +242,13 @@ export const getCombinedFeed = query({
             q.eq("leagueId", args.leagueId).eq("userId", message.userId),
           )
           .first();
+        
+        const userSpectator = await ctx.db
+          .query("spectators")
+          .withIndex("by_league_and_user", (q) =>
+            q.eq("leagueId", args.leagueId).eq("userId", message.userId),
+          )
+          .first();
 
         return {
           ...message,
@@ -223,9 +260,11 @@ export const getCombinedFeed = query({
           },
           displayName:
             userParticipant?.displayName ||
+            userSpectator?.displayName ||
             user?.name ||
             "Anonymous",
           isAdmin: league.adminUserId === message.userId,
+          isSpectator: !!userSpectator,
           timestamp: message.createdAt,
         };
       }),

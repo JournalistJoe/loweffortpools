@@ -171,6 +171,19 @@ export const getUserLeagues = query({
       }),
     );
 
+    // Get leagues where user is a spectator
+    const spectatorRecords = await ctx.db
+      .query("spectators")
+      .withIndex("by_user", (q) => q.eq("userId", userId))
+      .collect();
+
+    const spectatorLeagues = await Promise.all(
+      spectatorRecords.map(async (spectator) => {
+        const league = await ctx.db.get(spectator.leagueId);
+        return league ? { ...league, spectator } : null;
+      }),
+    );
+
     // Combine and deduplicate leagues
     const allLeagues = new Map();
 
@@ -179,7 +192,9 @@ export const getUserLeagues = query({
         ...league,
         isAdmin: true,
         isParticipant: false,
+        isSpectator: false,
         participant: null,
+        spectator: null,
       });
     });
 
@@ -190,7 +205,23 @@ export const getUserLeagues = query({
           ...league,
           isAdmin: existing?.isAdmin || league.adminUserId === userId,
           isParticipant: true,
+          isSpectator: existing?.isSpectator || false,
           participant: league.participant,
+          spectator: existing?.spectator || null,
+        });
+      }
+    });
+
+    spectatorLeagues.forEach((league) => {
+      if (league) {
+        const existing = allLeagues.get(league._id);
+        allLeagues.set(league._id, {
+          ...league,
+          isAdmin: existing?.isAdmin || league.adminUserId === userId,
+          isParticipant: existing?.isParticipant || false,
+          isSpectator: true,
+          participant: existing?.participant || null,
+          spectator: league.spectator,
         });
       }
     });
@@ -219,11 +250,20 @@ export const getLeague = query({
       )
       .first();
 
+    const spectator = await ctx.db
+      .query("spectators")
+      .withIndex("by_league_and_user", (q) =>
+        q.eq("leagueId", args.leagueId).eq("userId", userId),
+      )
+      .first();
+
     return {
       ...league,
       isAdmin: league.adminUserId === userId,
       isParticipant: !!participant,
+      isSpectator: !!spectator,
       participant,
+      spectator,
     };
   },
 });

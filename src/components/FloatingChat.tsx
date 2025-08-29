@@ -11,9 +11,10 @@ interface FloatingChatProps {
     isParticipant: boolean;
     isAdmin: boolean;
   };
+  isSpectator?: boolean;
 }
 
-export function FloatingChat({ league }: FloatingChatProps) {
+export function FloatingChat({ league, isSpectator }: FloatingChatProps) {
   const { leagueId } = useParams<{ leagueId: string }>();
   const [isOpen, setIsOpen] = useState(false);
   const dialogRef = useRef<HTMLDivElement>(null);
@@ -42,8 +43,8 @@ export function FloatingChat({ league }: FloatingChatProps) {
     }
   }, [isOpen]);
 
-  // Only show for participants and admins
-  if (!league.isParticipant && !league.isAdmin) {
+  // Only show for participants, admins, and spectators
+  if (!league.isParticipant && !league.isAdmin && !isSpectator) {
     return null;
   }
 

@@ -24,6 +24,7 @@ import type * as leagues from "../leagues.js";
 import type * as nflData from "../nflData.js";
 import type * as router from "../router.js";
 import type * as scoring from "../scoring.js";
+import type * as spectators from "../spectators.js";
 import type * as testLeague from "../testLeague.js";
 import type * as users from "../users.js";
 
@@ -47,6 +48,7 @@ declare const fullApi: ApiFromModules<{
   nflData: typeof nflData;
   router: typeof router;
   scoring: typeof scoring;
+  spectators: typeof spectators;
   testLeague: typeof testLeague;
   users: typeof users;
 }>;

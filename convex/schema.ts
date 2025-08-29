@@ -142,6 +142,16 @@ const applicationTables = {
   })
     .index("by_key", ["key"])
     .index("by_expires_at", ["expiresAt"]),
+
+  spectators: defineTable({
+    leagueId: v.id("leagues"),
+    userId: v.id("users"),
+    displayName: v.string(),
+    createdAt: v.number(),
+  })
+    .index("by_league", ["leagueId"])
+    .index("by_user", ["userId"])
+    .index("by_league_and_user", ["leagueId", "userId"]),
 };
 
 export default defineSchema({
