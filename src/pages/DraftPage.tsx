@@ -85,6 +85,8 @@ export function DraftPage() {
     );
   }
 
+  const numParticipants = draftState.participants.length;
+
   const formatTime = (ms: number) => {
     const minutes = Math.floor(ms / 60000);
     const seconds = Math.floor((ms % 60000) / 1000);
@@ -144,9 +146,9 @@ export function DraftPage() {
                 <h2 className="text-lg font-semibold">Draft Results</h2>
               </div>
               <div className="p-4">
-                <div className="grid grid-cols-8 gap-2 text-xs font-medium text-gray-500 mb-2">
+                <div className="grid gap-2 text-[10px] sm:text-xs font-medium text-gray-500 mb-2" style={{ gridTemplateColumns: `repeat(${numParticipants}, 1fr)` }}>
                   {draftState.participants.map((p) => (
-                    <div key={p._id} className="text-center truncate">
+                    <div key={p._id} className="text-center truncate overflow-hidden min-w-0" title={p.displayName}>
                       {p.displayName}
                     </div>
                   ))}
@@ -157,16 +159,16 @@ export function DraftPage() {
                     <div className="text-sm font-medium text-gray-700 mb-2">
                       Round {round}
                     </div>
-                    <div className="grid grid-cols-8 gap-2">
-                      {Array.from({ length: 8 }, (_, i) => {
+                    <div className="grid gap-2" style={{ gridTemplateColumns: `repeat(${numParticipants}, 1fr)` }}>
+                      {Array.from({ length: numParticipants }, (_, i) => {
                         // Calculate pick number based on snake draft order
                         let pickNumber;
                         if (round % 2 === 1) {
-                          // Odd rounds: normal order (1-8, 17-24)
-                          pickNumber = (round - 1) * 8 + i + 1;
+                          // Odd rounds: normal order (1-numParticipants, 17-24)
+                          pickNumber = (round - 1) * numParticipants + i + 1;
                         } else {
                           // Even rounds: reverse order (9-16, 25-32)
-                          pickNumber = (round - 1) * 8 + (8 - i);
+                          pickNumber = (round - 1) * numParticipants + (numParticipants - i);
                         }
                         const pick = draftState.picks.find(
                           (p) => p.pickNumber === pickNumber,

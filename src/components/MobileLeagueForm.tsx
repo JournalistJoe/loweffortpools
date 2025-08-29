@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useMutation, useQuery } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import { toast } from "sonner";
+import { JOIN_CODE_LENGTH } from "../utils/joinCodeUtils";
 
 interface MobileLeagueFormProps {
   onLeagueSelected: (leagueId: string) => void;
@@ -207,7 +208,7 @@ export function MobileLeagueForm({ onLeagueSelected }: MobileLeagueFormProps) {
                 value={joinCode}
                 onChange={(e) => setJoinCode(e.target.value.toUpperCase())}
                 placeholder="ABC123"
-                maxLength={6}
+                maxLength={JOIN_CODE_LENGTH}
                 className="w-full px-4 py-4 border border-green-200 dark:border-green-800 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 font-mono text-center text-xl tracking-widest min-h-[44px]"
                 inputMode="text"
                 autoCapitalize="characters"

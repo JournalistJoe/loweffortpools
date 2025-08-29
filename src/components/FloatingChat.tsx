@@ -64,8 +64,11 @@ export function FloatingChat({ league }: FloatingChatProps) {
           aria-labelledby="league-chat-title"
           tabIndex={-1}
           className="bg-card border border-border border flex flex-col z-50
-                     fixed top-16 bottom-0 left-0 right-0 overscroll-contain pb-[env(safe-area-inset-bottom)]
+                     fixed top-16 bottom-0 left-0 right-0 overscroll-contain pb-4
                      md:top-auto md:bottom-4 md:right-4 md:left-auto md:w-80 md:h-96 md:rounded-lg"
+          style={{
+            paddingBottom: 'calc(1rem + env(safe-area-inset-bottom, 0px))'
+          }}
         >
             {/* Header */}
             <div className="flex items-center justify-between p-3 border-b bg-primary text-primary-foreground md:rounded-t-lg relative">

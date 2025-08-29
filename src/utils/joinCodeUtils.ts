@@ -3,6 +3,12 @@
  */
 
 /**
+ * Shared constants for join codes
+ */
+export const JOIN_CODE_LENGTH = 6;
+export const JOIN_CODE_PLACEHOLDER = "Enter invite code";
+
+/**
  * Normalizes and validates a joinCode to match backend expectations.
  * 
  * Process:
@@ -29,7 +35,7 @@ export function normalizeJoinCode(input: string | null): string | null {
   const alphanumericOnly = uppercase.replace(/[^A-Z0-9]/g, '');
   
   // Step 4: Validate length is exactly 6 characters
-  if (alphanumericOnly.length !== 6) {
+  if (alphanumericOnly.length !== JOIN_CODE_LENGTH) {
     return null;
   }
   
@@ -45,5 +51,16 @@ export function isValidJoinCode(code: string | null): boolean {
     return false;
   }
   
-  return /^[A-Z0-9]{6}$/.test(code);
+  return new RegExp(`^[A-Z0-9]{${JOIN_CODE_LENGTH}}$`).test(code);
+}
+
+/**
+ * Formats user input for join codes in real-time
+ * Converts to uppercase, removes non-alphanumeric chars, enforces max length
+ */
+export function formatJoinCodeInput(input: string): string {
+  return input
+    .toUpperCase()
+    .replace(/[^A-Z0-9]/g, '')
+    .slice(0, JOIN_CODE_LENGTH);
 }

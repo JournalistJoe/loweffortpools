@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { useTheme } from "../contexts/ThemeContext";
 import { Button } from "../components/ui/button";
-import { normalizeJoinCode } from "../utils/joinCodeUtils";
+import { normalizeJoinCode, isValidJoinCode, JOIN_CODE_LENGTH, JOIN_CODE_PLACEHOLDER, formatJoinCodeInput } from "../utils/joinCodeUtils";
 import { Card, CardContent } from "../components/ui/card";
 import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
@@ -20,7 +20,7 @@ export function HomePage() {
 
   const handleJoinLeague = () => {
     const normalized = normalizeJoinCode(joinCode.trim());
-    if (normalized) {
+    if (normalized && isValidJoinCode(normalized)) {
       navigate(`/signin?joinCode=${encodeURIComponent(normalized)}`);
     } else {
       navigate("/signin");
@@ -99,11 +99,11 @@ export function HomePage() {
                 
                 <div className="flex gap-2 w-full sm:w-auto">
                   <Input
-                    placeholder="Enter invite code"
+                    placeholder={JOIN_CODE_PLACEHOLDER}
                     value={joinCode}
-                    onChange={(e) => setJoinCode(e.target.value.toUpperCase())}
+                    onChange={(e) => setJoinCode(formatJoinCodeInput(e.target.value))}
                     className="text-center uppercase tracking-wider"
-                    maxLength={6}
+                    maxLength={JOIN_CODE_LENGTH}
                   />
                   <Button variant="outline" onClick={handleJoinLeague} className="whitespace-nowrap">
                     Join League
@@ -130,11 +130,11 @@ export function HomePage() {
             
             <div className="flex gap-2">
               <Input
-                placeholder="Enter invite code"
+                placeholder={JOIN_CODE_PLACEHOLDER}
                 value={joinCode}
-                onChange={(e) => setJoinCode(e.target.value.toUpperCase())}
+                onChange={(e) => setJoinCode(formatJoinCodeInput(e.target.value))}
                 className="text-center uppercase tracking-wider"
-                maxLength={6}
+                maxLength={JOIN_CODE_LENGTH}
               />
               <Button variant="outline" onClick={handleJoinLeague} className="whitespace-nowrap">
                 Join League
@@ -285,11 +285,11 @@ export function HomePage() {
             
             <div className="flex gap-2 w-full md:w-auto">
               <Input
-                placeholder="Invite code"
+                placeholder={JOIN_CODE_PLACEHOLDER}
                 value={joinCode}
-                onChange={(e) => setJoinCode(e.target.value.toUpperCase())}
+                onChange={(e) => setJoinCode(formatJoinCodeInput(e.target.value))}
                 className="text-center uppercase tracking-wider"
-                maxLength={6}
+                maxLength={JOIN_CODE_LENGTH}
               />
               <Button variant="outline" size="lg" onClick={handleJoinLeague}>
                 Join by Code

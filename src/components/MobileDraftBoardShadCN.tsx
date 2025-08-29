@@ -62,26 +62,28 @@ export function MobileDraftBoardShadCN({
   const [expandedRound, setExpandedRound] = useState<string>("round-1");
   const [showAvailableTeams, setShowAvailableTeams] = useState(false);
 
+  const numParticipants = draftState.participants.length;
+
   // Group picks by round
   const picksByRound = Array.from({ length: 4 }, (_, roundIndex) => {
     const roundNumber = roundIndex + 1;
     const roundPicks = [];
 
-    for (let i = 0; i < 8; i++) {
+    for (let i = 0; i < numParticipants; i++) {
       let pickNumber;
       if (roundNumber % 2 === 1) {
         // Odd rounds: normal order
-        pickNumber = roundIndex * 8 + i + 1;
+        pickNumber = roundIndex * numParticipants + i + 1;
       } else {
         // Even rounds: reverse order
-        pickNumber = roundIndex * 8 + (8 - i);
+        pickNumber = roundIndex * numParticipants + (numParticipants - i);
       }
 
       const pick = draftState.picks.find((p) => p.pickNumber === pickNumber);
       roundPicks.push({
         pickNumber,
         pick,
-        participant: draftState.participants[roundNumber % 2 === 1 ? i : 7 - i],
+        participant: draftState.participants[roundNumber % 2 === 1 ? i : numParticipants - 1 - i],
       });
     }
 
@@ -91,7 +93,7 @@ export function MobileDraftBoardShadCN({
     };
   });
 
-  const currentRound = Math.ceil((draftState.picks.length + 1) / 8);
+  const currentRound = Math.ceil((draftState.picks.length + 1) / numParticipants);
 
   return (
     <div className="space-y-4 pb-4">

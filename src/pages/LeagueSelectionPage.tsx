@@ -3,6 +3,7 @@ import { api } from "../../convex/_generated/api";
 import { useState } from "react";
 import { toast } from "sonner";
 import { useLeagueContext } from "../contexts/LeagueContext";
+import { JOIN_CODE_LENGTH } from "../utils/joinCodeUtils";
 
 export function LeagueSelectionPage() {
   const leagues = useQuery(api.leagues.getUserLeagues);
@@ -252,7 +253,7 @@ export function LeagueSelectionPage() {
                   value={joinCode}
                   onChange={(e) => setJoinCode(e.target.value.toUpperCase())}
                   placeholder="ABC123"
-                  maxLength={6}
+                  maxLength={JOIN_CODE_LENGTH}
                   className="w-full px-3 py-2 border border-green-200 rounded-lg focus:ring-green-500 focus:border-green-500 font-mono text-center text-lg"
                 />
               </div>

@@ -105,12 +105,17 @@ export function MobileNavigationShadCN({ league }: NavigationProps) {
   const navItems = getNavItems();
   
   const getBottomNavItems = () => {
-    // For bottom navigation, replace "My Team" with personalized team name
-    return navItems.map(item => {
+    // First filter out chat route (if it exists)
+    const filteredItems = navItems.filter(item => 
+      !item.href.includes('/chat')
+    );
+    
+    // Then map to replace "My Team" with personalized name using safe fallback
+    return filteredItems.map(item => {
       if (item.name === "My Team" && league.participant) {
         return {
           ...item,
-          name: league.participant.displayName
+          name: league.participant.displayName?.trim() || "My Team"
         };
       }
       return item;

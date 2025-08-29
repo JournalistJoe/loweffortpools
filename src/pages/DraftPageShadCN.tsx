@@ -93,6 +93,7 @@ export function DraftPageShadCN() {
   }
 
   const isCommissionerAlone = league.isAdmin && draftState.participants.length === 1;
+  const numParticipants = draftState.participants.length;
 
   if (isCommissionerAlone) {
     return (
@@ -170,11 +171,11 @@ export function DraftPageShadCN() {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="grid gap-0 text-xs font-medium text-muted-foreground" style={{ gridTemplateColumns: '1.5rem repeat(8, 1fr)' }}>
-                  <div className="border-r border-b border-border"></div> {/* Thin round column header */}
+                <div className="grid gap-0 text-xs font-medium text-muted-foreground" style={{ gridTemplateColumns: `1.5rem repeat(${numParticipants}, 1fr)` }}>
+                  <div className="border-r border-b border-border" role="columnheader" aria-label="Round"></div> {/* Thin round column header */}
                   {draftState.participants.map((p, index) => (
-                    <div key={p._id} className={`text-center h-20 sm:h-auto sm:py-4 flex items-center justify-center overflow-visible border-b border-border ${index < draftState.participants.length - 1 ? 'border-r border-border' : ''}`}>
-                      <span className="sm:inline block transform -rotate-90 sm:rotate-0 break-words text-center leading-tight">
+                    <div key={p._id} className={`text-center h-20 sm:h-auto sm:py-4 flex items-center justify-center overflow-hidden border-b border-border ${index < numParticipants - 1 ? 'border-r border-border' : ''}`}>
+                      <span className="text-[10px] sm:text-xs truncate max-w-full sm:inline block transform -rotate-90 sm:rotate-0 origin-center whitespace-nowrap text-center leading-tight" title={p.displayName}>
                         {p.displayName}
                       </span>
                     </div>
@@ -182,19 +183,19 @@ export function DraftPageShadCN() {
                 </div>
 
                 {[1, 2, 3, 4].map((round, roundIndex) => (
-                  <div key={round} className="grid gap-0 items-stretch" style={{ gridTemplateColumns: '1.5rem repeat(8, 1fr)' }}>
+                  <div key={round} className="grid gap-0 items-stretch" style={{ gridTemplateColumns: `1.5rem repeat(${numParticipants}, 1fr)` }}>
                     <div className={`h-full text-xs font-medium text-foreground flex items-center justify-center border-r border-border ${roundIndex < 3 ? 'border-b border-border' : ''}`}>
                       {round}
                     </div>
-                    {Array.from({ length: 8 }, (_, i) => {
+                    {Array.from({ length: numParticipants }, (_, i) => {
                         // Calculate pick number based on snake draft order
                         let pickNumber;
                         if (round % 2 === 1) {
-                          // Odd rounds: normal order (1-8, 17-24)
-                          pickNumber = (round - 1) * 8 + i + 1;
+                          // Odd rounds: normal order (1-numParticipants, 17-24)
+                          pickNumber = (round - 1) * numParticipants + i + 1;
                         } else {
                           // Even rounds: reverse order (9-16, 25-32)
-                          pickNumber = (round - 1) * 8 + (8 - i);
+                          pickNumber = (round - 1) * numParticipants + (numParticipants - i);
                         }
                         const pick = draftState.picks.find(
                           (p) => p.pickNumber === pickNumber,
@@ -204,7 +205,7 @@ export function DraftPageShadCN() {
                         return (
                           <div
                             key={pickNumber}
-                            className={`aspect-square p-2 text-xs flex items-center justify-center relative group overflow-hidden ${i < 7 ? 'border-r border-border' : ''} ${roundIndex < 3 ? 'border-b border-border' : ''} ${
+                            className={`aspect-square p-2 text-xs flex items-center justify-center relative group overflow-hidden ${i < numParticipants - 1 ? 'border-r border-border' : ''} ${roundIndex < 3 ? 'border-b border-border' : ''} ${
                               isEmpty
                                 ? "bg-muted/20"
                                 : "bg-primary/5"

@@ -6,7 +6,7 @@ import { Input } from "./ui/input";
 import { Label } from "./ui/label";
 import { Share, Calendar, Users, Crown, Trophy, Clock } from "lucide-react";
 import { toast } from "sonner";
-import { useState, useMemo } from "react";
+import { useState, useEffect } from "react";
 import { useMutation } from "convex/react";
 import { api } from "../../convex/_generated/api";
 
@@ -34,11 +34,12 @@ export function CommissionerWelcome({ league, currentUser }: CommissionerWelcome
   
   const updateLeague = useMutation(api.leagues.updateLeague);
   
-  // Calculate minimum local datetime for datetime-local input
-  const minLocalDatetime = useMemo(() => {
+  // Calculate minimum local datetime for datetime-local input (client-only to avoid SSR mismatch)
+  const [minLocalDatetime, setMinLocalDatetime] = useState<string>();
+  useEffect(() => {
     const now = new Date();
-    const localTime = new Date(now.getTime() - (now.getTimezoneOffset() * 60000));
-    return localTime.toISOString().slice(0, 16);
+    const localTime = new Date(now.getTime() - now.getTimezoneOffset() * 60000);
+    setMinLocalDatetime(localTime.toISOString().slice(0, 16));
   }, []);
   
   // Default to September 4, 2025 8:00 PM ET (first regular season game)
@@ -320,7 +321,7 @@ export function CommissionerWelcome({ league, currentUser }: CommissionerWelcome
                     type="datetime-local"
                     value={scheduledDraftDate}
                     onChange={(e) => setScheduledDraftDate(e.target.value)}
-                    min={minLocalDatetime}
+                    min={minLocalDatetime ?? undefined}
                     className="mt-2"
                   />
                   <p className="text-xs text-muted-foreground mt-1">

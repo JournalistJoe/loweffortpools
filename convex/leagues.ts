@@ -1,15 +1,16 @@
 import { v } from "convex/values";
 import { query, mutation, internalMutation } from "./_generated/server";
 import { getAuthUserId } from "@convex-dev/auth/server";
+import { JOIN_CODE_LENGTH } from "./constants";
 
 // Constants
 const MAX_PARTICIPANTS = 8;
 
-// Generate a random 6-character join code
+// Generate a random join code
 function generateJoinCode(): string {
   const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
   let result = "";
-  for (let i = 0; i < 6; i++) {
+  for (let i = 0; i < JOIN_CODE_LENGTH; i++) {
     result += chars.charAt(Math.floor(Math.random() * chars.length));
   }
   return result;

@@ -1,8 +1,8 @@
 import { useQuery, useMutation } from "convex/react";
 import { api } from "../../convex/_generated/api";
-import { useState, useMemo, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { normalizeJoinCode } from "../utils/joinCodeUtils";
+import { normalizeJoinCode, JOIN_CODE_LENGTH } from "../utils/joinCodeUtils";
 import { toast } from "sonner";
 import { useLeagueContext } from "../contexts/LeagueContext";
 import { useTheme } from "../contexts/ThemeContext";
@@ -66,11 +66,12 @@ export function LeagueSelectionPageShadCN() {
     joinCode.length === 6 ? { joinCode } : "skip",
   );
 
-  // Calculate minimum local datetime for datetime-local input
-  const minLocalDatetime = useMemo(() => {
+  // Calculate minimum local datetime for datetime-local input (client-only to avoid SSR mismatch)
+  const [minLocalDatetime, setMinLocalDatetime] = useState<string>();
+  useEffect(() => {
     const now = new Date();
-    const localTime = new Date(now.getTime() - (now.getTimezoneOffset() * 60000));
-    return localTime.toISOString().slice(0, 16);
+    const localTime = new Date(now.getTime() - now.getTimezoneOffset() * 60000);
+    setMinLocalDatetime(localTime.toISOString().slice(0, 16));
   }, []);
 
   // Handle joinCode from URL or sessionStorage after authentication
@@ -411,7 +412,7 @@ export function LeagueSelectionPageShadCN() {
                     type="datetime-local"
                     value={scheduledDraftDate}
                     onChange={(e) => setScheduledDraftDate(e.target.value)}
-                    min={minLocalDatetime}
+                    min={minLocalDatetime ?? undefined}
                   />
                   <p className="text-xs text-muted-foreground mt-1">
                     Set when you want the draft to begin. You can change this later.
@@ -478,7 +479,7 @@ export function LeagueSelectionPageShadCN() {
                     value={joinCode}
                     onChange={(e) => setJoinCode(e.target.value.toUpperCase())}
                     placeholder="ABC123"
-                    maxLength={6}
+                    maxLength={JOIN_CODE_LENGTH}
                     className="font-mono text-center text-lg"
                   />
                 </div>
