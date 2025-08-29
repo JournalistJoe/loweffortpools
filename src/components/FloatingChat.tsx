@@ -47,7 +47,7 @@ export function FloatingChat({ league }: FloatingChatProps) {
     <>
       {/* Floating Chat Container */}
       {isOpen ? (
-        <div className="bg-white shadow-lg border flex flex-col z-50
+        <div className="bg-card border border-border border flex flex-col z-50
                         fixed top-16 bottom-0 left-0 right-0 
                         md:top-auto md:bottom-4 md:right-4 md:left-auto md:w-80 md:h-96 md:rounded-lg">
             {/* Header */}
@@ -78,7 +78,7 @@ export function FloatingChat({ league }: FloatingChatProps) {
           <Button
             onClick={() => setIsOpen(true)}
             size="lg"
-            className="h-12 w-12 rounded-full shadow-lg hover:shadow-xl transition-shadow"
+            className="h-12 w-12 rounded-full border border-border hover:border-2 border-border transition-shadow"
           >
             <MessageCircle className="h-5 w-5" />
           </Button>

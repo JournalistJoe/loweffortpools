@@ -130,11 +130,11 @@ export function TeamPage() {
         {/* Team Data Section for Post-Draft */}
         {league.status !== "setup" && (
           <div className="mb-6">
-            <h1 className="text-3xl font-bold text-gray-900">
+            <h1 className="text-3xl font-bold text-foreground">
               {teamData.participant.displayName}'s Teams
             </h1>
             <div className="mt-2 flex items-center space-x-4">
-              <span className="text-lg text-gray-600">
+              <span className="text-lg text-muted-foreground">
                 Draft Position: {teamData.participant.draftPosition}
               </span>
               <span className="text-lg font-semibold text-blue-600">
@@ -148,36 +148,36 @@ export function TeamPage() {
         {league.status !== "setup" && teamData.teams.length > 0 && (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {teamData.teams.map((teamInfo) => (
-            <div key={teamInfo.team._id} className="bg-white rounded-lg shadow">
+            <div key={teamInfo.team._id} className="bg-card rounded-lg border border-border">
               <div className="p-6">
                 <div className="flex items-center justify-between mb-4">
                   <div>
-                    <h2 className="text-xl font-bold text-gray-900">
+                    <h2 className="text-xl font-bold text-foreground">
                       {teamInfo.team.fullName}
                     </h2>
-                    <p className="text-sm text-gray-600">
+                    <p className="text-sm text-muted-foreground">
                       Round {teamInfo.pick.round}, Pick #
                       {teamInfo.pick.pickNumber}
                     </p>
                   </div>
                   <div className="text-right">
-                    <div className="text-2xl font-bold text-gray-900">
+                    <div className="text-2xl font-bold text-foreground">
                       {teamInfo.wins}-{teamInfo.losses}-{teamInfo.ties}
                     </div>
-                    <div className="text-sm text-gray-600">
+                    <div className="text-sm text-muted-foreground">
                       {teamInfo.wins + teamInfo.ties * 0.5} points
                     </div>
                   </div>
                 </div>
 
                 <div className="space-y-2">
-                  <h3 className="font-medium text-gray-900">Schedule</h3>
+                  <h3 className="font-medium text-foreground">Schedule</h3>
                   <div className="max-h-64 overflow-y-auto">
                     {teamInfo.games.map((game) => {
                       const opponent = game.isHome ? "vs" : "@";
 
                       let result = "";
-                      let resultClass = "text-gray-600";
+                      let resultClass = "text-muted-foreground";
 
                       if (game.status === "final") {
                         if (game.tie) {
@@ -206,7 +206,7 @@ export function TeamPage() {
                             <span className="w-8 text-center font-medium">
                               W{game.week}
                             </span>
-                            <span className="text-gray-600">
+                            <span className="text-muted-foreground">
                               {opponent} {game.opponentTeam?.abbrev || "TBD"}
                             </span>
                           </div>

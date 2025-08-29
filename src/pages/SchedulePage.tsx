@@ -52,7 +52,7 @@ export function SchedulePage() {
     const statusColors = {
       scheduled: "bg-blue-100 text-blue-800",
       in_progress: "bg-green-100 text-green-800",
-      final: "bg-gray-100 text-gray-800",
+      final: "bg-muted text-muted-foreground",
       postponed: "bg-yellow-100 text-yellow-800",
       canceled: "bg-red-100 text-red-800",
     };
@@ -71,10 +71,10 @@ export function SchedulePage() {
       <Navigation league={league} />
       <div className="max-w-6xl mx-auto p-4 pb-20">
         <div className="mb-6">
-          <h1 className="text-3xl font-bold text-gray-900">
+          <h1 className="text-3xl font-bold text-foreground">
             Schedule & Matchups
           </h1>
-          <p className="text-gray-600 mt-2">
+          <p className="text-muted-foreground mt-2">
             Upcoming games for {league.name || "Unnamed League"} teams
           </p>
         </div>
@@ -82,10 +82,10 @@ export function SchedulePage() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Upcoming Games */}
           <div className="lg:col-span-2">
-            <div className="bg-white rounded-lg shadow">
+            <div className="bg-card rounded-lg border border-border">
               <div className="p-4 border-b">
                 <h2 className="text-lg font-semibold">Next 15 Games</h2>
-                <p className="text-sm text-gray-600">
+                <p className="text-sm text-muted-foreground">
                   Upcoming games involving league teams
                 </p>
               </div>
@@ -102,11 +102,11 @@ export function SchedulePage() {
                         className={`p-4 rounded-lg border ${
                           game.isParticipantMatchup
                             ? "border-purple-200 bg-purple-50"
-                            : "border-gray-200 bg-gray-50"
+                            : "border-border bg-muted"
                         }`}
                       >
                         <div className="flex justify-between items-center mb-2">
-                          <div className="text-sm text-gray-600">
+                          <div className="text-sm text-muted-foreground">
                             Week {game.week} • {formatGameTime(game.gameDate)}
                           </div>
                           <div className="flex items-center space-x-2">
@@ -125,7 +125,7 @@ export function SchedulePage() {
                         <div className="flex items-center justify-between">
                           <div className="flex items-center space-x-3">
                             <div className="text-center">
-                              <div className="font-medium text-gray-900">
+                              <div className="font-medium text-foreground">
                                 {game.awayTeam?.abbrev}
                               </div>
                               {game.awayParticipant && (
@@ -134,9 +134,9 @@ export function SchedulePage() {
                                 </div>
                               )}
                             </div>
-                            <div className="text-gray-500">@</div>
+                            <div className="text-muted-foreground">@</div>
                             <div className="text-center">
-                              <div className="font-medium text-gray-900">
+                              <div className="font-medium text-foreground">
                                 {game.homeTeam?.abbrev}
                               </div>
                               {game.homeParticipant && (
@@ -149,11 +149,11 @@ export function SchedulePage() {
 
                           {game.status === "final" && (
                             <div className="text-right">
-                              <div className="text-sm font-medium text-gray-900">
+                              <div className="text-sm font-medium text-foreground">
                                 Final
                               </div>
                               {game.tie ? (
-                                <div className="text-xs text-gray-600">Tie</div>
+                                <div className="text-xs text-muted-foreground">Tie</div>
                               ) : (
                                 <div className="text-xs text-green-600">
                                   {game.winnerTeamId === game.homeTeamId
@@ -170,10 +170,10 @@ export function SchedulePage() {
                   </div>
                 ) : (
                   <div className="text-center py-8">
-                    <p className="text-gray-600">
+                    <p className="text-muted-foreground">
                       No upcoming games found for league teams
                     </p>
-                    <p className="text-sm text-gray-500 mt-2">
+                    <p className="text-sm text-muted-foreground mt-2">
                       Games may need to be imported via the admin panel
                     </p>
                   </div>
@@ -185,7 +185,7 @@ export function SchedulePage() {
           {/* Week Selector & Head-to-Head Matchups */}
           <div className="space-y-6">
             {/* Week Selector */}
-            <div className="bg-white rounded-lg shadow p-4">
+            <div className="bg-card rounded-lg border border-border p-4">
               <h3 className="font-semibold mb-3">View by Week</h3>
               {isLoadingSchedule ? (
                 <div className="flex justify-center py-4">
@@ -199,7 +199,7 @@ export function SchedulePage() {
                       e.target.value ? parseInt(e.target.value) : undefined,
                     )
                   }
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full px-3 py-2 border border-border rounded-lg focus:ring-blue-500 focus:border-blue-500"
                 >
                   <option value="">
                     Current Week ({weekSchedule?.week || 1})
@@ -214,10 +214,10 @@ export function SchedulePage() {
             </div>
 
             {/* Head-to-Head Matchups */}
-            <div className="bg-white rounded-lg shadow">
+            <div className="bg-card rounded-lg border border-border">
               <div className="p-4 border-b">
                 <h3 className="font-semibold">Head-to-Head Matchups</h3>
-                <p className="text-sm text-gray-600">
+                <p className="text-sm text-muted-foreground">
                   Week {selectedWeek || weekSchedule?.week || 1}
                 </p>
               </div>
@@ -244,10 +244,10 @@ export function SchedulePage() {
                               {game.homeParticipant?.displayName}
                             </span>
                           </div>
-                          <div className="text-sm text-gray-600">
+                          <div className="text-sm text-muted-foreground">
                             {game.awayTeam?.abbrev} @ {game.homeTeam?.abbrev}
                           </div>
-                          <div className="text-xs text-gray-500 mt-1">
+                          <div className="text-xs text-muted-foreground mt-1">
                             {formatGameTime(game.gameDate)}
                           </div>
                           <div className="mt-2 flex justify-center items-center space-x-2">
@@ -267,7 +267,7 @@ export function SchedulePage() {
                   </div>
                 ) : (
                   <div className="text-center py-4">
-                    <p className="text-gray-600 text-sm">
+                    <p className="text-muted-foreground text-sm">
                       No head-to-head matchups this week
                     </p>
                   </div>
@@ -276,7 +276,7 @@ export function SchedulePage() {
             </div>
 
             {/* Week Summary */}
-            <div className="bg-white rounded-lg shadow p-4">
+            <div className="bg-card rounded-lg border border-border p-4">
               <h3 className="font-semibold mb-3">
                 Week {selectedWeek || weekSchedule?.week || 1} Summary
               </h3>
@@ -287,26 +287,26 @@ export function SchedulePage() {
               ) : (
                 <div className="space-y-2 text-sm">
                   <div className="flex justify-between">
-                    <span className="text-gray-600">Total Games:</span>
+                    <span className="text-muted-foreground">Total Games:</span>
                     <span className="font-medium">
                       {weekSchedule?.games.length || 0}
                     </span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-gray-600">Head-to-Head:</span>
+                    <span className="text-muted-foreground">Head-to-Head:</span>
                     <span className="font-medium text-purple-600">
                       {weekSchedule?.participantMatchups.length || 0}
                     </span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-gray-600">Completed:</span>
+                    <span className="text-muted-foreground">Completed:</span>
                     <span className="font-medium text-green-600">
                       {weekSchedule?.games.filter((g) => g.status === "final")
                         .length || 0}
                     </span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-gray-600">Upcoming:</span>
+                    <span className="text-muted-foreground">Upcoming:</span>
                     <span className="font-medium text-blue-600">
                       {weekSchedule?.games.filter(
                         (g) => g.status === "scheduled",

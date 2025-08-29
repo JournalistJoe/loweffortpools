@@ -61,13 +61,13 @@ export function Navigation({ league }: NavigationProps) {
   const navItems = getNavItems();
 
   return (
-    <nav className="bg-white shadow">
+    <nav className="bg-card border-b border-border">
       <div className="max-w-7xl mx-auto px-4">
         <div className="flex justify-between h-16">
           <div className="flex items-center space-x-8">
             <Link
               to="/"
-              className="text-xl font-bold text-gray-900 hover:text-gray-700"
+              className="text-xl font-bold text-foreground hover:text-muted-foreground"
             >
               {league.name || "Unnamed League"}
             </Link>
@@ -80,8 +80,8 @@ export function Navigation({ league }: NavigationProps) {
                 to={item.href}
                 className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
                   item.current
-                    ? "bg-blue-100 text-blue-700"
-                    : "text-gray-600 hover:text-gray-900 hover:bg-gray-100"
+                    ? "bg-primary/10 text-primary"
+                    : "text-muted-foreground hover:text-foreground hover:bg-muted"
                 }`}
               >
                 {item.name}

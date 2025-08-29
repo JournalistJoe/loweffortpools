@@ -27,16 +27,16 @@ export function LeaderboardPage() {
       <Navigation league={league} />
       <div className="max-w-6xl mx-auto p-4 pb-20">
         <div className="mb-6">
-          <h1 className="text-3xl font-bold text-gray-900">Leaderboard</h1>
-          <p className="text-gray-600 mt-2">
+          <h1 className="text-3xl font-bold text-foreground">Leaderboard</h1>
+          <p className="text-muted-foreground mt-2">
             Current standings for {league.name || "Unnamed League"}
           </p>
         </div>
 
-        <div className="bg-white rounded-lg shadow overflow-hidden">
+        <div className="bg-card rounded-lg border border-border overflow-hidden">
           <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
+              <thead className="bg-muted">
                 <tr>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-20">
                     Rank
@@ -52,11 +52,11 @@ export function LeaderboardPage() {
                   </th>
                 </tr>
               </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
+              <tbody className="bg-card divide-y divide-border">
                 {leaderboard.map((entry, index) => (
                   <tr
                     key={entry.participant._id}
-                    className={`${index < 3 ? "bg-yellow-50" : ""} hover:bg-gray-50 cursor-pointer transition-colors`}
+                    className={`${index < 3 ? "bg-yellow-50 dark:bg-yellow-900/20" : ""} hover:bg-muted cursor-pointer transition-colors`}
                   >
                     <Link
                       to={`/league/${leagueId}/team/${entry.participant._id}`}

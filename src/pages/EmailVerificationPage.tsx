@@ -3,11 +3,13 @@ import { Button } from "../components/ui/button";
 import { useEffect, useState } from "react";
 import { useAuthActions } from "@convex-dev/auth/react";
 import { toast } from "sonner";
+import { useTheme } from "../contexts/ThemeContext";
 
 export function EmailVerificationPage() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { signIn } = useAuthActions();
+  const { theme } = useTheme();
   const [token, setToken] = useState<string | null>(null);
   const [email, setEmail] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -76,15 +78,15 @@ export function EmailVerificationPage() {
 
   if (error) {
     return (
-      <div className="flex justify-center items-center min-h-screen bg-gray-50">
+      <div className="flex justify-center items-center min-h-screen bg-background">
         <div className="w-full max-w-md p-8 text-center">
           <div className="mb-8">
             <img 
-              src="/lowEffortLogo.png" 
+              src={theme === "dark" ? "/lowEffortLogo-darkmode.png" : "/lowEffortLogo.png"} 
               alt="LowEffort.bet Logo" 
               className="h-16 w-16 mx-auto mb-4"
             />
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">LowEffort.bet</h1>
+            <h1 className="text-3xl font-bold text-foreground mb-2">LowEffort.bet</h1>
           </div>
           
           <div className="bg-red-50 border border-red-200 rounded-lg p-6 mb-6">
@@ -107,15 +109,15 @@ export function EmailVerificationPage() {
 
   if (isVerified) {
     return (
-      <div className="flex justify-center items-center min-h-screen bg-gray-50">
+      <div className="flex justify-center items-center min-h-screen bg-background">
         <div className="w-full max-w-md p-8 text-center">
           <div className="mb-8">
             <img 
-              src="/lowEffortLogo.png" 
+              src={theme === "dark" ? "/lowEffortLogo-darkmode.png" : "/lowEffortLogo.png"} 
               alt="LowEffort.bet Logo" 
               className="h-16 w-16 mx-auto mb-4"
             />
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">LowEffort.bet</h1>
+            <h1 className="text-3xl font-bold text-foreground mb-2">LowEffort.bet</h1>
           </div>
           
           <div className="bg-green-50 border border-green-200 rounded-lg p-6 mb-6">
@@ -130,15 +132,15 @@ export function EmailVerificationPage() {
 
   if (isVerifying || (!token || !email)) {
     return (
-      <div className="flex justify-center items-center min-h-screen bg-gray-50">
+      <div className="flex justify-center items-center min-h-screen bg-background">
         <div className="w-full max-w-md p-8 text-center">
           <div className="mb-8">
             <img 
-              src="/lowEffortLogo.png" 
+              src={theme === "dark" ? "/lowEffortLogo-darkmode.png" : "/lowEffortLogo.png"} 
               alt="LowEffort.bet Logo" 
               className="h-16 w-16 mx-auto mb-4"
             />
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">LowEffort.bet</h1>
+            <h1 className="text-3xl font-bold text-foreground mb-2">LowEffort.bet</h1>
           </div>
           
           <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">

@@ -66,8 +66,8 @@ export function ParticipantsPage() {
       <Navigation league={league} />
       <div className="max-w-6xl mx-auto p-4 pb-20">
         <div className="mb-6">
-          <h1 className="text-3xl font-bold text-gray-900">Participants</h1>
-          <p className="text-gray-600 mt-2">
+          <h1 className="text-3xl font-bold text-foreground">Participants</h1>
+          <p className="text-muted-foreground mt-2">
             {participants.length} participant
             {participants.length !== 1 ? "s" : ""} in{" "}
             {league.name || "Unnamed League"}
@@ -143,36 +143,36 @@ export function ParticipantsPage() {
           </Card>
         )}
 
-        <div className="bg-white rounded-lg shadow overflow-hidden">
+        <div className="bg-card rounded-lg border border-border overflow-hidden">
           <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
+            <table className="min-w-full divide-y divide-border">
+              <thead className="bg-muted">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
                     Draft Position
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
                     Participant
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
                     Teams Drafted
                   </th>
                 </tr>
               </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
+              <tbody className="bg-card divide-y divide-border">
                 {participants
                   .sort((a, b) => a.draftPosition - b.draftPosition)
                   .map((participant) => (
-                    <tr key={participant._id} className="hover:bg-gray-50">
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                    <tr key={participant._id} className="hover:bg-muted">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-foreground">
                         #{participant.draftPosition}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm font-medium text-gray-900">
+                        <div className="text-sm font-medium text-foreground">
                           {participant.displayName}
                         </div>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-muted-foreground">
                         {getTeamCount(participant._id)} teams
                       </td>
                     </tr>
@@ -183,9 +183,9 @@ export function ParticipantsPage() {
 
           {participants.length === 0 && (
             <div className="text-center py-12">
-              <p className="text-gray-500">No participants yet</p>
+              <p className="text-muted-foreground">No participants yet</p>
               {league.isAdmin && (
-                <p className="text-sm text-gray-400 mt-2">
+                <p className="text-sm text-muted-foreground mt-2">
                   Share the join code to invite participants
                 </p>
               )}

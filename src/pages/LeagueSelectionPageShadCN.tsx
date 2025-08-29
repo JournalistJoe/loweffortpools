@@ -5,6 +5,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { normalizeJoinCode } from "../utils/joinCodeUtils";
 import { toast } from "sonner";
 import { useLeagueContext } from "../contexts/LeagueContext";
+import { useTheme } from "../contexts/ThemeContext";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
@@ -39,6 +40,7 @@ export function LeagueSelectionPageShadCN() {
   const leagues = useQuery(api.leagues.getUserLeagues);
   const currentUser = useQuery(api.users.getCurrentUser);
   const { setSelectedLeagueId } = useLeagueContext();
+  const { theme } = useTheme();
   const location = useLocation();
   const navigate = useNavigate();
   const [showCreateForm, setShowCreateForm] = useState(false);
@@ -221,7 +223,7 @@ export function LeagueSelectionPageShadCN() {
     <div className="max-w-6xl mx-auto p-6 pb-20">
       <div className="mb-8 text-center">
         <img 
-          src="/lowEffortLogo.png" 
+          src={theme === "dark" ? "/lowEffortLogo-darkmode.png" : "/lowEffortLogo.png"} 
           alt="LowEffort.bet Logo" 
           className="h-12 w-12 mx-auto mb-4"
         />

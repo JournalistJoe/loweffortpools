@@ -82,17 +82,17 @@ export function Chat({ leagueId }: ChatProps) {
 
   if (!messages) {
     return (
-      <div className="bg-white rounded-lg shadow p-4">
+      <div className="bg-card rounded-lg border border-border p-4">
         <div className="animate-pulse">
-          <div className="h-4 bg-gray-200 rounded w-1/4 mb-2"></div>
-          <div className="h-3 bg-gray-200 rounded w-1/2"></div>
+          <div className="h-4 bg-muted rounded w-1/4 mb-2"></div>
+          <div className="h-3 bg-muted rounded w-1/2"></div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="bg-white rounded-lg shadow">
+    <div className="bg-card rounded-lg border border-border">
       {/* Chat Header */}
       <div
         className="p-4 border-b cursor-pointer hover:bg-gray-50 transition-colors"
@@ -211,7 +211,7 @@ export function Chat({ leagueId }: ChatProps) {
               onChange={(e) => setMessage(e.target.value)}
               placeholder="Type a message..."
               maxLength={500}
-              className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 text-sm"
+              className="flex-1 px-3 py-2 border border-border rounded-lg focus:ring-blue-500 focus:border-blue-500 text-sm"
             />
             <button
               type="submit"

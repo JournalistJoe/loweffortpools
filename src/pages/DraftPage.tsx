@@ -139,7 +139,7 @@ export function DraftPage() {
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
           {/* Draft Board */}
           <div className="lg:col-span-2">
-            <div className="bg-white rounded-lg shadow">
+            <div className="bg-card rounded-lg border border-border">
               <div className="p-4 border-b">
                 <h2 className="text-lg font-semibold">Draft Results</h2>
               </div>
@@ -178,7 +178,7 @@ export function DraftPage() {
                             key={pickNumber}
                             className={`p-2 text-xs text-center rounded border ${
                               isEmpty
-                                ? "border-gray-200 bg-gray-50"
+                                ? "border-border bg-muted"
                                 : "border-blue-200 bg-blue-50"
                             }`}
                           >
@@ -205,7 +205,7 @@ export function DraftPage() {
 
             {/* Available Teams */}
             {draftState.league.status === "draft" && (
-              <div className="mt-6 bg-white rounded-lg shadow">
+              <div className="mt-6 bg-card rounded-lg border border-border">
                 <div className="p-4 border-b">
                   <h2 className="text-lg font-semibold">Available Teams</h2>
                 </div>
@@ -219,7 +219,7 @@ export function DraftPage() {
                         className={`p-3 text-sm rounded border text-left transition-colors ${
                           selectedTeam === team._id
                             ? "border-blue-500 bg-blue-50 text-blue-900"
-                            : "border-gray-200 hover:border-gray-300 hover:bg-gray-50"
+                            : "border-border hover:border-border hover:bg-muted"
                         } ${!isUserTurn ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}`}
                       >
                         <div className="font-medium">{team.abbrev}</div>
@@ -249,7 +249,7 @@ export function DraftPage() {
           <div className="lg:col-span-2 space-y-6">
 
             {/* Activity Feed */}
-            <div className="bg-white rounded-lg shadow">
+            <div className="bg-card rounded-lg border border-border">
               <div className="p-4 border-b">
                 <h2 className="text-lg font-semibold">Activity</h2>
               </div>
@@ -257,7 +257,7 @@ export function DraftPage() {
                 {activity?.map((item) => (
                   <div
                     key={item._id}
-                    className="mb-3 pb-3 border-b border-gray-100 last:border-b-0"
+                    className="mb-3 pb-3 border-b border-border last:border-b-0"
                   >
                     <div className="text-sm text-gray-900">{item.message}</div>
                     <div className="text-xs text-gray-500 mt-1">

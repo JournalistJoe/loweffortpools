@@ -1,6 +1,7 @@
 import { Link, useParams } from "react-router-dom";
 import { SignOutButtonShadCN } from "../SignOutButtonShadCN";
 import { useState } from "react";
+import { useTheme } from "../contexts/ThemeContext";
 import { Button } from "./ui/button";
 import {
   Sheet,
@@ -40,6 +41,7 @@ interface NavigationProps {
 
 export function MobileNavigationShadCN({ league }: NavigationProps) {
   const { leagueId } = useParams<{ leagueId: string }>();
+  const { theme } = useTheme();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const getNavItems = () => {
@@ -127,7 +129,7 @@ export function MobileNavigationShadCN({ league }: NavigationProps) {
                 to="/"
                 className="text-xl font-bold text-foreground hover:text-muted-foreground transition-colors flex items-center gap-2"
               >
-                <img src="/lowEffortLogo.png" alt="LowEffort.bet" className="h-6 w-6" />
+                <img src={theme === "dark" ? "/lowEffortLogo-darkmode.png" : "/lowEffortLogo.png"} alt="LowEffort.bet" className="h-6 w-6" />
                 LowEffort.bet
               </Link>
 
@@ -185,7 +187,7 @@ export function MobileNavigationShadCN({ league }: NavigationProps) {
                 to="/"
                 className="text-xl font-bold text-foreground flex items-center gap-2"
               >
-                <img src="/lowEffortLogo.png" alt="LowEffort.bet" className="h-6 w-6" />
+                <img src={theme === "dark" ? "/lowEffortLogo-darkmode.png" : "/lowEffortLogo.png"} alt="LowEffort.bet" className="h-6 w-6" />
                 LowEffort.bet
               </Link>
               <div className="text-sm text-muted-foreground truncate mt-0.5">

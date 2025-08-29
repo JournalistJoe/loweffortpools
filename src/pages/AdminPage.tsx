@@ -238,7 +238,7 @@ export function AdminPage() {
 
         <div className="space-y-6">
           {/* League Management */}
-          <div className="bg-white rounded-lg shadow p-6">
+          <div className="bg-card rounded-lg border border-border p-6">
             <h2 className="text-lg font-semibold mb-4">League Settings</h2>
             <div className="grid grid-cols-2 gap-4 mb-4">
               <div>
@@ -250,7 +250,7 @@ export function AdminPage() {
                     type="text"
                     value={newLeagueName}
                     onChange={(e) => setNewLeagueName(e.target.value)}
-                    className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
+                    className="mt-1 w-full px-3 py-2 border border-border rounded-lg focus:ring-blue-500 focus:border-blue-500"
                   />
                 ) : (
                   <p className="mt-1 text-sm text-gray-900">
@@ -350,7 +350,7 @@ export function AdminPage() {
           </div>
 
           {/* Data Management */}
-          <div className="bg-white rounded-lg shadow p-6">
+          <div className="bg-card rounded-lg border border-border p-6">
             <h2 className="text-lg font-semibold mb-4">Data Management</h2>
             <div className="space-y-4">
               <div>
@@ -379,7 +379,7 @@ export function AdminPage() {
                     max="18"
                     value={syncWeek}
                     onChange={(e) => setSyncWeek(parseInt(e.target.value))}
-                    className="w-20 px-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
+                    className="w-20 px-3 py-2 border border-border rounded-lg focus:ring-blue-500 focus:border-blue-500"
                   />
                 </div>
                 <button
@@ -397,7 +397,7 @@ export function AdminPage() {
           </div>
 
           {/* Participant Management */}
-          <div className="bg-white rounded-lg shadow p-6">
+          <div className="bg-card rounded-lg border border-border p-6">
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-lg font-semibold">
                 Participants ({participants?.length || 0}/8)
@@ -572,7 +572,7 @@ export function AdminPage() {
 
           {/* Draft Management */}
           {league?.status === "setup" && (
-            <div className="bg-white rounded-lg shadow p-6">
+            <div className="bg-card rounded-lg border border-border p-6">
               <h2 className="text-lg font-semibold mb-4">Draft Management</h2>
               <div className="space-y-4">
                 <button
@@ -598,7 +598,7 @@ export function AdminPage() {
 
           {/* Reset Draft */}
           {(league?.status === "draft" || league?.status === "live") && (
-            <div className="bg-white rounded-lg shadow p-6">
+            <div className="bg-card rounded-lg border border-border p-6">
               <h2 className="text-lg font-semibold mb-4">
                 Reset Draft (Testing)
               </h2>

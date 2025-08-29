@@ -83,12 +83,12 @@ export function MobileLeagueForm({ onLeagueSelected }: MobileLeagueFormProps) {
   return (
     <div className="space-y-6">
       {/* Tab Selector */}
-      <div className="flex bg-gray-100 rounded-lg p-1">
+      <div className="flex bg-muted rounded-lg p-1">
         <button
           onClick={() => setActiveTab("create")}
           className={`flex-1 py-3 px-4 rounded-md font-medium text-base transition-colors min-h-[44px] ${
             activeTab === "create"
-              ? "bg-white text-blue-600 shadow-sm"
+              ? "bg-background text-blue-600 shadow-sm"
               : "text-gray-600 hover:text-gray-800"
           }`}
         >
@@ -98,7 +98,7 @@ export function MobileLeagueForm({ onLeagueSelected }: MobileLeagueFormProps) {
           onClick={() => setActiveTab("join")}
           className={`flex-1 py-3 px-4 rounded-md font-medium text-base transition-colors min-h-[44px] ${
             activeTab === "join"
-              ? "bg-white text-green-600 shadow-sm"
+              ? "bg-background text-green-600 shadow-sm"
               : "text-gray-600 hover:text-gray-800"
           }`}
         >
@@ -154,7 +154,7 @@ export function MobileLeagueForm({ onLeagueSelected }: MobileLeagueFormProps) {
             >
               {isCreating ? (
                 <div className="flex items-center justify-center">
-                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
+                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-primary-foreground mr-2"></div>
                   Creating League...
                 </div>
               ) : (
@@ -188,14 +188,14 @@ export function MobileLeagueForm({ onLeagueSelected }: MobileLeagueFormProps) {
                 onChange={(e) => setJoinCode(e.target.value.toUpperCase())}
                 placeholder="ABC123"
                 maxLength={6}
-                className="w-full px-4 py-4 border border-green-200 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 font-mono text-center text-xl tracking-widest min-h-[44px]"
+                className="w-full px-4 py-4 border border-green-200 dark:border-green-800 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 font-mono text-center text-xl tracking-widest min-h-[44px]"
                 inputMode="text"
                 autoCapitalize="characters"
               />
             </div>
 
             {leagueByJoinCode && (
-              <div className="p-4 bg-white rounded-lg border border-green-200">
+              <div className="p-4 bg-background rounded-lg border border-green-200 dark:border-green-800">
                 <h4 className="font-semibold text-gray-900 text-lg">
                   {leagueByJoinCode.name}
                 </h4>
@@ -222,7 +222,7 @@ export function MobileLeagueForm({ onLeagueSelected }: MobileLeagueFormProps) {
                 value={displayName}
                 onChange={(e) => setDisplayName(e.target.value)}
                 placeholder="e.g., John's Team"
-                className="w-full px-4 py-4 border border-green-200 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 text-base min-h-[44px]"
+                className="w-full px-4 py-4 border border-green-200 dark:border-green-800 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 text-base min-h-[44px]"
                 maxLength={30}
                 autoComplete="off"
               />
@@ -242,7 +242,7 @@ export function MobileLeagueForm({ onLeagueSelected }: MobileLeagueFormProps) {
             >
               {isJoining ? (
                 <div className="flex items-center justify-center">
-                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
+                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-primary-foreground mr-2"></div>
                   Joining League...
                 </div>
               ) : (

@@ -2,10 +2,12 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { PasswordResetForm } from "../components/PasswordResetForm";
 import { Button } from "../components/ui/button";
 import { useEffect, useState } from "react";
+import { useTheme } from "../contexts/ThemeContext";
 
 export function PasswordResetPage() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+  const { theme } = useTheme();
   const [token, setToken] = useState<string | null>(null);
   const [email, setEmail] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -25,15 +27,15 @@ export function PasswordResetPage() {
 
   if (error) {
     return (
-      <div className="flex justify-center items-center min-h-screen bg-gray-50">
+      <div className="flex justify-center items-center min-h-screen bg-background">
         <div className="w-full max-w-md p-8 text-center">
           <div className="mb-8">
             <img 
-              src="/lowEffortLogo.png" 
+              src={theme === "dark" ? "/lowEffortLogo-darkmode.png" : "/lowEffortLogo.png"} 
               alt="LowEffort.bet Logo" 
               className="h-16 w-16 mx-auto mb-4"
             />
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">LowEffort.bet</h1>
+            <h1 className="text-3xl font-bold text-foreground mb-2">LowEffort.bet</h1>
           </div>
           
           <div className="bg-red-50 border border-red-200 rounded-lg p-6 mb-6">
@@ -74,12 +76,12 @@ export function PasswordResetPage() {
       <div className="w-full max-w-md p-8">
         <div className="text-center mb-8">
           <img 
-            src="/lowEffortLogo.png" 
+            src={theme === "dark" ? "/lowEffortLogo-darkmode.png" : "/lowEffortLogo.png"} 
             alt="LowEffort.bet Logo" 
             className="h-16 w-16 mx-auto mb-4"
           />
           <h1 className="text-3xl font-bold text-gray-900 mb-2">LowEffort.bet</h1>
-          <p className="text-gray-600">Create your new password</p>
+          <p className="text-muted-foreground">Create your new password</p>
         </div>
         
         <PasswordResetForm token={token} email={email} />

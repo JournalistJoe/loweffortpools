@@ -37,7 +37,7 @@ export function MobileSignInForm() {
         }}
       >
         <input
-          className="w-full px-4 py-4 rounded-lg bg-white border border-gray-300 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all shadow-sm hover:shadow text-base min-h-[44px]"
+          className="w-full px-4 py-4 rounded-lg bg-input border border-border focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all shadow-sm hover:shadow text-base min-h-[44px]"
           type="email"
           name="email"
           placeholder="Email"
@@ -46,7 +46,7 @@ export function MobileSignInForm() {
           required
         />
         <input
-          className="w-full px-4 py-4 rounded-lg bg-white border border-gray-300 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all shadow-sm hover:shadow text-base min-h-[44px]"
+          className="w-full px-4 py-4 rounded-lg bg-input border border-border focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all shadow-sm hover:shadow text-base min-h-[44px]"
           type="password"
           name="password"
           placeholder={
@@ -63,7 +63,7 @@ export function MobileSignInForm() {
         >
           {submitting ? (
             <div className="flex items-center justify-center">
-              <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
+              <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-primary-foreground mr-2"></div>
               {flow === "signIn" ? "Signing in..." : "Signing up..."}
             </div>
           ) : flow === "signIn" ? (

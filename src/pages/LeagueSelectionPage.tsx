@@ -85,8 +85,8 @@ export function LeagueSelectionPage() {
   return (
     <div className="max-w-4xl mx-auto p-6 pb-20">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">Your Leagues</h1>
-        <p className="text-gray-600">
+        <h1 className="text-3xl font-bold text-foreground mb-2">Your Leagues</h1>
+        <p className="text-muted-foreground">
           Select a league to manage or participate in
         </p>
       </div>
@@ -96,16 +96,16 @@ export function LeagueSelectionPage() {
           {leagues.map((league) => (
             <div
               key={league._id}
-              className="bg-white rounded-lg shadow hover:shadow-md transition-shadow cursor-pointer border"
+              className="bg-card rounded-lg hover:shadow-md transition-shadow cursor-pointer border border-border"
               onClick={() => handleSelectLeague(league._id)}
             >
               <div className="p-6">
                 <div className="flex items-start justify-between mb-4">
                   <div>
-                    <h3 className="text-lg font-semibold text-gray-900 mb-1">
+                    <h3 className="text-lg font-semibold text-foreground mb-1">
                       {league.name}
                     </h3>
-                    <p className="text-sm text-gray-600">
+                    <p className="text-sm text-muted-foreground">
                       Season {league.seasonYear}
                     </p>
                   </div>
@@ -118,7 +118,7 @@ export function LeagueSelectionPage() {
                             ? "bg-blue-100 text-blue-800"
                             : league.status === "live"
                               ? "bg-green-100 text-green-800"
-                              : "bg-gray-100 text-gray-800"
+                              : "bg-muted text-muted-foreground"
                       }`}
                     >
                       {league.status.toUpperCase()}
@@ -131,7 +131,7 @@ export function LeagueSelectionPage() {
                   </div>
                 </div>
 
-                <div className="text-sm text-gray-600">
+                <div className="text-sm text-muted-foreground">
                   {league.isParticipant && league.participant && (
                     <p>Team: {league.participant.displayName}</p>
                   )}
@@ -143,10 +143,10 @@ export function LeagueSelectionPage() {
         </div>
       ) : (
         <div className="text-center py-12 mb-8">
-          <h2 className="text-xl font-semibold text-gray-900 mb-2">
+          <h2 className="text-xl font-semibold text-foreground mb-2">
             No leagues found
           </h2>
-          <p className="text-gray-600 mb-6">
+          <p className="text-muted-foreground mb-6">
             Create your first league or join an existing one with a join code.
           </p>
         </div>
@@ -213,7 +213,7 @@ export function LeagueSelectionPage() {
                     setShowCreateForm(false);
                     setLeagueName("");
                   }}
-                  className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 font-medium"
+                  className="px-4 py-2 bg-secondary text-secondary-foreground rounded-lg hover:bg-secondary/80 font-medium"
                 >
                   Cancel
                 </button>
@@ -258,8 +258,8 @@ export function LeagueSelectionPage() {
               </div>
 
               {leagueByJoinCode && (
-                <div className="p-3 bg-white rounded border">
-                  <h4 className="font-medium text-gray-900">
+                <div className="p-3 bg-card rounded border border-border">
+                  <h4 className="font-medium text-foreground">
                     {leagueByJoinCode.name}
                   </h4>
                   <p className="text-sm text-gray-600">
@@ -309,7 +309,7 @@ export function LeagueSelectionPage() {
                     setJoinCode("");
                     setDisplayName("");
                   }}
-                  className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 font-medium"
+                  className="px-4 py-2 bg-secondary text-secondary-foreground rounded-lg hover:bg-secondary/80 font-medium"
                 >
                   Cancel
                 </button>

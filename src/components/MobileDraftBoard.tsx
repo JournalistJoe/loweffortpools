@@ -118,7 +118,7 @@ export function MobileDraftBoard({
         {picksByRound.map(({ round, picks }) => (
           <div
             key={round}
-            className="bg-white rounded-lg border border-gray-200"
+            className="bg-card rounded-lg border border-border"
           >
             <button
               onClick={() =>
@@ -161,7 +161,7 @@ export function MobileDraftBoard({
                     className={`flex items-center justify-between py-3 px-3 rounded-lg border ${
                       pick
                         ? "border-blue-200 bg-blue-50"
-                        : "border-gray-200 bg-gray-50"
+                        : "border-border bg-muted"
                     }`}
                   >
                     <div className="flex items-center space-x-3">
@@ -203,7 +203,7 @@ export function MobileDraftBoard({
 
       {/* Available Teams - Mobile Optimized */}
       {draftState.league.status === "draft" && (
-        <div className="bg-white rounded-lg border border-gray-200">
+        <div className="bg-card rounded-lg border border-border">
           <button
             onClick={() => setShowAvailableTeams(!showAvailableTeams)}
             className="w-full px-4 py-3 flex items-center justify-between text-left min-h-[44px]"
@@ -239,7 +239,7 @@ export function MobileDraftBoard({
                     className={`w-full p-4 text-left rounded-lg border transition-colors min-h-[44px] ${
                       selectedTeam === team._id
                         ? "border-blue-500 bg-blue-50"
-                        : "border-gray-200 hover:border-gray-300 hover:bg-gray-50"
+                        : "border-border hover:border-border hover:bg-muted"
                     } ${!isUserTurn ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}`}
                   >
                     <div className="flex items-center justify-between">
@@ -270,7 +270,7 @@ export function MobileDraftBoard({
               </div>
 
               {isUserTurn && selectedTeam && (
-                <div className="mt-4 pt-4 border-t border-gray-200">
+                <div className="mt-4 pt-4 border-t border-border">
                   <button
                     onClick={onMakePick}
                     className="w-full py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-semibold text-lg min-h-[44px]"

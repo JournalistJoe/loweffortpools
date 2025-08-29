@@ -12,7 +12,7 @@ import {
   useNavigate,
 } from "react-router-dom";
 import { LeagueProvider } from "./contexts/LeagueContext";
-import { ThemeProvider } from "./contexts/ThemeContext";
+import { ThemeProvider, useTheme } from "./contexts/ThemeContext";
 import { LeagueSelectionPageShadCN as LeagueSelectionPage } from "./pages/LeagueSelectionPageShadCN";
 import { DraftPageShadCN as DraftPage } from "./pages/DraftPageShadCN";
 import { AdminPageShadCN as AdminPage } from "./pages/AdminPageShadCN";
@@ -32,6 +32,7 @@ import { Toaster } from "sonner";
 function SignInPage() {
   const location = useLocation();
   const navigate = useNavigate();
+  const { theme } = useTheme();
   const searchParams = new URLSearchParams(location.search);
   const joinCode = searchParams.get("joinCode");
   
@@ -47,7 +48,7 @@ function SignInPage() {
             className="flex items-center justify-center mx-auto mb-4 hover:opacity-75 transition-opacity"
           >
             <img 
-              src="/lowEffortLogo.png" 
+              src={theme === "dark" ? "/lowEffortLogo-darkmode.png" : "/lowEffortLogo.png"}
               alt="LowEffort.bet Logo" 
               className="h-16 w-16"
             />
@@ -65,7 +66,7 @@ function SignInPage() {
 
 function AuthenticatedRoutes() {
   return (
-    <main className="min-h-screen bg-gray-50">
+    <main className="min-h-screen bg-background">
       <LeagueProvider>
         <Routes>
           <Route path="/" element={<LeagueSelectionPage />} />
