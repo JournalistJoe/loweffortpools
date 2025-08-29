@@ -62,9 +62,9 @@ export function FloatingChat({ league }: FloatingChatProps) {
                 variant="ghost"
                 size="sm"
                 onClick={() => setIsOpen(false)}
-                className="h-8 w-8 p-0 text-primary-foreground hover:bg-primary/80 md:h-6 md:w-6"
+                className="h-10 w-10 p-0 text-primary-foreground hover:bg-primary-foreground/20 border border-primary-foreground/20 hover:border-primary-foreground/40 md:h-6 md:w-6 md:border-0 shrink-0 z-10"
               >
-                <X className="h-5 w-5 md:h-4 md:w-4" />
+                <X className="h-6 w-6 md:h-4 md:w-4 stroke-2" />
               </Button>
             </div>
 
