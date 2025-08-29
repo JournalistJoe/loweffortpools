@@ -1,4 +1,4 @@
-import { Link, useParams } from "react-router-dom";
+import { Link, useParams, useNavigate } from "react-router-dom";
 import { SignOutButtonShadCN } from "../SignOutButtonShadCN";
 import { useState } from "react";
 import { useTheme } from "../contexts/ThemeContext";
@@ -42,6 +42,7 @@ interface NavigationProps {
 export function MobileNavigationShadCN({ league }: NavigationProps) {
   const { leagueId } = useParams<{ leagueId: string }>();
   const { theme } = useTheme();
+  const navigate = useNavigate();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const getNavItems = () => {
@@ -240,6 +241,44 @@ export function MobileNavigationShadCN({ league }: NavigationProps) {
                   <Separator className="my-4" />
 
                   <SignOutButtonShadCN />
+
+                  {/* Footer Section */}
+                  <div className="mt-8 pt-4 border-t space-y-3">
+                    <div className="flex flex-col gap-2 text-sm text-muted-foreground">
+                      <button
+                        onClick={() => {
+                          navigate("/terms");
+                          setIsMobileMenuOpen(false);
+                        }}
+                        className="text-primary hover:underline text-left"
+                      >
+                        Terms of Service & Privacy Policy
+                      </button>
+                    </div>
+                    
+                    <div className="text-xs text-muted-foreground space-y-2">
+                      <p>
+                        Created & Maintained by{" "}
+                        <a 
+                          href="https://LongHairedFreakyPeople.com" 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          className="text-primary hover:underline"
+                        >
+                          Long Haired Freaky People
+                        </a>
+                      </p>
+                      <p>
+                        Contact:{" "}
+                        <a 
+                          href="mailto:Joey@LHFP.help"
+                          className="text-primary hover:underline"
+                        >
+                          Joey@LHFP.help
+                        </a>
+                      </p>
+                    </div>
+                  </div>
                 </div>
               </SheetContent>
               </Sheet>
