@@ -7,7 +7,7 @@ import { useState } from "react";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
-import { UserPlus, Eye, Trash2 } from "lucide-react";
+import { UserPlus } from "lucide-react";
 
 export function ParticipantsPage() {
   const { leagueId } = useParams<{ leagueId: string }>();
@@ -26,22 +26,8 @@ export function ParticipantsPage() {
     api.draft.getDraftState,
     leagueId ? { leagueId: leagueId as any } : "skip",
   );
-  const removeParticipant = useMutation(api.leagues.removeParticipant);
   const adminJoinOwnLeague = useMutation(api.leagues.adminJoinOwnLeague);
 
-  const handleRemoveParticipant = async (participantId: string) => {
-    if (!confirm("Are you sure you want to remove this participant?")) return;
-
-    try {
-      await removeParticipant({
-        leagueId: leagueId as any,
-        participantId: participantId as any,
-      });
-      toast.success("Participant removed successfully");
-    } catch (error) {
-      toast.error("Failed to remove participant");
-    }
-  };
 
   const handleAdminJoin = async () => {
     if (!leagueId || !teamName.trim()) return;
@@ -171,9 +157,6 @@ export function ParticipantsPage() {
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Teams Drafted
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Actions
-                  </th>
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
@@ -191,34 +174,6 @@ export function ParticipantsPage() {
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                         {getTeamCount(participant._id)} teams
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                        <div className="flex items-center gap-2">
-                          <Button
-                            asChild
-                            variant="ghost"
-                            size="sm"
-                            className="h-8 w-8 p-0 text-blue-600 hover:text-blue-900 hover:bg-blue-50"
-                            title="View Team"
-                          >
-                            <Link to={`/league/${leagueId}/team/${participant._id}`}>
-                              <Eye className="h-4 w-4" />
-                            </Link>
-                          </Button>
-                          {league.isAdmin && league.status === "setup" && (
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() =>
-                                handleRemoveParticipant(participant._id)
-                              }
-                              className="h-8 w-8 p-0 text-red-600 hover:text-red-900 hover:bg-red-50"
-                              title="Remove Participant"
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
-                          )}
-                        </div>
                       </td>
                     </tr>
                   ))}
