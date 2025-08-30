@@ -52,10 +52,16 @@ export function PartialLeagueWelcome({ league, currentUser, participants }: Part
     setMinLocalDatetime(localTime.toISOString().slice(0, 16));
   }, []);
   
-  // Default to September 4, 2025 8:00 PM UTC (first regular season game)
+  // Helper function to convert UTC Date instant to local datetime string for datetime-local input
+  const convertUTCToLocalDatetimeString = (utcDate: Date): string => {
+    const localDate = new Date(utcDate.getTime() - utcDate.getTimezoneOffset() * 60000);
+    return localDate.toISOString().slice(0, 16);
+  };
+
+  // Default to September 4, 2025 8:00 PM UTC converted to user's local time
   const defaultDraftDate = useMemo(() => {
     const utcDate = new Date(Date.UTC(2025, 8, 4, 20, 0)); // September 4, 2025, 8:00 PM UTC
-    return utcDate.toISOString().slice(0, 16);
+    return convertUTCToLocalDatetimeString(utcDate);
   }, []);
 
   const handleShareJoinCode = () => {
@@ -333,7 +339,7 @@ Don't make me be the guy who couldn't get 8 people together for something this s
             <div className="p-4 bg-red-50 dark:bg-red-950/20 rounded-lg border border-red-200 dark:border-red-800">
               <h4 className="font-semibold text-red-700 dark:text-red-300 mb-2">The Brutally Honest Method:</h4>
               <p className="text-sm text-muted-foreground italic">
-                "Look, I need " {participantsNeeded} " more people or this whole thing falls apart and I look like an idiot. 
+                "Look, I need {participantsNeeded} more people or this whole thing falls apart and I look like an idiot. 
                 Help me not look like an idiot."
               </p>
             </div>
@@ -396,7 +402,7 @@ Don't make me be the guy who couldn't get 8 people together for something this s
                   className="mt-2"
                 />
                 <p className="text-xs text-muted-foreground mt-1">
-                  Defaults to Sept 4, 2025 8:00 PM UTC (first regular season game)
+                  Defaults to Sept 4, 2025 8:00 PM (your local time)
                 </p>
               </div>
               <div className="flex gap-2 justify-center">
