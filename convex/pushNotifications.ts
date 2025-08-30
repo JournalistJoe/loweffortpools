@@ -401,6 +401,53 @@ export const getNotificationStats = query({
   },
 });
 
+// Admin-only global notification statistics
+export const getGlobalNotificationStats = query({
+  args: {
+    limit: v.optional(v.number()),
+  },
+  handler: async (ctx, args) => {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) throw new Error("Must be logged in");
+    
+    const currentUser = await ctx.db.get(userId);
+    if (!currentUser?.isSuperuser) throw new Error("Must be a superuser to view global stats");
+
+    // Get all notification deliveries (for global stats)
+    const deliveries = await ctx.db
+      .query("notificationDeliveries")
+      .order("desc")
+      .take(args.limit || 1000);
+
+    // Calculate global stats
+    const total = deliveries.length;
+    const sent = deliveries.filter(d => d.status === "sent").length;
+    const failed = deliveries.filter(d => d.status === "failed").length;
+    
+    // Get recent deliveries (last 24 hours)
+    const last24Hours = Date.now() - (24 * 60 * 60 * 1000);
+    const recentDeliveries = deliveries.filter(d => d.sentAt >= last24Hours);
+    const recentSent = recentDeliveries.filter(d => d.status === "sent").length;
+    const recentFailed = recentDeliveries.filter(d => d.status === "failed").length;
+    
+    return {
+      deliveries: deliveries.slice(0, 50), // Return last 50 for display
+      stats: {
+        total,
+        sent,
+        failed,
+        successRate: total > 0 ? (sent / total) : 0,
+        recent24h: {
+          total: recentDeliveries.length,
+          sent: recentSent,
+          failed: recentFailed,
+          successRate: recentDeliveries.length > 0 ? (recentSent / recentDeliveries.length) : 0,
+        }
+      }
+    };
+  },
+});
+
 // Internal query to get user subscriptions (for actions)
 export const getUserSubscriptionsInternal = query({
   args: {

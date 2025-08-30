@@ -57,7 +57,7 @@ export function SystemAdminPage() {
   const createTestLeague = useMutation(api.testLeague.createTestLeague);
   const sendTestNotification = useAction(api.notificationActions.sendTestNotification);
   const getAllUsers = useQuery(api.users.getAllUsers);
-  const notificationStats = useQuery(api.pushNotifications.getNotificationStats, currentUser?._id ? {} : "skip");
+  const notificationStats = useQuery(api.pushNotifications.getGlobalNotificationStats, currentUser?.isSuperuser ? {} : "skip");
 
   // Show loading state while currentUser is undefined
   if (currentUser === undefined) {
