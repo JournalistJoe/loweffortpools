@@ -141,12 +141,30 @@ export const getNotificationPreferences = query({
     const userId = await getAuthUserId(ctx);
     if (!userId) return null;
 
-    const preferences = await ctx.db
+    let isUsingGlobalDefaults = false;
+    
+    // First, try to find league-specific preferences
+    let preferences = await ctx.db
       .query("notificationPreferences")
       .withIndex("by_user_and_league", (q) => 
         q.eq("userId", userId).eq("leagueId", args.leagueId)
       )
       .first();
+
+    // If no league-specific preferences found and we were looking for a specific league,
+    // try to find global preferences as fallback
+    if (!preferences && args.leagueId) {
+      preferences = await ctx.db
+        .query("notificationPreferences")
+        .withIndex("by_user_and_league", (q) => 
+          q.eq("userId", userId).eq("leagueId", undefined)
+        )
+        .first();
+      
+      if (preferences) {
+        isUsingGlobalDefaults = true;
+      }
+    }
 
     // Return default preferences if none exist
     if (!preferences) {
@@ -156,6 +174,7 @@ export const getNotificationPreferences = query({
         enableMyTurn: true,
         enableImportantOnly: false,
         mutedUntil: null,
+        isUsingGlobalDefaults: args.leagueId !== undefined, // true if we're in league context but no specific prefs
       };
     }
 
@@ -165,6 +184,7 @@ export const getNotificationPreferences = query({
       enableMyTurn: preferences.enableMyTurn,
       enableImportantOnly: preferences.enableImportantOnly,
       mutedUntil: preferences.mutedUntil,
+      isUsingGlobalDefaults,
     };
   },
 });
