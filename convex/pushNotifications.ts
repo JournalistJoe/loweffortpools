@@ -176,6 +176,8 @@ export const getUserNotificationPreferences = query({
     leagueId: v.optional(v.id("leagues")),
   },
   handler: async (ctx, args) => {
+    let isUsingGlobalDefaults = false;
+    
     // First, try to find league-specific preferences
     let preferences = await ctx.db
       .query("notificationPreferences")
@@ -193,6 +195,10 @@ export const getUserNotificationPreferences = query({
           q.eq("userId", args.userId).eq("leagueId", undefined)
         )
         .first();
+      
+      if (preferences) {
+        isUsingGlobalDefaults = true;
+      }
     }
 
     // Return default preferences if none exist
@@ -213,7 +219,7 @@ export const getUserNotificationPreferences = query({
       enableMyTurn: preferences.enableMyTurn,
       enableImportantOnly: preferences.enableImportantOnly,
       mutedUntil: preferences.mutedUntil,
-      isUsingGlobalDefaults: false,
+      isUsingGlobalDefaults,
     };
   },
 });
