@@ -203,14 +203,19 @@ export const notifyChatMessage = action({
     // Send notifications to each user
     for (const userId of allUsers) {
       try {
+        console.log(`Processing chat notification for user ${userId} in league ${args.leagueId}`);
+        
         // Check user's notification preferences
         let preferences = await ctx.runQuery(api.pushNotifications.getUserNotificationPreferences, {
           userId: userId,
           leagueId: args.leagueId,
         });
 
+        console.log(`User ${userId} preferences:`, preferences);
+
         // Default to allowing notifications if no preferences found
         if (!preferences) {
+          console.log(`No preferences found for user ${userId}, using defaults`);
           preferences = { 
             enableChatMessages: true,
             enableDraftPicks: true,
@@ -221,23 +226,32 @@ export const notifyChatMessage = action({
         }
 
         // Skip if chat notifications are disabled
-        if (!preferences.enableChatMessages) continue;
+        if (!preferences.enableChatMessages) {
+          console.log(`Skipping user ${userId}: chat notifications disabled`);
+          continue;
+        }
 
         // Skip if user has notifications muted
         if (preferences.mutedUntil && Date.now() < preferences.mutedUntil) {
+          console.log(`Skipping user ${userId}: notifications muted until ${new Date(preferences.mutedUntil)}`);
           continue;
         }
 
         // Skip if user only wants important notifications
-        if (preferences.enableImportantOnly) continue;
+        if (preferences.enableImportantOnly) {
+          console.log(`Skipping user ${userId}: important only mode enabled`);
+          continue;
+        }
 
         // Truncate long messages
         const truncatedMessage = args.message.length > 100 
           ? args.message.substring(0, 97) + "..."
           : args.message;
 
+        console.log(`Sending push notification to user ${userId}`);
+        
         // Send the push notification
-        await ctx.runAction(api.pushNotifications.sendPushNotification, {
+        const result = await ctx.runAction(api.pushNotifications.sendPushNotification, {
           userId,
           title: `💬 ${args.senderDisplayName}`,
           body: truncatedMessage,
@@ -255,6 +269,8 @@ export const notifyChatMessage = action({
             { action: "view-chat", title: "View Chat", icon: "/icon-192x192.png" }
           ],
         });
+        
+        console.log(`Push notification result for user ${userId}:`, result);
 
       } catch (error) {
         console.error(`Failed to send chat notification to user ${userId}:`, error);
