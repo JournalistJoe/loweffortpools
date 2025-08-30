@@ -1,6 +1,7 @@
 import { v } from "convex/values";
 import { query, mutation } from "./_generated/server";
 import { getAuthUserId } from "@convex-dev/auth/server";
+import { api } from "./_generated/api";
 
 export const getMessages = query({
   args: {
@@ -141,6 +142,21 @@ export const sendMessage = mutation({
       userId,
       message: trimmedMessage,
       createdAt: Date.now(),
+    });
+
+    // Get sender display name for notification
+    const senderDisplayName = participant?.displayName || 
+                             spectator?.displayName || 
+                             (await ctx.db.get(userId))?.name ||
+                             "Anonymous";
+
+    // Send push notifications for chat message
+    await ctx.scheduler.runAfter(0, api.notificationActions.notifyChatMessage, {
+      leagueId: args.leagueId,
+      messageId,
+      senderUserId: userId,
+      message: trimmedMessage,
+      senderDisplayName,
     });
 
     return messageId;

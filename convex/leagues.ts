@@ -2,6 +2,7 @@ import { v } from "convex/values";
 import { query, mutation, internalMutation } from "./_generated/server";
 import { getAuthUserId } from "@convex-dev/auth/server";
 import { JOIN_CODE_LENGTH } from "./constants";
+import { api } from "./_generated/api";
 
 // Constants
 const MAX_PARTICIPANTS = 8;
@@ -1040,6 +1041,14 @@ export const startDraft = mutation({
       type: "draft_started",
       message: "Draft has started!",
       createdAt: now,
+    });
+
+    // Send push notifications for draft start
+    await ctx.scheduler.runAfter(0, api.notificationActions.notifyLeagueActivity, {
+      leagueId: args.leagueId,
+      activityType: "draft_started",
+      message: "Draft has started!",
+      excludeUserId: userId,
     });
 
     return true;

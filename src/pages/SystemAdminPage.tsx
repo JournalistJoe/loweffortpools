@@ -26,6 +26,10 @@ import {
   TestTube,
   Shield,
   AlertTriangle,
+  Bell,
+  Users,
+  Send,
+  Activity,
 } from "lucide-react";
 import {
   Dialog,
@@ -45,10 +49,15 @@ export function SystemAdminPage() {
   const [isCreatingTestLeague, setIsCreatingTestLeague] = useState(false);
   const [showImportDialog, setShowImportDialog] = useState(false);
   const [showResyncDialog, setShowResyncDialog] = useState(false);
+  const [testUserId, setTestUserId] = useState("");
+  const [isSendingTest, setIsSendingTest] = useState(false);
 
   const importTeams = useMutation(api.nflData.importTeams);
   const manualResync = useMutation(api.nflData.manualResync);
   const createTestLeague = useMutation(api.testLeague.createTestLeague);
+  const sendTestNotification = useMutation(api.notificationActions.sendTestNotification);
+  const getAllUsers = useQuery(api.users.getAllUsers);
+  const notificationStats = useQuery(api.pushNotifications.getNotificationStats, currentUser?._id ? {} : "skip");
 
   // Show loading state while currentUser is undefined
   if (currentUser === undefined) {
@@ -113,6 +122,34 @@ export function SystemAdminPage() {
       toast.error(String(error));
     } finally {
       setIsCreatingTestLeague(false);
+    }
+  };
+
+  const handleSendTestNotification = async () => {
+    if (!testUserId) {
+      toast.error("Please select a user to send the test notification to");
+      return;
+    }
+
+    setIsSendingTest(true);
+    try {
+      const result = await sendTestNotification({
+        userId: testUserId as any,
+        title: "🧪 Admin Test Notification",
+        body: "This is a test notification from the system administrator.",
+      });
+
+      if (result.sent > 0) {
+        toast.success(`Test notification sent successfully to ${result.sent} device(s)`);
+      } else if (result.totalSubscriptions === 0) {
+        toast.warning("User has no active push subscriptions");
+      } else {
+        toast.error(`Failed to send notification: ${result.errors?.join(", ") || "Unknown error"}`);
+      }
+    } catch (error) {
+      toast.error(String(error));
+    } finally {
+      setIsSendingTest(false);
     }
   };
 
@@ -234,6 +271,68 @@ export function SystemAdminPage() {
             <p className="text-sm text-muted-foreground">
               Manually sync game results for a specific week (affects all leagues)
             </p>
+          </CardContent>
+        </Card>
+
+        {/* Push Notification Testing */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Bell className="h-5 w-5" />
+              Push Notification Testing
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {/* Notification Stats */}
+            {notificationStats && (
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                <div className="flex items-start gap-2">
+                  <Activity className="h-5 w-5 text-blue-600 mt-0.5" />
+                  <div>
+                    <h4 className="font-medium text-blue-800">System Notification Stats</h4>
+                    <div className="text-sm text-blue-700 mt-1 space-y-1">
+                      <p>Total Deliveries: {notificationStats.stats.total}</p>
+                      <p>Success Rate: {(notificationStats.stats.successRate * 100).toFixed(1)}%</p>
+                      <p>Recent Sent: {notificationStats.stats.sent} | Failed: {notificationStats.stats.failed}</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Test Notification Sender */}
+            <div className="space-y-3">
+              <div className="space-y-2">
+                <Label htmlFor="test-user">Select User for Test Notification</Label>
+                <Select value={testUserId} onValueChange={setTestUserId}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Choose a user..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {getAllUsers?.map((user) => (
+                      <SelectItem key={user._id} value={user._id}>
+                        <div className="flex items-center gap-2">
+                          <Users className="h-4 w-4" />
+                          {user.name || "Anonymous"} ({user.email || "No email"})
+                        </div>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <Button
+                onClick={handleSendTestNotification}
+                disabled={isSendingTest || !testUserId}
+                className="gap-2"
+              >
+                <Send className="h-4 w-4" />
+                {isSendingTest ? "Sending..." : "Send Test Notification"}
+              </Button>
+              <p className="text-sm text-muted-foreground">
+                Send a test push notification to the selected user's subscribed devices
+              </p>
+            </div>
           </CardContent>
         </Card>
 

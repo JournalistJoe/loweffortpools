@@ -9,10 +9,28 @@ export default defineConfig(({ mode }) => ({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
+      strategies: 'generateSW',
+      injectRegister: 'auto',
+      includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'icon-*.png'],
       workbox: {
         clientsClaim: true,
         skipWaiting: true,
-        globPatterns: ['**/*.{js,css,html,ico,png,svg,jpg,jpeg,webp}']
+        globPatterns: ['**/*.{js,css,html,ico,png,svg,jpg,jpeg,webp}'],
+        runtimeCaching: [
+          {
+            urlPattern: /^https:\/\/api\.convex\.cloud/,
+            handler: 'NetworkFirst',
+            options: {
+              cacheName: 'convex-api',
+              expiration: {
+                maxEntries: 50,
+                maxAgeSeconds: 60 * 60 * 24, // 24 hours
+              },
+            },
+          },
+        ],
+        // Custom service worker code for push notifications
+        importScripts: ['/sw-push.js'],
       },
       manifest: {
         name: 'LowEffort.bet',
@@ -44,7 +62,11 @@ export default defineConfig(({ mode }) => ({
             purpose: 'maskable'
           }
         ]
-      }
+      },
+      devOptions: {
+        enabled: true,
+        type: 'module',
+      },
     }),
     // The code below enables dev tools like taking screenshots of your site
     // while it is being developed on chef.convex.dev.

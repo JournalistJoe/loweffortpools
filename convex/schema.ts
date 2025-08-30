@@ -157,6 +157,53 @@ const applicationTables = {
     .index("by_league", ["leagueId"])
     .index("by_user", ["userId"])
     .index("by_league_and_user", ["leagueId", "userId"]),
+
+  pushSubscriptions: defineTable({
+    userId: v.id("users"),
+    endpoint: v.string(),
+    p256dhKey: v.string(), // Public key for encryption
+    authKey: v.string(),   // Authentication secret
+    createdAt: v.number(),
+    updatedAt: v.number(),
+    userAgent: v.optional(v.string()),
+    isActive: v.boolean(),
+  })
+    .index("by_user", ["userId"])
+    .index("by_endpoint", ["endpoint"])
+    .index("by_user_and_active", ["userId", "isActive"]),
+
+  notificationPreferences: defineTable({
+    userId: v.id("users"),
+    leagueId: v.optional(v.id("leagues")), // null for global preferences
+    enableChatMessages: v.boolean(),
+    enableDraftPicks: v.boolean(),
+    enableMyTurn: v.boolean(),
+    enableImportantOnly: v.boolean(),
+    mutedUntil: v.optional(v.number()), // Unix timestamp when mute expires
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index("by_user", ["userId"])
+    .index("by_league", ["leagueId"])
+    .index("by_user_and_league", ["userId", "leagueId"]),
+
+  // Push notification delivery tracking
+  notificationDeliveries: defineTable({
+    userId: v.id("users"),
+    subscriptionId: v.id("pushSubscriptions"),
+    title: v.string(),
+    body: v.string(),
+    type: v.string(), // "test", "chat_message", "draft_pick", etc.
+    status: v.union(v.literal("sent"), v.literal("failed")),
+    errorMessage: v.optional(v.string()),
+    leagueId: v.optional(v.id("leagues")),
+    sentAt: v.number(),
+  })
+    .index("by_user", ["userId"])
+    .index("by_status", ["status"])
+    .index("by_type", ["type"])
+    .index("by_league", ["leagueId"])
+    .index("by_user_and_sent_at", ["userId", "sentAt"]),
 };
 
 export default defineSchema({

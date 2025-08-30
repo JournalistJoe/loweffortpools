@@ -1,6 +1,7 @@
 import { v } from "convex/values";
 import { query, mutation, internalMutation } from "./_generated/server";
 import { getAuthUserId } from "@convex-dev/auth/server";
+import { api } from "./_generated/api";
 
 // Snake draft order calculation
 function getParticipantForPick(pickIndex: number): number {
@@ -176,6 +177,14 @@ export const makePick = mutation({
         message: "Draft completed! League is now live.",
         createdAt: Date.now(),
       });
+
+      // Send push notifications for draft completion
+      await ctx.scheduler.runAfter(0, api.notificationActions.notifyLeagueActivity, {
+        leagueId: args.leagueId,
+        activityType: "draft_completed",
+        message: "Draft completed! League is now live.",
+        excludeUserId: userId,
+      });
     } else {
       await ctx.db.patch(args.leagueId, {
         currentPickIndex: nextPickIndex,
@@ -190,6 +199,16 @@ export const makePick = mutation({
       createdAt: Date.now(),
       participantId: participant._id,
       nflTeamId: args.nflTeamId,
+    });
+
+    // Send push notifications for draft pick
+    await ctx.scheduler.runAfter(0, api.notificationActions.notifyLeagueActivity, {
+      leagueId: args.leagueId,
+      activityType: "draft_pick",
+      message: `${participant.displayName} selected ${nflTeam.fullName}`,
+      participantId: participant._id,
+      nflTeamId: args.nflTeamId,
+      excludeUserId: userId,
     });
 
     return true;
@@ -308,6 +327,13 @@ export const checkAndMakeAutoPick = internalMutation({
           message: "Draft completed! League is now live.",
           createdAt: now,
         });
+
+        // Send push notifications for draft completion
+        await ctx.scheduler.runAfter(0, api.notificationActions.notifyLeagueActivity, {
+          leagueId: league._id,
+          activityType: "draft_completed",
+          message: "Draft completed! League is now live.",
+        });
       } else {
         await ctx.db.patch(league._id, {
           currentPickIndex: nextPickIndex,
@@ -321,6 +347,15 @@ export const checkAndMakeAutoPick = internalMutation({
         type: "draft_autopick",
         message: `Time expired! ${currentParticipant.displayName} was automatically assigned ${selectedTeam.fullName}`,
         createdAt: now,
+        participantId: currentParticipant._id,
+        nflTeamId: selectedTeam._id,
+      });
+
+      // Send push notifications for autopick
+      await ctx.scheduler.runAfter(0, api.notificationActions.notifyLeagueActivity, {
+        leagueId: league._id,
+        activityType: "draft_autopick",
+        message: `Time expired! ${currentParticipant.displayName} was automatically assigned ${selectedTeam.fullName}`,
         participantId: currentParticipant._id,
         nflTeamId: selectedTeam._id,
       });

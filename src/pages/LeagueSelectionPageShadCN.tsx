@@ -39,6 +39,7 @@ import {
 import { DraftCountdown } from "../components/DraftCountdown";
 import { EmptyLeaguesState } from "../components/EmptyLeaguesState";
 import { SignOutButton } from "../SignOutButton";
+import { UserMenu } from "../components/UserMenu";
 
 export function LeagueSelectionPageShadCN() {
   const leagues = useQuery(api.leagues.getUserLeagues);
@@ -266,21 +267,6 @@ export function LeagueSelectionPageShadCN() {
             <span className="text-xl font-bold">LowEffort.bet</span>
           </div>
           <div className="flex items-center space-x-2">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={toggleTheme}
-              className="h-9 w-9"
-              aria-label={theme === "light" ? "Switch to dark theme" : "Switch to light theme"}
-              aria-pressed={theme === "dark"}
-              title={theme === "light" ? "Switch to dark theme" : "Switch to light theme"}
-            >
-              {theme === "light" ? (
-                <Moon className="h-4 w-4" aria-hidden="true" />
-              ) : (
-                <Sun className="h-4 w-4" aria-hidden="true" />
-              )}
-            </Button>
             {currentUser?.isSuperuser && (
               <Button
                 onClick={() => navigate("/system-admin")}
@@ -292,7 +278,7 @@ export function LeagueSelectionPageShadCN() {
                 System Admin
               </Button>
             )}
-            <SignOutButton />
+            <UserMenu />
           </div>
         </div>
       </header>
