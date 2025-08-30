@@ -348,7 +348,7 @@ export const getNflTeamById = query({
   handler: async (ctx, args) => {
     const team = await ctx.db.get(args.teamId);
     if (!team) {
-      ctx.log(`NFL team not found: ${args.teamId}`);
+      console.log(`NFL team not found: ${args.teamId}`);
       throw new Error(`NFL team not found: ${args.teamId}`);
     }
     return team;

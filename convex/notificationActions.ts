@@ -204,14 +204,20 @@ export const notifyChatMessage = action({
     for (const userId of allUsers) {
       try {
         // Check user's notification preferences
-        const preferences = await ctx.runQuery(api.pushNotifications.getUserNotificationPreferences, {
+        let preferences = await ctx.runQuery(api.pushNotifications.getUserNotificationPreferences, {
           userId: userId,
           leagueId: args.leagueId,
         });
 
         // Default to allowing notifications if no preferences found
         if (!preferences) {
-          preferences = { enableChatMessages: true };
+          preferences = { 
+            enableChatMessages: true,
+            enableDraftPicks: true,
+            enableMyTurn: true,
+            enableImportantOnly: false,
+            mutedUntil: null
+          };
         }
 
         // Skip if chat notifications are disabled
