@@ -145,16 +145,26 @@ export function NotificationSettings({ leagueId, showGlobalSettings = false }: N
             <CardDescription className="text-sm">
               {showGlobalSettings 
                 ? "Default notification preferences for all leagues"
-                : "Customize notifications for this league"
+                : preferences?.isUsingGlobalDefaults
+                  ? "Using global defaults - customize below to override for this league"
+                  : "Customize notifications for this league"
               }
             </CardDescription>
           </div>
-          {isMuted && (
-            <Badge variant="outline" className="text-orange-600 border-orange-600 self-start sm:self-center">
-              <BellOff className="w-3 h-3 mr-1" />
-              Muted ({muteTimeRemaining}h left)
-            </Badge>
-          )}
+          <div className="flex flex-col gap-2 sm:flex-row sm:gap-3 sm:items-center">
+            {preferences?.isUsingGlobalDefaults && !showGlobalSettings && (
+              <Badge variant="outline" className="text-blue-600 border-blue-600 self-start sm:self-center">
+                <Bell className="w-3 h-3 mr-1" />
+                Using Global Defaults
+              </Badge>
+            )}
+            {isMuted && (
+              <Badge variant="outline" className="text-orange-600 border-orange-600 self-start sm:self-center">
+                <BellOff className="w-3 h-3 mr-1" />
+                Muted ({muteTimeRemaining}h left)
+              </Badge>
+            )}
+          </div>
         </div>
       </CardHeader>
       <CardContent className="space-y-6">
@@ -243,7 +253,14 @@ export function NotificationSettings({ leagueId, showGlobalSettings = false }: N
           <div className="text-sm sm:text-xs text-muted-foreground space-y-2 sm:space-y-1">
             <p className="leading-relaxed">• Notifications work even when the app is closed</p>
             <p className="leading-relaxed">• High-priority notifications may override "Important Only" setting</p>
-            <p className="leading-relaxed">• You can customize settings for each league separately</p>
+            {showGlobalSettings ? (
+              <p className="leading-relaxed">• These settings apply to all leagues unless overridden in specific leagues</p>
+            ) : (
+              <>
+                <p className="leading-relaxed">• League settings override your global defaults</p>
+                <p className="leading-relaxed">• Customize global defaults in your user menu (top right)</p>
+              </>
+            )}
           </div>
         </div>
       </CardContent>

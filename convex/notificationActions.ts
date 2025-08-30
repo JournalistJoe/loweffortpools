@@ -212,17 +212,9 @@ export const notifyChatMessage = action({
         });
 
         console.log(`User ${userId} preferences:`, preferences);
-
-        // Default to allowing notifications if no preferences found
-        if (!preferences) {
-          console.log(`No preferences found for user ${userId}, using defaults`);
-          preferences = { 
-            enableChatMessages: true,
-            enableDraftPicks: true,
-            enableMyTurn: true,
-            enableImportantOnly: false,
-            mutedUntil: null
-          };
+        
+        if (preferences.isUsingGlobalDefaults) {
+          console.log(`User ${userId} is using global defaults for league ${args.leagueId}`);
         }
 
         // Skip if chat notifications are disabled

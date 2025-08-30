@@ -132,11 +132,11 @@ export function UserMenu() {
       </DropdownMenu>
 
       <Dialog open={showNotifications} onOpenChange={setShowNotifications}>
-        <DialogContent className="max-w-full sm:max-w-lg md:max-w-2xl lg:max-w-3xl max-h-[80vh] overflow-y-auto p-4 sm:p-6">
-          <DialogHeader>
-            <DialogTitle>Notification Settings</DialogTitle>
+        <DialogContent className="max-w-full sm:max-w-lg md:max-w-2xl lg:max-w-3xl max-h-[90vh] overflow-y-auto p-3 sm:p-4 md:p-6">
+          <DialogHeader className="pb-4">
+            <DialogTitle className="text-lg sm:text-xl">Notification Settings</DialogTitle>
           </DialogHeader>
-          <div className="space-y-6">
+          <div className="space-y-4 sm:space-y-6">
             <PushNotificationManager />
             <NotificationSettings showGlobalSettings={true} />
           </div>
