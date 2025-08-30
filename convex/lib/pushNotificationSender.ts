@@ -42,21 +42,29 @@ export const sendPushNotificationNode = action({
     }))),
   },
   handler: async (ctx, args): Promise<{ sent: number; failed: number; errors: string[]; totalSubscriptions: number }> => {
+    console.log(`⚡ sendPushNotificationNode: Starting for user ${args.userId}: "${args.title}"`);
+    
     try {
       // Check if VAPID keys are configured
+      console.log(`🔐 Checking VAPID keys...`);
       if (!VAPID_PUBLIC_KEY || !VAPID_PRIVATE_KEY) {
-        console.warn('VAPID keys not configured - push notifications will not be sent');
+        console.warn('❌ VAPID keys not configured - push notifications will not be sent');
         return { sent: 0, failed: 0, errors: ['VAPID keys not configured'], totalSubscriptions: 0 };
       }
+      console.log(`✅ VAPID keys are configured`);
+      
       // Get user's active push subscriptions
+      console.log(`🔍 Getting active subscriptions for user ${args.userId}...`);
       const subscriptions: any[] = await ctx.runQuery(api.pushNotifications.getUserSubscriptionsInternal, {
         userId: args.userId,
       });
 
       if (subscriptions.length === 0) {
-        console.log(`No active push subscriptions for user ${args.userId}`);
+        console.log(`❌ No active push subscriptions for user ${args.userId}`);
         return { sent: 0, failed: 0, errors: [], totalSubscriptions: 0 };
       }
+      
+      console.log(`✅ Found ${subscriptions.length} active subscriptions, proceeding with delivery...`);
 
       let sent = 0;
       let failed = 0;

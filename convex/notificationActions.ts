@@ -185,13 +185,22 @@ export const notifyChatMessage = action({
     senderDisplayName: v.string(),
   },
   handler: async (ctx, args) => {
+    console.log(`🚀 Starting notifyChatMessage for league ${args.leagueId}, sender ${args.senderUserId}`);
+    
     // Get league details
     const league = await ctx.runQuery(api.leagues.getLeague, { leagueId: args.leagueId });
-    if (!league) return;
+    if (!league) {
+      console.log(`❌ League ${args.leagueId} not found, exiting early`);
+      return;
+    }
+    
+    console.log(`✅ League found: ${league.name}`);
 
     // Get all participants and spectators except the sender
     const participants = await ctx.runQuery(api.leagues.getParticipants, { leagueId: args.leagueId });
     const spectators = await ctx.runQuery(api.spectators.getSpectators, { leagueId: args.leagueId });
+
+    console.log(`👥 Found ${participants.length} participants and ${spectators.length} spectators`);
 
     const allUsers = [
       ...participants.map((p: any) => p.userId),
@@ -199,6 +208,13 @@ export const notifyChatMessage = action({
     ].filter((userId, index, self) => 
       self.indexOf(userId) === index && userId !== args.senderUserId
     );
+    
+    console.log(`📋 Processing notifications for ${allUsers.length} users (excluding sender)`);
+    
+    if (allUsers.length === 0) {
+      console.log(`🔔 No users to notify, exiting early`);
+      return;
+    }
 
     // Send notifications to each user
     for (const userId of allUsers) {

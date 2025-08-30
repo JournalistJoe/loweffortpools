@@ -287,6 +287,8 @@ export const sendPushNotification = action({
     }))),
   },
   handler: async (ctx, args): Promise<{ sent: number; failed: number; errors?: string[]; totalSubscriptions?: number }> => {
+    console.log(`📤 sendPushNotification called for user ${args.userId}, title: "${args.title}"`);
+    
     // Convert data format for Node.js action
     const nodeData = args.data ? {
       type: args.data.type || "notification",
@@ -297,8 +299,10 @@ export const sendPushNotification = action({
       timestamp: args.data.timestamp,
     } : undefined;
 
+    console.log(`🔄 Delegating to sendPushNotificationNode with data:`, nodeData);
+
     // Delegate to Node.js runtime action for actual push notification sending
-    return await ctx.runAction(api.lib.pushNotificationSender.sendPushNotificationNode, {
+    const result = await ctx.runAction(api.lib.pushNotificationSender.sendPushNotificationNode, {
       userId: args.userId,
       title: args.title,
       body: args.body,
@@ -308,6 +312,9 @@ export const sendPushNotification = action({
       data: nodeData,
       actions: args.actions,
     });
+    
+    console.log(`📊 sendPushNotificationNode result:`, result);
+    return result;
   },
 });
 
@@ -400,12 +407,25 @@ export const getUserSubscriptionsInternal = query({
     userId: v.id("users"),
   },
   handler: async (ctx, args) => {
+    console.log(`🔍 getUserSubscriptionsInternal: Fetching subscriptions for user ${args.userId}`);
+    
     const subscriptions = await ctx.db
       .query("pushSubscriptions")
       .withIndex("by_user_and_active", (q) => 
         q.eq("userId", args.userId).eq("isActive", true)
       )
       .collect();
+
+    console.log(`📱 Found ${subscriptions.length} active subscriptions for user ${args.userId}`);
+    
+    if (subscriptions.length > 0) {
+      console.log(`📋 Subscription details:`, subscriptions.map(s => ({
+        id: s._id,
+        endpoint: s.endpoint.substring(0, 50) + "...",
+        userAgent: s.userAgent,
+        createdAt: new Date(s.createdAt).toISOString(),
+      })));
+    }
 
     return subscriptions;
   },
