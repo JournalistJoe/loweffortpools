@@ -196,9 +196,9 @@ export const notifyChatMessage = action({
     
     console.log(`✅ League found: ${league.name}`);
 
-    // Get all participants and spectators except the sender
-    const participants = await ctx.runQuery(api.leagues.getParticipants, { leagueId: args.leagueId });
-    const spectators = await ctx.runQuery(api.spectators.getSpectators, { leagueId: args.leagueId });
+    // Get all participants and spectators except the sender (using internal queries for background actions)
+    const participants = await ctx.runQuery(api.leagues.getParticipantsInternal, { leagueId: args.leagueId });
+    const spectators = await ctx.runQuery(api.spectators.getSpectatorsInternal, { leagueId: args.leagueId });
 
     console.log(`👥 Found ${participants.length} participants and ${spectators.length} spectators`);
 

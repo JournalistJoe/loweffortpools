@@ -1,5 +1,5 @@
 import { v } from "convex/values";
-import { query, mutation, internalMutation } from "./_generated/server";
+import { query, mutation } from "./_generated/server";
 import { getAuthUserId } from "@convex-dev/auth/server";
 import { JOIN_CODE_LENGTH } from "./constants";
 import { api } from "./_generated/api";
@@ -975,6 +975,21 @@ export const randomizeParticipantOrder = mutation({
     });
 
     return true;
+  },
+});
+
+// Internal query for accessing participants without auth (used by background actions)
+export const getParticipantsInternal = query({
+  args: {
+    leagueId: v.id("leagues"),
+  },
+  handler: async (ctx, args) => {
+    const participants = await ctx.db
+      .query("participants")
+      .withIndex("by_league", (q) => q.eq("leagueId", args.leagueId))
+      .collect();
+
+    return participants.sort((a, b) => a.draftPosition - b.draftPosition);
   },
 });
 

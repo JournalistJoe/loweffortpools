@@ -166,6 +166,21 @@ export const removeSpectator = mutation({
   },
 });
 
+// Internal query for accessing spectators without auth (used by background actions)
+export const getSpectatorsInternal = query({
+  args: {
+    leagueId: v.id("leagues"),
+  },
+  handler: async (ctx, args) => {
+    const spectators = await ctx.db
+      .query("spectators")
+      .withIndex("by_league", (q) => q.eq("leagueId", args.leagueId))
+      .collect();
+
+    return spectators.sort((a, b) => a.createdAt - b.createdAt);
+  },
+});
+
 export const getSpectators = query({
   args: {
     leagueId: v.id("leagues"),
