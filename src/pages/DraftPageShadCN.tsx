@@ -12,10 +12,9 @@ import {
   CardHeader,
   CardTitle,
 } from "../components/ui/card";
-import { Clock, Trophy, Users, Bell } from "lucide-react";
+import { Clock, Trophy, Users } from "lucide-react";
 import { CommissionerWelcome } from "../components/CommissionerWelcome";
 import { PartialLeagueWelcome } from "../components/PartialLeagueWelcome";
-import { NotificationSettings } from "../components/NotificationSettings";
 
 export function DraftPageShadCN() {
   const { leagueId } = useParams<{ leagueId: string }>();
@@ -305,10 +304,6 @@ export function DraftPageShadCN() {
               </Card>
             )}
 
-            {/* League Notification Settings */}
-            <div className="mt-6">
-              <NotificationSettings leagueId={leagueId as any} />
-            </div>
         </div>
       </div>
     </div>

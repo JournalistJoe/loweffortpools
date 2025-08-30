@@ -13,6 +13,12 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "./ui/sheet";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "./ui/dialog";
 import { Separator } from "./ui/separator";
 import { Badge } from "./ui/badge";
 import {
@@ -24,9 +30,11 @@ import {
   Home,
   User,
   LogOut,
+  Bell,
 } from "lucide-react";
 import { ThemeToggle } from "./ThemeToggle";
 import { DraftCountdown } from "./DraftCountdown";
+import { NotificationSettings } from "./NotificationSettings";
 
 interface NavigationProps {
   league: {
@@ -53,6 +61,7 @@ export function MobileNavigationShadCN({ league }: NavigationProps) {
   const { theme } = useTheme();
   const navigate = useNavigate();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [showNotificationSettings, setShowNotificationSettings] = useState(false);
   const removeParticipant = useMutation(api.leagues.removeParticipant);
 
   const handleLeaveLeague = async () => {
@@ -219,6 +228,16 @@ export function MobileNavigationShadCN({ league }: NavigationProps) {
                 </Button>
               )}
 
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setShowNotificationSettings(true)}
+                className="gap-2"
+              >
+                <Bell className="h-4 w-4" />
+                Notifications
+              </Button>
+
               <ThemeToggle />
               <SignOutButtonShadCN />
             </div>
@@ -301,6 +320,18 @@ export function MobileNavigationShadCN({ league }: NavigationProps) {
                   )}
 
                   <Separator className="my-4" />
+
+                  <Button
+                    onClick={() => {
+                      setShowNotificationSettings(true);
+                      setIsMobileMenuOpen(false);
+                    }}
+                    variant="ghost"
+                    className="w-full justify-start gap-3 h-12"
+                  >
+                    <Bell className="h-4 w-4" />
+                    Notification Settings
+                  </Button>
 
                   <SignOutButtonShadCN />
 
@@ -388,6 +419,18 @@ export function MobileNavigationShadCN({ league }: NavigationProps) {
         {/* Add bottom padding to prevent content from being hidden behind bottom tabs */}
         <div className="h-16"></div>
       </div>
+
+      {/* Notification Settings Dialog */}
+      <Dialog open={showNotificationSettings} onOpenChange={setShowNotificationSettings}>
+        <DialogContent className="max-w-full sm:max-w-lg md:max-w-2xl lg:max-w-3xl max-h-[80vh] overflow-y-auto p-4 sm:p-6">
+          <DialogHeader>
+            <DialogTitle>League Notification Settings</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-6">
+            <NotificationSettings leagueId={leagueId as any} />
+          </div>
+        </DialogContent>
+      </Dialog>
     </>
   );
 }
