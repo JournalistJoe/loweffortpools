@@ -71,21 +71,21 @@ self.addEventListener('notificationclick', function(event) {
       case 'view-chat':
         // Open the app to the specific league
         event.waitUntil(
-          clients.openWindow(data.url || '/')
+          self.clients.openWindow(data.url || '/')
         );
         break;
         
       case 'make-pick':
         // Open the app to make a draft pick
         event.waitUntil(
-          clients.openWindow(data.url || '/')
+          self.clients.openWindow(data.url || '/')
         );
         break;
         
       case 'reply':
         // Open the app to the chat
         event.waitUntil(
-          clients.openWindow(data.url || '/')
+          self.clients.openWindow(data.url || '/')
         );
         break;
         
@@ -95,13 +95,13 @@ self.addEventListener('notificationclick', function(event) {
         
       default:
         event.waitUntil(
-          clients.openWindow(data.url || '/')
+          self.clients.openWindow(data.url || '/')
         );
     }
   } else {
     // Default click behavior - open the app
     event.waitUntil(
-      clients.openWindow(data.url || '/')
+      self.clients.openWindow(data.url || '/')
     );
   }
 });

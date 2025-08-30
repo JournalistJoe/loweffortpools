@@ -150,14 +150,19 @@ export const sendMessage = mutation({
                              (await ctx.db.get(userId))?.name ||
                              "Anonymous";
 
-    // Send push notifications for chat message
-    await ctx.scheduler.runAfter(0, api.notificationActions.notifyChatMessage, {
-      leagueId: args.leagueId,
-      messageId,
-      senderUserId: userId,
-      message: trimmedMessage,
-      senderDisplayName,
-    });
+    // Send push notifications for chat message (best-effort)
+    try {
+      await ctx.scheduler.runAfter(0, api.notificationActions.notifyChatMessage, {
+        leagueId: args.leagueId,
+        messageId,
+        senderUserId: userId,
+        message: trimmedMessage,
+        senderDisplayName,
+      });
+    } catch (error) {
+      console.error(`Failed to schedule chat notification - leagueId: ${args.leagueId}, messageId: ${messageId}:`, error);
+      // Don't rethrow - let the message insertion succeed even if notification scheduling fails
+    }
 
     return messageId;
   },

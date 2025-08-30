@@ -49,16 +49,27 @@ export const notifyLeagueActivity = action({
     // Get NFL team info if available
     let nflTeam = null;
     if (args.nflTeamId) {
-      // Get NFL team from database directly - we'll need a query function for this
-      // For now, we'll skip this and use just the team name from args if available
-      nflTeam = { logoUrl: "/icon-192x192.png" }; // fallback
+      try {
+        nflTeam = await ctx.runQuery(api.nflData.getNflTeamById, {
+          teamId: args.nflTeamId,
+        });
+      } catch (error) {
+        console.error(`Failed to fetch NFL team data for teamId: ${args.nflTeamId}:`, error);
+        nflTeam = null; // Will use fallback below
+      }
+      
+      // Use fallback if team not found
+      if (!nflTeam) {
+        nflTeam = { logoUrl: "/icon-192x192.png" };
+      }
     }
 
     // Send notifications to each user
     for (const user of uniqueUsers) {
       try {
         // Check user's notification preferences
-        const preferences = await ctx.runQuery(api.pushNotifications.getNotificationPreferences, {
+        const preferences = await ctx.runQuery(api.pushNotifications.getUserNotificationPreferences, {
+          userId: user.userId,
           leagueId: args.leagueId,
         });
 
@@ -193,11 +204,12 @@ export const notifyChatMessage = action({
     for (const userId of allUsers) {
       try {
         // Check user's notification preferences
-        const preferences = await ctx.runQuery(api.pushNotifications.getNotificationPreferences, {
+        const preferences = await ctx.runQuery(api.pushNotifications.getUserNotificationPreferences, {
+          userId: userId,
           leagueId: args.leagueId,
         });
 
-        // Skip if preferences not found
+        // Skip if preferences not found (with sensible default: allow notifications)
         if (!preferences) continue;
 
         // Skip if chat notifications are disabled

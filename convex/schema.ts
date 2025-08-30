@@ -170,7 +170,8 @@ const applicationTables = {
   })
     .index("by_user", ["userId"])
     .index("by_endpoint", ["endpoint"])
-    .index("by_user_and_active", ["userId", "isActive"]),
+    .index("by_user_and_active", ["userId", "isActive"])
+    .index("by_user_and_endpoint", ["userId", "endpoint"]),
 
   notificationPreferences: defineTable({
     userId: v.id("users"),

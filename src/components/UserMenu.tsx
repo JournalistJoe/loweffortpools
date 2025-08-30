@@ -24,11 +24,9 @@ import {
   User,
   Bell,
   BellOff,
-  Settings,
   Sun,
   Moon,
   LogOut,
-  TestTube2,
 } from "lucide-react";
 import { SignOutButton } from "../SignOutButton";
 import { PushNotificationManager } from "./PushNotificationManager";
@@ -110,10 +108,6 @@ export function UserMenu() {
             </div>
           </DropdownMenuItem>
 
-          <DropdownMenuItem onClick={() => navigate("/notifications")}>
-            <TestTube2 className="w-4 h-4 mr-2" />
-            <span>Notification Center</span>
-          </DropdownMenuItem>
 
           <DropdownMenuItem onClick={toggleTheme}>
             {theme === "dark" ? (
@@ -138,7 +132,7 @@ export function UserMenu() {
       </DropdownMenu>
 
       <Dialog open={showNotifications} onOpenChange={setShowNotifications}>
-        <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+        <DialogContent className="max-w-2xl lg:max-w-3xl max-h-[80vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Notification Settings</DialogTitle>
           </DialogHeader>

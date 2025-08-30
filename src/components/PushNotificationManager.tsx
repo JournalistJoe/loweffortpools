@@ -30,7 +30,8 @@ export function PushNotificationManager() {
     }
 
     try {
-      const permission = await Notification.requestPermission();
+      // Only read permission status, don't request yet
+      const permission = Notification.permission;
       if (permission === "denied") {
         setSubscriptionStatus("denied");
         return;
@@ -40,10 +41,28 @@ export function PushNotificationManager() {
       const existingSubscription = await registration.pushManager.getSubscription();
 
       if (existingSubscription) {
-        setSubscription(existingSubscription);
-        setSubscriptionStatus("subscribed");
+        // Verify subscription is persisted server-side
+        try {
+          if (userSubscriptions && userSubscriptions.some(sub => 
+            sub.endpoint === existingSubscription.endpoint && sub.isActive
+          )) {
+            setSubscription(existingSubscription);
+            setSubscriptionStatus("subscribed");
+          } else {
+            // Subscription not found server-side, treat as unsubscribed
+            setSubscriptionStatus("unsubscribed");
+          }
+        } catch (error) {
+          console.error("Error verifying subscription server-side:", error);
+          setSubscription(existingSubscription);
+          setSubscriptionStatus("subscribed"); // Assume it's valid
+        }
       } else {
-        setSubscriptionStatus("unsubscribed");
+        if (permission === "granted") {
+          setSubscriptionStatus("unsubscribed");
+        } else {
+          setSubscriptionStatus("supported");
+        }
       }
     } catch (error) {
       console.error("Error checking notification support:", error);
@@ -66,14 +85,30 @@ export function PushNotificationManager() {
       }
 
       const registration = await navigator.serviceWorker.ready;
-      const newSubscription = await registration.pushManager.subscribe({
-        userVisibleOnly: true,
-        applicationServerKey: urlBase64ToUint8Array(vapidPublicKey),
-      });
+      
+      // Check for existing subscription first
+      let newSubscription = await registration.pushManager.getSubscription();
+      
+      if (!newSubscription) {
+        // Only subscribe if no existing subscription
+        newSubscription = await registration.pushManager.subscribe({
+          userVisibleOnly: true,
+          applicationServerKey: urlBase64ToUint8Array(vapidPublicKey),
+        });
+      }
 
-      // Extract subscription details
-      const p256dh = arrayBufferToBase64(newSubscription.getKey("p256dh")!);
-      const auth = arrayBufferToBase64(newSubscription.getKey("auth")!);
+      // Extract subscription details with null checks
+      const p256dhKey = newSubscription.getKey("p256dh");
+      const authKey = newSubscription.getKey("auth");
+      
+      if (!p256dhKey || !authKey) {
+        console.error("Failed to get subscription keys - p256dhKey or authKey is null");
+        toast.error("Failed to setup push notifications - invalid subscription keys");
+        return;
+      }
+      
+      const p256dh = arrayBufferToBase64(p256dhKey);
+      const auth = arrayBufferToBase64(authKey);
 
       // Save subscription to backend
       await subscribe({

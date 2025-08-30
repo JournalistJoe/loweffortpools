@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState, ReactNode } from "react";
+import { createContext, useContext, useEffect, useState, ReactNode, useCallback } from "react";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "../../convex/_generated/api";
 
@@ -90,7 +90,7 @@ export function NotificationProvider({ children }: NotificationProviderProps) {
     }
   };
 
-  const clearBadge = () => {
+  const clearBadge = useCallback(() => {
     setUnreadCount(0);
     updateAppBadge(0);
 
@@ -100,9 +100,9 @@ export function NotificationProvider({ children }: NotificationProviderProps) {
         type: 'CLEAR_BADGE'
       });
     }
-  };
+  }, []);
 
-  const updateBadge = (count: number) => {
+  const updateBadge = useCallback((count: number) => {
     setUnreadCount(count);
     updateAppBadge(count);
 
@@ -113,7 +113,7 @@ export function NotificationProvider({ children }: NotificationProviderProps) {
         count
       });
     }
-  };
+  }, []);
 
   const updateAppBadge = (count: number) => {
     try {
@@ -142,7 +142,7 @@ export function NotificationProvider({ children }: NotificationProviderProps) {
     return () => {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
-  }, []);
+  }, [clearBadge]);
 
   // Listen for focus events to clear badge
   useEffect(() => {
@@ -154,7 +154,7 @@ export function NotificationProvider({ children }: NotificationProviderProps) {
     return () => {
       window.removeEventListener('focus', handleFocus);
     };
-  }, []);
+  }, [clearBadge]);
 
   const contextValue: NotificationContextType = {
     isSupported,

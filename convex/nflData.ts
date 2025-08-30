@@ -1,5 +1,6 @@
 import { v } from "convex/values";
 import {
+  query,
   mutation,
   action,
   internalMutation,
@@ -336,5 +337,16 @@ export const manualResync = mutation({
 
       throw error;
     }
+  },
+});
+
+// Get NFL team by ID
+export const getNflTeamById = query({
+  args: {
+    teamId: v.id("nflTeams"),
+  },
+  handler: async (ctx, args) => {
+    const team = await ctx.db.get(args.teamId);
+    return team;
   },
 });

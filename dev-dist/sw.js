@@ -87,7 +87,7 @@ define(['./workbox-e7681877'], (function (workbox) { 'use strict';
   }], {});
   workbox.cleanupOutdatedCaches();
   workbox.registerRoute(new workbox.NavigationRoute(workbox.createHandlerBoundToURL("index.html"), {
-    allowlist: [/^\/$/]
+    denylist: [/^\/api\//, /^\/static\//, /^\/assets\//, /^\/.*\.(js|css|png|jpg|jpeg|gif|svg|ico|woff|woff2|ttf|eot)$/]
   }));
   workbox.registerRoute(/^https:\/\/api\.convex\.cloud/, new workbox.NetworkFirst({
     "cacheName": "convex-api",

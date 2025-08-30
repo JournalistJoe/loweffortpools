@@ -28,7 +28,6 @@ import { PasswordResetPage } from "./pages/PasswordResetPage";
 import { EmailVerificationPage } from "./pages/EmailVerificationPage";
 import { HomePage } from "./pages/HomePage";
 import { TermsOfServicePage } from "./pages/TermsOfServicePage";
-import { NotificationTestPage } from "./pages/NotificationTestPage";
 import { Toaster } from "sonner";
 
 function SignInPage() {
@@ -72,7 +71,6 @@ function AuthenticatedRoutes() {
       <LeagueProvider>
         <Routes>
           <Route path="/" element={<LeagueSelectionPage />} />
-          <Route path="/notifications" element={<NotificationTestPage />} />
           <Route path="/system-admin" element={<SystemAdminPage />} />
           <Route
             path="/league/:leagueId/draft"

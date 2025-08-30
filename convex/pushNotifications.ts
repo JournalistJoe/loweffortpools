@@ -3,10 +3,19 @@ import { query, mutation, action } from "./_generated/server";
 import { getAuthUserId } from "@convex-dev/auth/server";
 import { api } from "./_generated/api";
 
-// VAPID keys from environment variables
-const VAPID_PUBLIC_KEY = process.env.VAPID_PUBLIC_KEY!;
-const VAPID_PRIVATE_KEY = process.env.VAPID_PRIVATE_KEY!;
+// VAPID keys from environment variables with validation
+const VAPID_PUBLIC_KEY = process.env.VAPID_PUBLIC_KEY;
+const VAPID_PRIVATE_KEY = process.env.VAPID_PRIVATE_KEY;
 const VAPID_SUBJECT = process.env.VAPID_SUBJECT || "mailto:noreply@loweffort.bet";
+
+// Validate VAPID keys at module initialization
+if (!VAPID_PUBLIC_KEY || !VAPID_PRIVATE_KEY) {
+  throw new Error("VAPID keys are required: VAPID_PUBLIC_KEY and VAPID_PRIVATE_KEY must be set in environment variables");
+}
+
+if (!VAPID_PUBLIC_KEY.trim() || !VAPID_PRIVATE_KEY.trim()) {
+  throw new Error("VAPID keys cannot be empty: VAPID_PUBLIC_KEY and VAPID_PRIVATE_KEY must be non-empty strings");
+}
 
 // Get user's push subscriptions
 export const getUserSubscriptions = query({
@@ -40,37 +49,63 @@ export const subscribe = mutation({
 
     const now = Date.now();
 
-    // Check if subscription already exists
-    const existing = await ctx.db
+    // Check for existing subscription by user and endpoint
+    const existingUserEndpoint = await ctx.db
+      .query("pushSubscriptions")
+      .withIndex("by_user_and_endpoint", (q) => 
+        q.eq("userId", userId).eq("endpoint", args.endpoint)
+      )
+      .first();
+
+    if (existingUserEndpoint && existingUserEndpoint.isActive) {
+      // Update existing active subscription
+      await ctx.db.patch(existingUserEndpoint._id, {
+        p256dhKey: args.p256dhKey,
+        authKey: args.authKey,
+        updatedAt: now,
+        userAgent: args.userAgent,
+      });
+      return existingUserEndpoint._id;
+    }
+
+    // Check for any other subscriptions with same endpoint (from other users or inactive)
+    const existingEndpoint = await ctx.db
       .query("pushSubscriptions")
       .withIndex("by_endpoint", (q) => q.eq("endpoint", args.endpoint))
       .first();
 
-    if (existing) {
-      // Update existing subscription
-      await ctx.db.patch(existing._id, {
-        userId,
-        p256dhKey: args.p256dhKey,
-        authKey: args.authKey,
+    if (existingEndpoint && existingEndpoint.userId !== userId) {
+      // Deactivate duplicate from other user
+      await ctx.db.patch(existingEndpoint._id, {
+        isActive: false,
         updatedAt: now,
-        userAgent: args.userAgent,
-        isActive: true,
       });
-      return existing._id;
-    } else {
-      // Create new subscription
-      const subscriptionId = await ctx.db.insert("pushSubscriptions", {
-        userId,
-        endpoint: args.endpoint,
-        p256dhKey: args.p256dhKey,
-        authKey: args.authKey,
-        createdAt: now,
-        updatedAt: now,
-        userAgent: args.userAgent,
-        isActive: true,
-      });
-      return subscriptionId;
     }
+
+    if (existingUserEndpoint && !existingUserEndpoint.isActive) {
+      // Reactivate existing inactive subscription for same user
+      await ctx.db.patch(existingUserEndpoint._id, {
+        p256dhKey: args.p256dhKey,
+        authKey: args.authKey,
+        updatedAt: now,
+        userAgent: args.userAgent,
+        isActive: true,
+      });
+      return existingUserEndpoint._id;
+    }
+
+    // Create new subscription
+    const subscriptionId = await ctx.db.insert("pushSubscriptions", {
+      userId,
+      endpoint: args.endpoint,
+      p256dhKey: args.p256dhKey,
+      authKey: args.authKey,
+      createdAt: now,
+      updatedAt: now,
+      userAgent: args.userAgent,
+      isActive: true,
+    });
+    return subscriptionId;
   },
 });
 
@@ -110,6 +145,41 @@ export const getNotificationPreferences = query({
       .query("notificationPreferences")
       .withIndex("by_user_and_league", (q) => 
         q.eq("userId", userId).eq("leagueId", args.leagueId)
+      )
+      .first();
+
+    // Return default preferences if none exist
+    if (!preferences) {
+      return {
+        enableChatMessages: true,
+        enableDraftPicks: true,
+        enableMyTurn: true,
+        enableImportantOnly: false,
+        mutedUntil: null,
+      };
+    }
+
+    return {
+      enableChatMessages: preferences.enableChatMessages,
+      enableDraftPicks: preferences.enableDraftPicks,
+      enableMyTurn: preferences.enableMyTurn,
+      enableImportantOnly: preferences.enableImportantOnly,
+      mutedUntil: preferences.mutedUntil,
+    };
+  },
+});
+
+// Get user's notification preferences (internal query for actions)
+export const getUserNotificationPreferences = query({
+  args: {
+    userId: v.id("users"),
+    leagueId: v.optional(v.id("leagues")),
+  },
+  handler: async (ctx, args) => {
+    const preferences = await ctx.db
+      .query("notificationPreferences")
+      .withIndex("by_user_and_league", (q) => 
+        q.eq("userId", args.userId).eq("leagueId", args.leagueId)
       )
       .first();
 
