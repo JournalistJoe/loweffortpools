@@ -67,63 +67,65 @@ function SignInPage() {
 
 function AuthenticatedRoutes() {
   return (
-    <main className="min-h-screen bg-background">
-      <LeagueProvider>
-        <Routes>
-          <Route path="/" element={<LeagueSelectionPage />} />
-          <Route path="/system-admin" element={<SystemAdminPage />} />
-          <Route
-            path="/league/:leagueId/draft"
-            element={
-              <LeagueWrapper>
-                <DraftPage />
-              </LeagueWrapper>
-            }
-          />
-          <Route
-            path="/league/:leagueId/admin"
-            element={
-              <LeagueWrapper>
-                <AdminPage />
-              </LeagueWrapper>
-            }
-          />
-          <Route
-            path="/league/:leagueId/leaderboard"
-            element={
-              <LeagueWrapper>
-                <LeaderboardPage />
-              </LeagueWrapper>
-            }
-          />
-          <Route
-            path="/league/:leagueId/team/:participantId"
-            element={
-              <LeagueWrapper>
-                <TeamPage />
-              </LeagueWrapper>
-            }
-          />
-          <Route
-            path="/league/:leagueId/schedule"
-            element={
-              <LeagueWrapper>
-                <SchedulePage />
-              </LeagueWrapper>
-            }
-          />
-          <Route
-            path="/league/:leagueId/participants"
-            element={
-              <LeagueWrapper>
-                <ParticipantsPage />
-              </LeagueWrapper>
-            }
-          />
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
-      </LeagueProvider>
-    </main>
+    <NotificationProvider>
+      <main className="min-h-screen bg-background">
+        <LeagueProvider>
+          <Routes>
+            <Route path="/" element={<LeagueSelectionPage />} />
+            <Route path="/system-admin" element={<SystemAdminPage />} />
+            <Route
+              path="/league/:leagueId/draft"
+              element={
+                <LeagueWrapper>
+                  <DraftPage />
+                </LeagueWrapper>
+              }
+            />
+            <Route
+              path="/league/:leagueId/admin"
+              element={
+                <LeagueWrapper>
+                  <AdminPage />
+                </LeagueWrapper>
+              }
+            />
+            <Route
+              path="/league/:leagueId/leaderboard"
+              element={
+                <LeagueWrapper>
+                  <LeaderboardPage />
+                </LeagueWrapper>
+              }
+            />
+            <Route
+              path="/league/:leagueId/team/:participantId"
+              element={
+                <LeagueWrapper>
+                  <TeamPage />
+                </LeagueWrapper>
+              }
+            />
+            <Route
+              path="/league/:leagueId/schedule"
+              element={
+                <LeagueWrapper>
+                  <SchedulePage />
+                </LeagueWrapper>
+              }
+            />
+            <Route
+              path="/league/:leagueId/participants"
+              element={
+                <LeagueWrapper>
+                  <ParticipantsPage />
+                </LeagueWrapper>
+              }
+            />
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+        </LeagueProvider>
+      </main>
+    </NotificationProvider>
   );
 }
 
@@ -140,53 +142,51 @@ function App() {
 
   return (
     <ThemeProvider>
-      <NotificationProvider>
-        <Router>
-          <Routes>
-            {/* Public routes that work regardless of auth status */}
-            <Route path="/forgot-password" element={<ForgotPasswordPage />} />
-            <Route path="/reset-password" element={<PasswordResetPage />} />
-            <Route path="/verify-email" element={<EmailVerificationPage />} />
-            <Route 
-              path="/signin" 
-              element={
-                isAuthenticated ? (
-                  <Navigate 
-                    to={(() => {
-                      // Preserve joinCode in redirect if present
-                      const params = new URLSearchParams(window.location.search);
-                      const joinCode = params.get("joinCode");
-                      const normalizedJoinCode = normalizeJoinCode(joinCode);
-                      return normalizedJoinCode ? `/?joinCode=${normalizedJoinCode}` : "/";
-                    })()} 
-                    replace 
-                  />
-                ) : (
-                  <SignInPage />
-                )
-              } 
-            />
-            <Route path="/terms" element={<TermsOfServicePage />} />
-            
-            {/* Homepage for unauthenticated users, protected routes for authenticated */}
-            <Route
-              path="/"
-              element={
-                isAuthenticated ? <AuthenticatedRoutes /> : <HomePage />
-              }
-            />
-            
-            {/* Protected routes - redirect to homepage if not authenticated */}
-            <Route
-              path="/*"
-              element={
-                isAuthenticated ? <AuthenticatedRoutes /> : <HomePage />
-              }
-            />
-          </Routes>
-          <Toaster position="top-center" />
-        </Router>
-      </NotificationProvider>
+      <Router>
+        <Routes>
+          {/* Public routes that work regardless of auth status */}
+          <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+          <Route path="/reset-password" element={<PasswordResetPage />} />
+          <Route path="/verify-email" element={<EmailVerificationPage />} />
+          <Route 
+            path="/signin" 
+            element={
+              isAuthenticated ? (
+                <Navigate 
+                  to={(() => {
+                    // Preserve joinCode in redirect if present
+                    const params = new URLSearchParams(window.location.search);
+                    const joinCode = params.get("joinCode");
+                    const normalizedJoinCode = normalizeJoinCode(joinCode);
+                    return normalizedJoinCode ? `/?joinCode=${normalizedJoinCode}` : "/";
+                  })()} 
+                  replace 
+                />
+              ) : (
+                <SignInPage />
+              )
+            } 
+          />
+          <Route path="/terms" element={<TermsOfServicePage />} />
+          
+          {/* Homepage for unauthenticated users, protected routes for authenticated */}
+          <Route
+            path="/"
+            element={
+              isAuthenticated ? <AuthenticatedRoutes /> : <HomePage />
+            }
+          />
+          
+          {/* Protected routes - redirect to homepage if not authenticated */}
+          <Route
+            path="/*"
+            element={
+              isAuthenticated ? <AuthenticatedRoutes /> : <HomePage />
+            }
+          />
+        </Routes>
+        <Toaster position="top-center" />
+      </Router>
     </ThemeProvider>
   );
 }

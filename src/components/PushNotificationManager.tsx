@@ -23,6 +23,13 @@ export function PushNotificationManager() {
     checkNotificationSupport();
   }, []);
 
+  // Verify existing subscription when userSubscriptions data is available
+  useEffect(() => {
+    if (userSubscriptions !== undefined) {
+      verifyExistingSubscription();
+    }
+  }, [userSubscriptions]);
+
   const checkNotificationSupport = async () => {
     if (!("serviceWorker" in navigator) || !("PushManager" in window)) {
       setSubscriptionStatus("unsupported");
@@ -41,22 +48,9 @@ export function PushNotificationManager() {
       const existingSubscription = await registration.pushManager.getSubscription();
 
       if (existingSubscription) {
-        // Verify subscription is persisted server-side
-        try {
-          if (userSubscriptions && userSubscriptions.some(sub => 
-            sub.endpoint === existingSubscription.endpoint && sub.isActive
-          )) {
-            setSubscription(existingSubscription);
-            setSubscriptionStatus("subscribed");
-          } else {
-            // Subscription not found server-side, treat as unsubscribed
-            setSubscriptionStatus("unsubscribed");
-          }
-        } catch (error) {
-          console.error("Error verifying subscription server-side:", error);
-          setSubscription(existingSubscription);
-          setSubscriptionStatus("subscribed"); // Assume it's valid
-        }
+        // Set subscription but don't verify yet (will be done when userSubscriptions loads)
+        setSubscription(existingSubscription);
+        setSubscriptionStatus("checking");
       } else {
         if (permission === "granted") {
           setSubscriptionStatus("unsubscribed");
@@ -67,6 +61,27 @@ export function PushNotificationManager() {
     } catch (error) {
       console.error("Error checking notification support:", error);
       setSubscriptionStatus("unsupported");
+    }
+  };
+
+  const verifyExistingSubscription = async () => {
+    if (!subscription || !userSubscriptions) return;
+
+    try {
+      const isValidSubscription = userSubscriptions.some(sub => 
+        sub.endpoint === subscription.endpoint && sub.isActive
+      );
+
+      if (isValidSubscription) {
+        setSubscriptionStatus("subscribed");
+      } else {
+        // Subscription not found server-side, treat as unsubscribed
+        setSubscriptionStatus("unsubscribed");
+      }
+    } catch (error) {
+      console.error("Error verifying subscription server-side:", error);
+      // Don't assume validity in catch - keep checking status
+      setSubscriptionStatus("checking");
     }
   };
 

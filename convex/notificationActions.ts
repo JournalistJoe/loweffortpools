@@ -209,8 +209,10 @@ export const notifyChatMessage = action({
           leagueId: args.leagueId,
         });
 
-        // Skip if preferences not found (with sensible default: allow notifications)
-        if (!preferences) continue;
+        // Default to allowing notifications if no preferences found
+        if (!preferences) {
+          preferences = { enableChatMessages: true };
+        }
 
         // Skip if chat notifications are disabled
         if (!preferences.enableChatMessages) continue;

@@ -71,21 +71,27 @@ self.addEventListener('notificationclick', function(event) {
       case 'view-chat':
         // Open the app to the specific league
         event.waitUntil(
-          self.clients.openWindow(data.url || '/')
+          self.clients && typeof self.clients.openWindow === 'function'
+            ? self.clients.openWindow(data.url || '/')
+            : Promise.resolve(console.warn('Clients API unavailable'))
         );
         break;
         
       case 'make-pick':
         // Open the app to make a draft pick
         event.waitUntil(
-          self.clients.openWindow(data.url || '/')
+          self.clients && typeof self.clients.openWindow === 'function'
+            ? self.clients.openWindow(data.url || '/')
+            : Promise.resolve(console.warn('Clients API unavailable'))
         );
         break;
         
       case 'reply':
         // Open the app to the chat
         event.waitUntil(
-          self.clients.openWindow(data.url || '/')
+          self.clients && typeof self.clients.openWindow === 'function'
+            ? self.clients.openWindow(data.url || '/')
+            : Promise.resolve(console.warn('Clients API unavailable'))
         );
         break;
         
@@ -95,7 +101,9 @@ self.addEventListener('notificationclick', function(event) {
         
       default:
         event.waitUntil(
-          self.clients.openWindow(data.url || '/')
+          self.clients && typeof self.clients.openWindow === 'function'
+            ? self.clients.openWindow(data.url || '/')
+            : Promise.resolve(console.warn('Clients API unavailable'))
         );
     }
   } else {
