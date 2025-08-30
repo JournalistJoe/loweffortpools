@@ -132,7 +132,7 @@ export function UserMenu() {
       </DropdownMenu>
 
       <Dialog open={showNotifications} onOpenChange={setShowNotifications}>
-        <DialogContent className="max-w-2xl lg:max-w-3xl max-h-[80vh] overflow-y-auto">
+        <DialogContent className="max-w-full sm:max-w-lg md:max-w-2xl lg:max-w-3xl max-h-[80vh] overflow-y-auto p-4 sm:p-6">
           <DialogHeader>
             <DialogTitle>Notification Settings</DialogTitle>
           </DialogHeader>

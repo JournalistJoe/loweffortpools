@@ -90,16 +90,16 @@ export function NotificationSettings({ leagueId, showGlobalSettings = false }: N
   return (
     <Card>
       <CardHeader>
-        <div className="flex items-center justify-between">
-          <div>
-            <CardTitle className="flex items-center gap-2">
-              <Bell className="w-5 h-5" />
-              Notification Settings
+        <div className="space-y-3 sm:space-y-0 sm:flex sm:items-center sm:justify-between">
+          <div className="space-y-2">
+            <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
+              <Bell className="w-4 h-4 sm:w-5 sm:h-5" />
+              <span>Notification Settings</span>
               {!showGlobalSettings && leagueId && (
-                <Badge variant="secondary" className="text-xs">League Specific</Badge>
+                <Badge variant="secondary" className="text-xs ml-2">League Specific</Badge>
               )}
             </CardTitle>
-            <CardDescription>
+            <CardDescription className="text-sm">
               {showGlobalSettings 
                 ? "Default notification preferences for all leagues"
                 : "Customize notifications for this league"
@@ -107,7 +107,7 @@ export function NotificationSettings({ leagueId, showGlobalSettings = false }: N
             </CardDescription>
           </div>
           {isMuted && (
-            <Badge variant="outline" className="text-orange-600 border-orange-600">
+            <Badge variant="outline" className="text-orange-600 border-orange-600 self-start sm:self-center">
               <BellOff className="w-3 h-3 mr-1" />
               Muted ({muteTimeRemaining}h left)
             </Badge>
@@ -118,9 +118,9 @@ export function NotificationSettings({ leagueId, showGlobalSettings = false }: N
         {/* Mute Controls */}
         <div className="space-y-3">
           <Label className="text-sm font-medium">Temporary Mute</Label>
-          <div className="flex items-center gap-3">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-3">
             <Select value={muteFor} onValueChange={setMuteFor}>
-              <SelectTrigger className="w-40">
+              <SelectTrigger className="w-full sm:w-40 min-h-[44px]">
                 <SelectValue placeholder="Mute for..." />
               </SelectTrigger>
               <SelectContent>
@@ -135,89 +135,97 @@ export function NotificationSettings({ leagueId, showGlobalSettings = false }: N
             <Button 
               variant="outline" 
               onClick={() => handleMuteFor(muteFor)}
-              size="sm"
+              className="min-h-[44px] w-full sm:w-auto"
             >
               Apply
             </Button>
           </div>
-          <p className="text-sm text-muted-foreground">
+          <p className="text-sm text-muted-foreground leading-relaxed">
             Temporarily disable all notifications for this {showGlobalSettings ? 'account' : 'league'}
           </p>
         </div>
 
         <div className="border-t pt-6">
-          <h4 className="text-sm font-medium mb-4">Notification Types</h4>
-          <div className="space-y-4">
+          <h4 className="text-base sm:text-sm font-medium mb-4">Notification Types</h4>
+          <div className="space-y-5">
             {/* Important Only Toggle */}
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <Zap className="w-4 h-4 text-orange-500" />
-                <div>
-                  <Label className="font-medium">Important Only</Label>
-                  <p className="text-sm text-muted-foreground">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 p-3 sm:p-0 rounded-lg border sm:border-none bg-muted/30 sm:bg-transparent min-h-[60px] sm:min-h-[auto]">
+              <div className="flex items-start gap-3">
+                <Zap className="w-5 h-5 sm:w-4 sm:h-4 text-orange-500 mt-0.5" />
+                <div className="flex-1">
+                  <Label className="font-medium text-base sm:text-sm">Important Only</Label>
+                  <p className="text-sm text-muted-foreground mt-1 leading-relaxed">
                     Only receive high-priority notifications (draft start, your turn)
                   </p>
                 </div>
               </div>
-              <Switch
-                checked={preferences.enableImportantOnly}
-                onCheckedChange={(checked) => handleToggle("enableImportantOnly", checked)}
-                disabled={isMuted}
-              />
+              <div className="flex justify-end sm:justify-center">
+                <Switch
+                  checked={preferences.enableImportantOnly}
+                  onCheckedChange={(checked) => handleToggle("enableImportantOnly", checked)}
+                  disabled={isMuted}
+                />
+              </div>
             </div>
 
             {/* My Turn Toggle */}
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <User className="w-4 h-4 text-blue-500" />
-                <div>
-                  <Label className="font-medium">My Turn</Label>
-                  <p className="text-sm text-muted-foreground">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 p-3 sm:p-0 rounded-lg border sm:border-none bg-muted/30 sm:bg-transparent min-h-[60px] sm:min-h-[auto]">
+              <div className="flex items-start gap-3">
+                <User className="w-5 h-5 sm:w-4 sm:h-4 text-blue-500 mt-0.5" />
+                <div className="flex-1">
+                  <Label className="font-medium text-base sm:text-sm">My Turn</Label>
+                  <p className="text-sm text-muted-foreground mt-1 leading-relaxed">
                     Get notified when it's your turn to draft
                   </p>
                 </div>
               </div>
-              <Switch
-                checked={preferences.enableMyTurn}
-                onCheckedChange={(checked) => handleToggle("enableMyTurn", checked)}
-                disabled={isMuted || preferences.enableImportantOnly}
-              />
+              <div className="flex justify-end sm:justify-center">
+                <Switch
+                  checked={preferences.enableMyTurn}
+                  onCheckedChange={(checked) => handleToggle("enableMyTurn", checked)}
+                  disabled={isMuted || preferences.enableImportantOnly}
+                />
+              </div>
             </div>
 
             {/* Draft Picks Toggle */}
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <Trophy className="w-4 h-4 text-yellow-500" />
-                <div>
-                  <Label className="font-medium">Draft Picks</Label>
-                  <p className="text-sm text-muted-foreground">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 p-3 sm:p-0 rounded-lg border sm:border-none bg-muted/30 sm:bg-transparent min-h-[60px] sm:min-h-[auto]">
+              <div className="flex items-start gap-3">
+                <Trophy className="w-5 h-5 sm:w-4 sm:h-4 text-yellow-500 mt-0.5" />
+                <div className="flex-1">
+                  <Label className="font-medium text-base sm:text-sm">Draft Picks</Label>
+                  <p className="text-sm text-muted-foreground mt-1 leading-relaxed">
                     Notifications for all draft picks and draft events
                   </p>
                 </div>
               </div>
-              <Switch
-                checked={preferences.enableDraftPicks}
-                onCheckedChange={(checked) => handleToggle("enableDraftPicks", checked)}
-                disabled={isMuted || preferences.enableImportantOnly}
-              />
+              <div className="flex justify-end sm:justify-center">
+                <Switch
+                  checked={preferences.enableDraftPicks}
+                  onCheckedChange={(checked) => handleToggle("enableDraftPicks", checked)}
+                  disabled={isMuted || preferences.enableImportantOnly}
+                />
+              </div>
             </div>
 
             {/* Chat Messages Toggle */}
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <MessageCircle className="w-4 h-4 text-green-500" />
-                <div>
-                  <Label className="font-medium">Chat Messages</Label>
-                  <p className="text-sm text-muted-foreground">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 p-3 sm:p-0 rounded-lg border sm:border-none bg-muted/30 sm:bg-transparent min-h-[60px] sm:min-h-[auto]">
+              <div className="flex items-start gap-3">
+                <MessageCircle className="w-5 h-5 sm:w-4 sm:h-4 text-green-500 mt-0.5" />
+                <div className="flex-1">
+                  <Label className="font-medium text-base sm:text-sm">Chat Messages</Label>
+                  <p className="text-sm text-muted-foreground mt-1 leading-relaxed">
                     New messages in league chat
                   </p>
                 </div>
               </div>
-              <Switch
-                checked={preferences.enableChatMessages}
-                onCheckedChange={(checked) => handleToggle("enableChatMessages", checked)}
-                disabled={isMuted || preferences.enableImportantOnly}
-              />
+              <div className="flex justify-end sm:justify-center">
+                <Switch
+                  checked={preferences.enableChatMessages}
+                  onCheckedChange={(checked) => handleToggle("enableChatMessages", checked)}
+                  disabled={isMuted || preferences.enableImportantOnly}
+                />
+              </div>
             </div>
           </div>
         </div>
@@ -225,10 +233,10 @@ export function NotificationSettings({ leagueId, showGlobalSettings = false }: N
 
         {/* Status Info */}
         <div className="border-t pt-6">
-          <div className="text-xs text-muted-foreground space-y-1">
-            <p>• Notifications work even when the app is closed</p>
-            <p>• High-priority notifications may override "Important Only" setting</p>
-            <p>• You can customize settings for each league separately</p>
+          <div className="text-sm sm:text-xs text-muted-foreground space-y-2 sm:space-y-1">
+            <p className="leading-relaxed">• Notifications work even when the app is closed</p>
+            <p className="leading-relaxed">• High-priority notifications may override "Important Only" setting</p>
+            <p className="leading-relaxed">• You can customize settings for each league separately</p>
           </div>
         </div>
       </CardContent>
