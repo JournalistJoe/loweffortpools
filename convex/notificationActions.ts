@@ -187,8 +187,8 @@ export const notifyChatMessage = action({
   handler: async (ctx, args) => {
     console.log(`🚀 Starting notifyChatMessage for league ${args.leagueId}, sender ${args.senderUserId}`);
     
-    // Get league details
-    const league = await ctx.runQuery(api.leagues.getLeague, { leagueId: args.leagueId });
+    // Get league details (using internal query for background actions)
+    const league = await ctx.runQuery(api.leagues.getLeagueInternal, { leagueId: args.leagueId });
     if (!league) {
       console.log(`❌ League ${args.leagueId} not found, exiting early`);
       return;

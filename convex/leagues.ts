@@ -233,6 +233,17 @@ export const getUserLeagues = query({
   },
 });
 
+// Internal query for accessing league data without auth (used by background actions)
+export const getLeagueInternal = query({
+  args: {
+    leagueId: v.id("leagues"),
+  },
+  handler: async (ctx, args) => {
+    const league = await ctx.db.get(args.leagueId);
+    return league;
+  },
+});
+
 export const getLeague = query({
   args: {
     leagueId: v.id("leagues"),
