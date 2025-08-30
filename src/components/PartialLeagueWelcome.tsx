@@ -52,11 +52,10 @@ export function PartialLeagueWelcome({ league, currentUser, participants }: Part
     setMinLocalDatetime(localTime.toISOString().slice(0, 16));
   }, []);
   
-  // Default to September 4, 2025 8:00 PM ET (first regular season game)
+  // Default to September 4, 2025 8:00 PM UTC (first regular season game)
   const defaultDraftDate = useMemo(() => {
-    const septDate = new Date(2025, 8, 4, 20, 0); // September 4, 2025, 8:00 PM
-    const localTime = new Date(septDate.getTime() - (septDate.getTimezoneOffset() * 60000));
-    return localTime.toISOString().slice(0, 16);
+    const utcDate = new Date(Date.UTC(2025, 8, 4, 20, 0)); // September 4, 2025, 8:00 PM UTC
+    return utcDate.toISOString().slice(0, 16);
   }, []);
 
   const handleShareJoinCode = () => {
@@ -279,7 +278,7 @@ Don't make me be the guy who couldn't get 8 people together for something this s
                 <div className="flex items-center justify-between">
                   <span className="text-sm font-medium text-muted-foreground">Join Link:</span>
                   <Badge variant="outline" className="text-sm font-mono px-2 py-1 max-w-xs truncate">
-                    loweffort.bet/join/{league.joinCode}
+                    loweffort.bet/leagues?joinCode={league.joinCode}
                   </Badge>
                 </div>
                 <div className="flex items-center justify-between">
@@ -334,7 +333,7 @@ Don't make me be the guy who couldn't get 8 people together for something this s
             <div className="p-4 bg-red-50 dark:bg-red-950/20 rounded-lg border border-red-200 dark:border-red-800">
               <h4 className="font-semibold text-red-700 dark:text-red-300 mb-2">The Brutally Honest Method:</h4>
               <p className="text-sm text-muted-foreground italic">
-                "Look, I need {participantsNeeded} more people or this whole thing falls apart and I look like an idiot. 
+                "Look, I need " {participantsNeeded} " more people or this whole thing falls apart and I look like an idiot. 
                 Help me not look like an idiot."
               </p>
             </div>
@@ -387,7 +386,7 @@ Don't make me be the guy who couldn't get 8 people together for something this s
           {showDraftDateInput ? (
             <div className="space-y-4 mb-6">
               <div className="text-left max-w-md mx-auto">
-                <Label htmlFor="draftDate">Draft Date & Time</Label>
+                <Label htmlFor="draftDate">Draft Date & Time (Local Time)</Label>
                 <Input
                   id="draftDate"
                   type="datetime-local"
@@ -397,7 +396,7 @@ Don't make me be the guy who couldn't get 8 people together for something this s
                   className="mt-2"
                 />
                 <p className="text-xs text-muted-foreground mt-1">
-                  Defaults to Sept 4, 2025 (first regular season game)
+                  Defaults to Sept 4, 2025 8:00 PM UTC (first regular season game)
                 </p>
               </div>
               <div className="flex gap-2 justify-center">
