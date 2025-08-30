@@ -73,7 +73,7 @@ export function DraftPageShadCN() {
   }
 
   const isCommissionerAlone = league.isAdmin && draftState.participants.length === 1;
-  const isPartialLeague = draftState.participants.length >= 2 && draftState.participants.length < 8;
+  const isPartialLeague = draftState.participants.length >= 2 && draftState.participants.length <= 7;
   const numParticipants = draftState.participants.length;
 
   if (isCommissionerAlone) {
