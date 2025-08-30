@@ -34,6 +34,7 @@ const applicationTables = {
     currentPickStartedAt: v.optional(v.number()),
     scheduledDraftDate: v.optional(v.number()),
     draftPickTimeLimit: v.optional(v.number()), // Time limit in milliseconds, defaults to 180000 (3 minutes)
+    scheduledAutopickId: v.optional(v.id("_scheduled_functions")), // ID of scheduled function for auto-pick cancellation
   })
     .index("by_admin", ["adminUserId"])
     .index("by_join_code", ["joinCode"])
@@ -44,6 +45,8 @@ const applicationTables = {
     userId: v.id("users"),
     displayName: v.string(),
     draftPosition: v.number(),
+    isAutoDrafting: v.optional(v.boolean()),
+    autoDraftReason: v.optional(v.string()),
   })
     .index("by_league", ["leagueId"])
     .index("by_user", ["userId"])
@@ -72,6 +75,16 @@ const applicationTables = {
     .index("by_league", ["leagueId"])
     .index("by_participant", ["participantId"])
     .index("by_pick_number", ["pickNumber"]),
+
+  draftPreferences: defineTable({
+    participantId: v.id("participants"),
+    leagueId: v.id("leagues"),
+    rankings: v.array(v.id("nflTeams")),
+    enableAutoDraft: v.boolean(),
+    updatedAt: v.number(),
+  })
+    .index("by_participant", ["participantId"])
+    .index("by_league_and_participant", ["leagueId", "participantId"]),
 
   games: defineTable({
     week: v.number(),
@@ -105,7 +118,11 @@ const applicationTables = {
       v.literal("draft_started"),
       v.literal("draft_pick"),
       v.literal("draft_autopick"),
+      v.literal("draft_preference_autopick"),
       v.literal("draft_completed"),
+      v.literal("draft_preferences_set"),
+      v.literal("participant_autodraft_enabled"),
+      v.literal("participant_autodraft_disabled"),
     ),
     message: v.string(),
     createdAt: v.number(),

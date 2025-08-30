@@ -11,7 +11,7 @@ crons.cron("nightly sync", "0 11 * * *", internal.crons.nightlySync, {});
 // Weekly finalize at Tuesday 03:15 PT (11:15 UTC)
 crons.cron("weekly finalize", "15 11 * * 2", internal.crons.weeklyFinalize, {});
 
-// Check for expired draft picks every minute
+// Check for expired draft picks every minute as backup (can't do 30 seconds with standard cron)
 crons.cron("draft autopick", "* * * * *", internal.draft.checkAndMakeAutoPick, {});
 
 export default crons;

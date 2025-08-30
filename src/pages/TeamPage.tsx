@@ -8,6 +8,7 @@ import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
 import { Edit, Save, X } from "lucide-react";
+import { DraftPreferenceManager } from "../components/DraftPreferenceManager";
 
 export function TeamPage() {
   const { leagueId, participantId } = useParams<{
@@ -79,52 +80,57 @@ export function TeamPage() {
       <div className="max-w-6xl mx-auto p-4 pb-20">
         {/* Team Settings Section for Setup Phase */}
         {league.status === "setup" && canEditParticipant && (
-          <Card className="mb-6">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                Team Settings
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="team-name">Team Name</Label>
-                {isEditingName ? (
-                  <div className="flex gap-2 items-center">
-                    <Input
-                      id="team-name"
-                      value={newTeamName}
-                      onChange={(e) => setNewTeamName(e.target.value)}
-                      placeholder="Enter your team name"
-                      className="flex-1"
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter") handleSaveName();
-                        if (e.key === "Escape") handleCancelEdit();
-                      }}
-                    />
-                    <Button size="sm" onClick={handleSaveName}>
-                      <Save className="h-4 w-4" />
-                    </Button>
-                    <Button size="sm" variant="outline" onClick={handleCancelEdit}>
-                      <X className="h-4 w-4" />
-                    </Button>
-                  </div>
-                ) : (
-                  <div className="flex items-center gap-2">
-                    <span className="font-medium text-lg">
-                      {teamData.participant.displayName}
-                    </span>
-                    <Button size="sm" variant="outline" onClick={handleEditName}>
-                      <Edit className="h-4 w-4" />
-                      Edit
-                    </Button>
-                  </div>
-                )}
-              </div>
-              <div className="text-sm text-muted-foreground">
-                <span>Draft Position: {teamData.participant.draftPosition}</span>
-              </div>
-            </CardContent>
-          </Card>
+          <div className="space-y-6 mb-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  Team Settings
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="team-name">Team Name</Label>
+                  {isEditingName ? (
+                    <div className="flex gap-2 items-center">
+                      <Input
+                        id="team-name"
+                        value={newTeamName}
+                        onChange={(e) => setNewTeamName(e.target.value)}
+                        placeholder="Enter your team name"
+                        className="flex-1"
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") handleSaveName();
+                          if (e.key === "Escape") handleCancelEdit();
+                        }}
+                      />
+                      <Button size="sm" onClick={handleSaveName}>
+                        <Save className="h-4 w-4" />
+                      </Button>
+                      <Button size="sm" variant="outline" onClick={handleCancelEdit}>
+                        <X className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-2">
+                      <span className="font-medium text-lg">
+                        {teamData.participant.displayName}
+                      </span>
+                      <Button size="sm" variant="outline" onClick={handleEditName}>
+                        <Edit className="h-4 w-4" />
+                        Edit
+                      </Button>
+                    </div>
+                  )}
+                </div>
+                <div className="text-sm text-muted-foreground">
+                  <span>Draft Position: {teamData.participant.draftPosition}</span>
+                </div>
+              </CardContent>
+            </Card>
+            
+            {/* Draft Preferences */}
+            <DraftPreferenceManager leagueId={leagueId!} />
+          </div>
         )}
         
         {/* Team Data Section for Post-Draft */}

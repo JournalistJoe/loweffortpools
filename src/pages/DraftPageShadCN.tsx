@@ -15,6 +15,7 @@ import {
 import { Clock, Trophy, Users } from "lucide-react";
 import { CommissionerWelcome } from "../components/CommissionerWelcome";
 import { PartialLeagueWelcome } from "../components/PartialLeagueWelcome";
+import { AutoDraftToggle, ParticipantAutoDraftStatus } from "../components/AutoDraftToggle";
 
 export function DraftPageShadCN() {
   const { leagueId } = useParams<{ leagueId: string }>();
@@ -144,6 +145,18 @@ export function DraftPageShadCN() {
               )}
           </div>
         </div>
+
+        {/* Auto-draft toggle for user's turn */}
+        {draftState.league.status === "draft" && league.participant && (
+          <div className="mb-6">
+            <AutoDraftToggle
+              leagueId={leagueId!}
+              participant={league.participant}
+              currentUser={currentUser}
+              isCurrentParticipantTurn={isUserTurn}
+            />
+          </div>
+        )}
 
         <div className="space-y-6">
             <Card>

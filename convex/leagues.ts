@@ -2,7 +2,7 @@ import { v } from "convex/values";
 import { query, mutation } from "./_generated/server";
 import { getAuthUserId } from "@convex-dev/auth/server";
 import { JOIN_CODE_LENGTH } from "./constants";
-import { api } from "./_generated/api";
+import { api, internal } from "./_generated/api";
 
 // Constants
 const MAX_PARTICIPANTS = 8;
@@ -1077,6 +1077,11 @@ export const startDraft = mutation({
       excludeUserId: userId,
     });
 
+    // Schedule first auto-pick
+    await ctx.scheduler.runAfter(0, internal.draft.scheduleNextAutoPick, {
+      leagueId: args.leagueId,
+    });
+
     return true;
   },
 });
@@ -1099,6 +1104,7 @@ export const resetDraft = mutation({
       currentPickIndex: undefined,
       draftStartedAt: undefined,
       currentPickStartedAt: undefined,
+      scheduledAutopickId: undefined,
     });
     await ctx.db.insert("activity", {
       leagueId: args.leagueId,
