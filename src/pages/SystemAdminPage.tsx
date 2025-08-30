@@ -1,4 +1,4 @@
-import { useQuery, useMutation } from "convex/react";
+import { useQuery, useMutation, useAction } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -55,7 +55,7 @@ export function SystemAdminPage() {
   const importTeams = useMutation(api.nflData.importTeams);
   const manualResync = useMutation(api.nflData.manualResync);
   const createTestLeague = useMutation(api.testLeague.createTestLeague);
-  const sendTestNotification = useMutation(api.notificationActions.sendTestNotification);
+  const sendTestNotification = useAction(api.notificationActions.sendTestNotification);
   const getAllUsers = useQuery(api.users.getAllUsers);
   const notificationStats = useQuery(api.pushNotifications.getNotificationStats, currentUser?._id ? {} : "skip");
 
