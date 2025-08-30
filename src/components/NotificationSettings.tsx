@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, ReactNode } from "react";
 import { useMutation, useQuery, useAction } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/card";
@@ -14,6 +14,49 @@ import { Id } from "../../convex/_generated/dataModel";
 interface NotificationSettingsProps {
   leagueId?: Id<"leagues">;
   showGlobalSettings?: boolean;
+}
+
+interface NotificationToggleItemProps {
+  icon: ReactNode;
+  iconColor: string;
+  title: string;
+  description: string;
+  checked: boolean;
+  onCheckedChange: (checked: boolean) => void;
+  disabled?: boolean;
+}
+
+function NotificationToggleItem({
+  icon,
+  iconColor,
+  title,
+  description,
+  checked,
+  onCheckedChange,
+  disabled = false,
+}: NotificationToggleItemProps) {
+  return (
+    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 p-3 sm:p-0 rounded-lg border sm:border-none bg-muted/30 sm:bg-transparent min-h-[60px] sm:min-h-[auto]">
+      <div className="flex items-start gap-3">
+        <div className={`w-5 h-5 sm:w-4 sm:h-4 ${iconColor} mt-0.5`}>
+          {icon}
+        </div>
+        <div className="flex-1">
+          <Label className="font-medium text-base sm:text-sm">{title}</Label>
+          <p className="text-sm text-muted-foreground mt-1 leading-relaxed">
+            {description}
+          </p>
+        </div>
+      </div>
+      <div className="flex justify-end sm:justify-center">
+        <Switch
+          checked={checked}
+          onCheckedChange={onCheckedChange}
+          disabled={disabled}
+        />
+      </div>
+    </div>
+  );
 }
 
 export function NotificationSettings({ leagueId, showGlobalSettings = false }: NotificationSettingsProps) {
@@ -149,84 +192,48 @@ export function NotificationSettings({ leagueId, showGlobalSettings = false }: N
           <h4 className="text-base sm:text-sm font-medium mb-4">Notification Types</h4>
           <div className="space-y-5">
             {/* Important Only Toggle */}
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 p-3 sm:p-0 rounded-lg border sm:border-none bg-muted/30 sm:bg-transparent min-h-[60px] sm:min-h-[auto]">
-              <div className="flex items-start gap-3">
-                <Zap className="w-5 h-5 sm:w-4 sm:h-4 text-orange-500 mt-0.5" />
-                <div className="flex-1">
-                  <Label className="font-medium text-base sm:text-sm">Important Only</Label>
-                  <p className="text-sm text-muted-foreground mt-1 leading-relaxed">
-                    Only receive high-priority notifications (draft start, your turn)
-                  </p>
-                </div>
-              </div>
-              <div className="flex justify-end sm:justify-center">
-                <Switch
-                  checked={preferences.enableImportantOnly}
-                  onCheckedChange={(checked) => handleToggle("enableImportantOnly", checked)}
-                  disabled={isMuted}
-                />
-              </div>
-            </div>
+            <NotificationToggleItem
+              icon={<Zap />}
+              iconColor="text-orange-500"
+              title="Important Only"
+              description="Only receive high-priority notifications (draft start, your turn)"
+              checked={preferences.enableImportantOnly}
+              onCheckedChange={(checked) => handleToggle("enableImportantOnly", checked)}
+              disabled={isMuted}
+            />
 
             {/* My Turn Toggle */}
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 p-3 sm:p-0 rounded-lg border sm:border-none bg-muted/30 sm:bg-transparent min-h-[60px] sm:min-h-[auto]">
-              <div className="flex items-start gap-3">
-                <User className="w-5 h-5 sm:w-4 sm:h-4 text-blue-500 mt-0.5" />
-                <div className="flex-1">
-                  <Label className="font-medium text-base sm:text-sm">My Turn</Label>
-                  <p className="text-sm text-muted-foreground mt-1 leading-relaxed">
-                    Get notified when it's your turn to draft
-                  </p>
-                </div>
-              </div>
-              <div className="flex justify-end sm:justify-center">
-                <Switch
-                  checked={preferences.enableMyTurn}
-                  onCheckedChange={(checked) => handleToggle("enableMyTurn", checked)}
-                  disabled={isMuted || preferences.enableImportantOnly}
-                />
-              </div>
-            </div>
+            <NotificationToggleItem
+              icon={<User />}
+              iconColor="text-blue-500"
+              title="My Turn"
+              description="Get notified when it's your turn to draft"
+              checked={preferences.enableMyTurn}
+              onCheckedChange={(checked) => handleToggle("enableMyTurn", checked)}
+              disabled={isMuted || preferences.enableImportantOnly}
+            />
 
             {/* Draft Picks Toggle */}
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 p-3 sm:p-0 rounded-lg border sm:border-none bg-muted/30 sm:bg-transparent min-h-[60px] sm:min-h-[auto]">
-              <div className="flex items-start gap-3">
-                <Trophy className="w-5 h-5 sm:w-4 sm:h-4 text-yellow-500 mt-0.5" />
-                <div className="flex-1">
-                  <Label className="font-medium text-base sm:text-sm">Draft Picks</Label>
-                  <p className="text-sm text-muted-foreground mt-1 leading-relaxed">
-                    Notifications for all draft picks and draft events
-                  </p>
-                </div>
-              </div>
-              <div className="flex justify-end sm:justify-center">
-                <Switch
-                  checked={preferences.enableDraftPicks}
-                  onCheckedChange={(checked) => handleToggle("enableDraftPicks", checked)}
-                  disabled={isMuted || preferences.enableImportantOnly}
-                />
-              </div>
-            </div>
+            <NotificationToggleItem
+              icon={<Trophy />}
+              iconColor="text-yellow-500"
+              title="Draft Picks"
+              description="Notifications for all draft picks and draft events"
+              checked={preferences.enableDraftPicks}
+              onCheckedChange={(checked) => handleToggle("enableDraftPicks", checked)}
+              disabled={isMuted || preferences.enableImportantOnly}
+            />
 
             {/* Chat Messages Toggle */}
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 p-3 sm:p-0 rounded-lg border sm:border-none bg-muted/30 sm:bg-transparent min-h-[60px] sm:min-h-[auto]">
-              <div className="flex items-start gap-3">
-                <MessageCircle className="w-5 h-5 sm:w-4 sm:h-4 text-green-500 mt-0.5" />
-                <div className="flex-1">
-                  <Label className="font-medium text-base sm:text-sm">Chat Messages</Label>
-                  <p className="text-sm text-muted-foreground mt-1 leading-relaxed">
-                    New messages in league chat
-                  </p>
-                </div>
-              </div>
-              <div className="flex justify-end sm:justify-center">
-                <Switch
-                  checked={preferences.enableChatMessages}
-                  onCheckedChange={(checked) => handleToggle("enableChatMessages", checked)}
-                  disabled={isMuted || preferences.enableImportantOnly}
-                />
-              </div>
-            </div>
+            <NotificationToggleItem
+              icon={<MessageCircle />}
+              iconColor="text-green-500"
+              title="Chat Messages"
+              description="New messages in league chat"
+              checked={preferences.enableChatMessages}
+              onCheckedChange={(checked) => handleToggle("enableChatMessages", checked)}
+              disabled={isMuted || preferences.enableImportantOnly}
+            />
           </div>
         </div>
 
