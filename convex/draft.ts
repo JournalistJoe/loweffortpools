@@ -262,7 +262,7 @@ export const getPreferencesByLeagueAndParticipant = query({
       .withIndex("by_league_and_participant", (q) =>
         q.eq("leagueId", args.leagueId).eq("participantId", args.participantId),
       )
-      .first();
+      .unique();
 
     return preferences;
   },
@@ -325,7 +325,7 @@ export const setDraftPreferences = mutation({
       .withIndex("by_league_and_participant", (q) =>
         q.eq("leagueId", args.leagueId).eq("participantId", participant._id)
       )
-      .first();
+      .unique();
 
     if (existingPreferences) {
       // Update existing preferences
@@ -381,7 +381,7 @@ export const getDraftPreferences = query({
       .withIndex("by_league_and_participant", (q) =>
         q.eq("leagueId", args.leagueId).eq("participantId", participant._id),
       )
-      .first();
+      .unique();
 
     if (!preferences) return null;
 
@@ -611,7 +611,7 @@ async function makeAutoPick(
     .withIndex("by_league_and_participant", (q) =>
       q.eq("leagueId", league._id).eq("participantId", currentParticipant._id)
     )
-    .first();
+    .unique();
 
   if (preferences && preferences.rankings.length > 0) {
     // Find the highest ranked available team
