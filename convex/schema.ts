@@ -47,6 +47,7 @@ const applicationTables = {
     draftPosition: v.number(),
     isAutoDrafting: v.optional(v.boolean()),
     autoDraftReason: v.optional(v.string()),
+    isAdminManaged: v.optional(v.boolean()),
   })
     .index("by_league", ["leagueId"])
     .index("by_user", ["userId"])

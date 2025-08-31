@@ -36,6 +36,7 @@ import {
   Trophy,
   Shield,
   Shuffle,
+  Bot,
 } from "lucide-react";
 
 function formatLocalForDateTimeLocal(d: Date) {
@@ -58,10 +59,6 @@ export function AdminPageShadCN() {
     api.spectators.getSpectators,
     leagueId ? { leagueId: leagueId as any } : "skip",
   );
-  const allUsers = useQuery(api.leagues.getAllUsers);
-  const [showAddParticipant, setShowAddParticipant] = useState(false);
-  const [selectedUserId, setSelectedUserId] = useState("");
-  const [displayName, setDisplayName] = useState("");
   const [draftPosition, setDraftPosition] = useState("1");
   const [editingParticipant, setEditingParticipant] = useState<string | null>(
     null,
@@ -75,9 +72,11 @@ export function AdminPageShadCN() {
   const [newLeagueName, setNewLeagueName] = useState("");
   const [scheduledDraftDate, setScheduledDraftDate] = useState("");
   const [draftPickTimeLimit, setDraftPickTimeLimit] = useState("180");
+  const [showAddAdminTeam, setShowAddAdminTeam] = useState(false);
+  const [adminManagedTeamName, setAdminManagedTeamName] = useState("");
+  const [adminManagedDraftPosition, setAdminManagedDraftPosition] = useState("1");
 
   const startDraft = useMutation(api.leagues.startDraft);
-  const addParticipant = useMutation(api.leagues.addParticipant);
   const removeParticipant = useMutation(api.leagues.removeParticipant);
   const updateParticipantPosition = useMutation(
     api.leagues.updateParticipantPosition,
@@ -94,6 +93,7 @@ export function AdminPageShadCN() {
   const deleteLeague = useMutation(api.leagues.deleteLeague);
   const regenerateJoinCode = useMutation(api.leagues.regenerateJoinCode);
   const removeSpectator = useMutation(api.spectators.removeSpectator);
+  const addAdminManagedTeam = useMutation(api.leagues.addAdminManagedTeam);
 
 
   const handleStartDraft = async () => {
@@ -108,24 +108,6 @@ export function AdminPageShadCN() {
 
 
 
-  const handleAddParticipant = async () => {
-    if (!leagueId || !selectedUserId || !displayName) return;
-    try {
-      await addParticipant({
-        leagueId: leagueId as any,
-        userId: selectedUserId as any,
-        displayName,
-        draftPosition: parseInt(draftPosition),
-      });
-      toast.success("Participant added successfully");
-      setShowAddParticipant(false);
-      setSelectedUserId("");
-      setDisplayName("");
-      setDraftPosition("1");
-    } catch (error) {
-      toast.error(String(error));
-    }
-  };
 
   const handleRemoveParticipant = async (participantId: string) => {
     if (!leagueId) return;
@@ -185,6 +167,23 @@ export function AdminPageShadCN() {
         leagueId: leagueId as any,
       });
       toast.success("Draft order randomized successfully");
+    } catch (error) {
+      toast.error(String(error));
+    }
+  };
+
+  const handleAddAdminManagedTeam = async () => {
+    if (!leagueId || !adminManagedTeamName.trim()) return;
+    try {
+      await addAdminManagedTeam({
+        leagueId: leagueId as any,
+        displayName: adminManagedTeamName.trim(),
+        draftPosition: parseInt(adminManagedDraftPosition),
+      });
+      toast.success("Admin-managed team added successfully");
+      setShowAddAdminTeam(false);
+      setAdminManagedTeamName("");
+      setAdminManagedDraftPosition("1");
     } catch (error) {
       toast.error(String(error));
     }
@@ -535,7 +534,6 @@ export function AdminPageShadCN() {
                 {participants && participants.length > 1 && league.status === "setup" && (
                   <Button
                     onClick={handleRandomizeOrder}
-                    variant="outline"
                     size="sm"
                     className="gap-2 w-full sm:w-auto"
                   >
@@ -670,9 +668,17 @@ export function AdminPageShadCN() {
                             </Select>
                           </div>
                         ) : (
-                          <Badge variant="outline">
-                            Position {participant.draftPosition}
-                          </Badge>
+                          <div className="flex items-center gap-2">
+                            <Badge variant="outline">
+                              Position {participant.draftPosition}
+                            </Badge>
+                            {participant.isAdminManaged && (
+                              <Badge variant="secondary" className="gap-1">
+                                <Bot className="h-3 w-3" />
+                                Admin Managed
+                              </Badge>
+                            )}
+                          </div>
                         )}
                       </div>
 
@@ -770,48 +776,39 @@ export function AdminPageShadCN() {
                 </div>
               )}
 
-              {/* Add Participant Form */}
-              {showAddParticipant && (
+
+              {/* Add Admin-Managed Team Form */}
+              {showAddAdminTeam && (
                 <Card className="mt-4">
                   <CardHeader>
-                    <CardTitle className="text-base">
-                      Add Participant (Admin)
+                    <CardTitle className="text-base flex items-center gap-2">
+                      <Bot className="h-4 w-4" />
+                      Add Admin-Managed Team
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-4">
                     <div>
-                      <Label>Choose User</Label>
-                      <Select
-                        value={selectedUserId}
-                        onValueChange={setSelectedUserId}
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder="Choose user..." />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {allUsers?.map((user) => (
-                            <SelectItem key={user._id} value={user._id}>
-                              {user.name} ({user.email})
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-
-                    <div>
                       <Label>Team Name</Label>
                       <Input
-                        value={displayName}
-                        onChange={(e) => setDisplayName(e.target.value)}
-                        placeholder="Team name"
+                        value={adminManagedTeamName}
+                        onChange={(e) => setAdminManagedTeamName(e.target.value)}
+                        placeholder="Admin team name (e.g., CPU Team 1)"
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") handleAddAdminManagedTeam();
+                          if (e.key === "Escape") {
+                            setShowAddAdminTeam(false);
+                            setAdminManagedTeamName("");
+                            setAdminManagedDraftPosition("1");
+                          }
+                        }}
                       />
                     </div>
 
                     <div>
                       <Label>Draft Position</Label>
                       <Select
-                        value={draftPosition}
-                        onValueChange={setDraftPosition}
+                        value={adminManagedDraftPosition}
+                        onValueChange={setAdminManagedDraftPosition}
                       >
                         <SelectTrigger>
                           <SelectValue />
@@ -828,20 +825,19 @@ export function AdminPageShadCN() {
 
                     <div className="flex gap-2">
                       <Button
-                        onClick={handleAddParticipant}
-                        disabled={!selectedUserId || !displayName}
+                        onClick={handleAddAdminManagedTeam}
+                        disabled={!adminManagedTeamName.trim()}
                         className="gap-2"
                       >
-                        <UserPlus className="h-4 w-4" />
-                        Add
+                        <Bot className="h-4 w-4" />
+                        Add Team
                       </Button>
                       <Button
                         variant="outline"
                         onClick={() => {
-                          setShowAddParticipant(false);
-                          setSelectedUserId("");
-                          setDisplayName("");
-                          setDraftPosition("1");
+                          setShowAddAdminTeam(false);
+                          setAdminManagedTeamName("");
+                          setAdminManagedDraftPosition("1");
                         }}
                         className="gap-2"
                       >
@@ -851,6 +847,20 @@ export function AdminPageShadCN() {
                     </div>
                   </CardContent>
                 </Card>
+              )}
+
+              {/* Add Admin-Managed Team Action */}
+              {league.status === "setup" && (
+                <div className="mt-4">
+                  <Button
+                    onClick={() => setShowAddAdminTeam(true)}
+                    variant="outline"
+                    className="gap-2 w-full sm:w-auto"
+                  >
+                    <Bot className="h-4 w-4" />
+                    Add Admin-Managed Team
+                  </Button>
+                </div>
               )}
             </CardContent>
           </Card>

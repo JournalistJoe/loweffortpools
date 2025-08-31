@@ -123,16 +123,25 @@ export const makePick = mutation({
 
     // Check if it's the user's turn
     const currentDraftPosition = getParticipantForPick(league.currentPickIndex);
-    const participant = await ctx.db
+    
+    // Find the current participant who should be picking
+    const currentParticipant = await ctx.db
       .query("participants")
-      .withIndex("by_league_and_user", (q) =>
-        q.eq("leagueId", args.leagueId).eq("userId", userId),
+      .withIndex("by_league_and_position", (q) =>
+        q.eq("leagueId", args.leagueId).eq("draftPosition", currentDraftPosition),
       )
       .first();
 
-    if (!participant || participant.draftPosition !== currentDraftPosition) {
+    if (!currentParticipant) {
+      throw new Error("No participant found for current draft position");
+    }
+
+    // Check if user can make this pick (either their own participant or admin-managed team)
+    if (currentParticipant.userId !== userId) {
       throw new Error("It's not your turn to pick");
     }
+
+    const participant = currentParticipant;
 
     // Check if team is available
     const existingPick = await ctx.db
@@ -210,10 +219,14 @@ export const makePick = mutation({
       }
     }
 
+    const activityMessage = participant.isAdminManaged
+      ? `${participant.displayName} (Admin Managed) selected ${nflTeam.fullName}`
+      : `${participant.displayName} selected ${nflTeam.fullName}`;
+
     await ctx.db.insert("activity", {
       leagueId: args.leagueId,
       type: "draft_pick",
-      message: `${participant.displayName} selected ${nflTeam.fullName}`,
+      message: activityMessage,
       createdAt: Date.now(),
       participantId: participant._id,
       nflTeamId: args.nflTeamId,
@@ -223,7 +236,7 @@ export const makePick = mutation({
     await ctx.scheduler.runAfter(0, api.notificationActions.notifyLeagueActivity, {
       leagueId: args.leagueId,
       activityType: "draft_pick",
-      message: `${participant.displayName} selected ${nflTeam.fullName}`,
+      message: activityMessage,
       participantId: participant._id,
       nflTeamId: args.nflTeamId,
       excludeUserId: userId,
@@ -602,30 +615,32 @@ async function makeAutoPick(
     return null; // No teams available
   }
 
-  // Try to get participant's draft preferences
+  // Try to get participant's draft preferences (skip for admin-managed teams)
   let selectedTeam;
   let usedPreferences = false;
   
-  const preferences = await ctx.db
-    .query("draftPreferences")
-    .withIndex("by_league_and_participant", (q) =>
-      q.eq("leagueId", league._id).eq("participantId", currentParticipant._id)
-    )
-    .unique();
+  if (!currentParticipant.isAdminManaged) {
+    const preferences = await ctx.db
+      .query("draftPreferences")
+      .withIndex("by_league_and_participant", (q) =>
+        q.eq("leagueId", league._id).eq("participantId", currentParticipant._id)
+      )
+      .unique();
 
-  if (preferences && preferences.rankings.length > 0) {
-    // Find the highest ranked available team
-    for (const teamId of preferences.rankings) {
-      const team = availableTeams.find((t) => t._id === teamId);
-      if (team) {
-        selectedTeam = team;
-        usedPreferences = true;
-        break;
+    if (preferences && preferences.rankings.length > 0) {
+      // Find the highest ranked available team
+      for (const teamId of preferences.rankings) {
+        const team = availableTeams.find((t) => t._id === teamId);
+        if (team) {
+          selectedTeam = team;
+          usedPreferences = true;
+          break;
+        }
       }
     }
   }
 
-  // Fallback to random selection if no preferences or no preferred teams available
+  // Fallback to random selection if no preferences, no preferred teams available, or admin-managed
   if (!selectedTeam) {
     const randomIndex = Math.floor(Math.random() * availableTeams.length);
     selectedTeam = availableTeams[randomIndex];
@@ -691,16 +706,24 @@ async function makeAutoPick(
   let activityType: "draft_autopick" | "draft_preference_autopick";
   let message: string;
 
-  if (reason === "auto_enabled") {
-    activityType = usedPreferences ? "draft_preference_autopick" : "draft_autopick";
-    message = usedPreferences
-      ? `${currentParticipant.displayName} was auto-drafted ${selectedTeam.fullName} from their preferences`
-      : `${currentParticipant.displayName} was randomly assigned ${selectedTeam.fullName} (auto-draft enabled)`;
+  if (currentParticipant.isAdminManaged) {
+    // Admin-managed teams always use random selection
+    activityType = "draft_autopick";
+    message = reason === "auto_enabled"
+      ? `${currentParticipant.displayName} (Admin Managed) was randomly assigned ${selectedTeam.fullName} (auto-draft enabled)`
+      : `Time expired! ${currentParticipant.displayName} (Admin Managed) was randomly assigned ${selectedTeam.fullName}`;
   } else {
-    activityType = usedPreferences ? "draft_preference_autopick" : "draft_autopick";
-    message = usedPreferences
-      ? `Time expired! ${currentParticipant.displayName} was auto-drafted ${selectedTeam.fullName} from their preferences`
-      : `Time expired! ${currentParticipant.displayName} was randomly assigned ${selectedTeam.fullName}`;
+    if (reason === "auto_enabled") {
+      activityType = usedPreferences ? "draft_preference_autopick" : "draft_autopick";
+      message = usedPreferences
+        ? `${currentParticipant.displayName} was auto-drafted ${selectedTeam.fullName} from their preferences`
+        : `${currentParticipant.displayName} was randomly assigned ${selectedTeam.fullName} (auto-draft enabled)`;
+    } else {
+      activityType = usedPreferences ? "draft_preference_autopick" : "draft_autopick";
+      message = usedPreferences
+        ? `Time expired! ${currentParticipant.displayName} was auto-drafted ${selectedTeam.fullName} from their preferences`
+        : `Time expired! ${currentParticipant.displayName} was randomly assigned ${selectedTeam.fullName}`;
+    }
   }
 
   await ctx.db.insert("activity", {

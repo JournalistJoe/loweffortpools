@@ -704,6 +704,69 @@ export const addParticipant = mutation({
   },
 });
 
+export const addAdminManagedTeam = mutation({
+  args: {
+    leagueId: v.id("leagues"),
+    displayName: v.string(),
+    draftPosition: v.number(),
+  },
+  handler: async (ctx, args) => {
+    const adminUserId = await getAuthUserId(ctx);
+    if (!adminUserId) throw new Error("Must be logged in");
+
+    const league = await ctx.db.get(args.leagueId);
+    if (!league) throw new Error("League not found");
+
+    if (league.adminUserId !== adminUserId) {
+      throw new Error("Only admin can add admin-managed teams");
+    }
+
+    if (league.status !== "setup") {
+      throw new Error("Can only add admin-managed teams during setup");
+    }
+
+    // Check if draft position is taken
+    const positionTaken = await ctx.db
+      .query("participants")
+      .withIndex("by_league_and_position", (q) =>
+        q.eq("leagueId", args.leagueId).eq("draftPosition", args.draftPosition),
+      )
+      .first();
+
+    if (positionTaken) {
+      throw new Error("Draft position already taken");
+    }
+
+    // Check league participant limit
+    const participants = await ctx.db
+      .query("participants")
+      .withIndex("by_league", (q) => q.eq("leagueId", args.leagueId))
+      .collect();
+
+    if (participants.length >= MAX_PARTICIPANTS) {
+      throw new Error("League is full");
+    }
+
+    const participantId = await ctx.db.insert("participants", {
+      leagueId: args.leagueId,
+      userId: adminUserId, // Admin manages this team
+      displayName: args.displayName,
+      draftPosition: args.draftPosition,
+      isAdminManaged: true,
+    });
+
+    await ctx.db.insert("activity", {
+      leagueId: args.leagueId,
+      type: "participant_added",
+      message: `${args.displayName} added as admin-managed team (Draft Position ${args.draftPosition})`,
+      createdAt: Date.now(),
+      participantId,
+    });
+
+    return participantId;
+  },
+});
+
 export const removeParticipant = mutation({
   args: {
     leagueId: v.id("leagues"),

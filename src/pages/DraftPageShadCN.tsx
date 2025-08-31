@@ -11,7 +11,7 @@ import {
   CardHeader,
   CardTitle,
 } from "../components/ui/card";
-import { Clock, Trophy, Users } from "lucide-react";
+import { Clock, Trophy, Users, Bot } from "lucide-react";
 import { CommissionerWelcome } from "../components/CommissionerWelcome";
 import { PartialLeagueWelcome } from "../components/PartialLeagueWelcome";
 import { AutoDraftToggle, ParticipantAutoDraftStatus } from "../components/AutoDraftToggle";
@@ -104,6 +104,11 @@ export function DraftPageShadCN() {
 
   const isUserTurn =
     draftState.currentParticipant?.userId === league.participant?.userId;
+    
+  // Check if admin can pick for admin-managed team
+  const canAdminPick = league.isAdmin && 
+    draftState.currentParticipant?.isAdminManaged && 
+    draftState.currentParticipant?.userId === currentUser._id;
 
   return (
     <div>
@@ -123,8 +128,14 @@ export function DraftPageShadCN() {
                   <span className="text-sm text-muted-foreground">
                     Current Pick:
                   </span>
-                  <span className="font-medium">
+                  <span className="font-medium flex items-center gap-2">
                     {draftState.currentParticipant.displayName}
+                    {draftState.currentParticipant.isAdminManaged && (
+                      <Badge variant="secondary" className="gap-1 text-xs">
+                        <Bot className="h-3 w-3" />
+                        Admin Managed
+                      </Badge>
+                    )}
                   </span>
                   {timeRemaining !== null && (
                     <Badge
@@ -142,8 +153,8 @@ export function DraftPageShadCN() {
           </div>
         </div>
 
-        {/* Auto-draft toggle for user's turn */}
-        {draftState.league.status === "draft" && league.participant && (
+        {/* Auto-draft toggle for user's turn - only for non-admin-managed participants */}
+        {draftState.league.status === "draft" && league.participant && !league.participant.isAdminManaged && (
           <div className="mb-6">
             <AutoDraftToggle
               leagueId={leagueId!}
@@ -166,8 +177,8 @@ export function DraftPageShadCN() {
                 <div className="grid gap-0 text-xs font-medium text-muted-foreground" style={{ gridTemplateColumns: `1.5rem repeat(${numParticipants}, 1fr)` }}>
                   <div className="border-r border-b border-border" role="columnheader" aria-label="Round"></div> {/* Thin round column header */}
                   {draftState.participants.map((p, index) => (
-                    <div key={p._id} className={`text-center h-20 sm:h-auto sm:py-4 flex items-center justify-center overflow-hidden border-b border-border ${index < numParticipants - 1 ? 'border-r border-border' : ''}`}>
-                      <span className="text-[10px] sm:text-xs truncate max-w-full sm:inline block transform -rotate-90 sm:rotate-0 origin-center whitespace-nowrap text-center leading-tight" title={p.displayName}>
+                    <div key={p._id} className={`text-center h-20 sm:h-auto sm:py-4 flex flex-col sm:flex-row items-center justify-center overflow-hidden border-b border-border ${index < numParticipants - 1 ? 'border-r border-border' : ''} ${p.isAdminManaged ? 'bg-muted/10' : ''}`}>
+                      <span className="text-[10px] sm:text-xs truncate max-w-full sm:inline block transform -rotate-90 sm:rotate-0 origin-center whitespace-nowrap text-center leading-tight" title={`${p.displayName}${p.isAdminManaged ? ' (Admin Managed)' : ''}`}>
                         {p.displayName}
                       </span>
                     </div>
@@ -260,7 +271,7 @@ export function DraftPageShadCN() {
                       <Button
                         key={team._id}
                         onClick={() => setSelectedTeam(team._id)}
-                        disabled={!isUserTurn || draftState.league.status === "setup"}
+                        disabled={(!isUserTurn && !canAdminPick) || draftState.league.status === "setup"}
                         variant={
                           selectedTeam === team._id ? "default" : "outline"
                         }
@@ -297,23 +308,40 @@ export function DraftPageShadCN() {
                     ))}
                   </div>
 
-                  {isUserTurn && selectedTeam && draftState.league.status === "draft" && (
-                    <div className="mt-4 flex justify-center">
-                      <Button
-                        onClick={handleMakePick}
-                        size="lg"
-                        className="gap-2"
-                      >
-                        <Trophy className="h-4 w-4" />
-                        Make Pick
-                      </Button>
-                    </div>
+                  {(isUserTurn || canAdminPick) && selectedTeam && draftState.league.status === "draft" && (
+                    <>
+                      {/* Desktop version - centered in card */}
+                      <div className="mt-4 flex justify-center sm:block hidden">
+                        <Button
+                          onClick={handleMakePick}
+                          size="lg"
+                          className="gap-2"
+                        >
+                          {canAdminPick ? <Bot className="h-4 w-4" /> : <Trophy className="h-4 w-4" />}
+                          {canAdminPick ? "Pick for Admin Team" : "Make Pick"}
+                        </Button>
+                      </div>
+                    </>
                   )}
                 </CardContent>
               </Card>
             )}
 
         </div>
+
+        {/* Mobile sticky pick button */}
+        {(isUserTurn || canAdminPick) && selectedTeam && draftState.league.status === "draft" && (
+          <div className="sm:hidden fixed bottom-20 left-4 right-4 z-50">
+            <Button
+              onClick={handleMakePick}
+              size="lg"
+              className="gap-2 w-full shadow-lg"
+            >
+              {canAdminPick ? <Bot className="h-4 w-4" /> : <Trophy className="h-4 w-4" />}
+              {canAdminPick ? "Pick for Admin Team" : "Make Pick"}
+            </Button>
+          </div>
+        )}
       </div>
     </div>
   );

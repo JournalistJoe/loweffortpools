@@ -300,7 +300,7 @@ export const updateNotificationPreferences = mutation({
       };
       
       // Only include mutedUntil if it's a valid number
-      if (args.mutedUntil && typeof args.mutedUntil === 'number') {
+      if (typeof args.mutedUntil === 'number') {
         insertData.mutedUntil = args.mutedUntil;
       }
       

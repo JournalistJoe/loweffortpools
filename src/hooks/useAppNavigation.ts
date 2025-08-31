@@ -28,6 +28,9 @@ interface League {
 export function useAppNavigation(league: League) {
   const { leagueId } = useParams<{ leagueId: string }>();
   const location = useLocation();
+  
+  // Guard against undefined leagueId, use league._id as fallback
+  const effectiveLeagueId = leagueId || league._id;
 
   const getLeagueNavItems = () => {
     const items = [];
@@ -37,33 +40,33 @@ export function useAppNavigation(league: League) {
       // Setup phase - show draft tab first, then participants tab
       items.push({
         name: "Draft",
-        href: `/league/${leagueId}/draft`,
+        href: `/league/${effectiveLeagueId}/draft`,
         current: location.pathname.includes("/draft"),
         icon: Trophy,
       });
       items.push({
         name: "Participants",
-        href: `/league/${leagueId}/participants`,
+        href: `/league/${effectiveLeagueId}/participants`,
         current: location.pathname.includes("/participants"),
         icon: Users,
       });
     } else if (league.status === "draft") {
       items.unshift({
         name: "Draft",
-        href: `/league/${leagueId}/draft`,
+        href: `/league/${effectiveLeagueId}/draft`,
         current: location.pathname.includes("/draft"),
         icon: Trophy,
       });
     } else if (league.status === "live" || league.status === "completed") {
       items.unshift({
         name: "Leaderboard",
-        href: `/league/${leagueId}/leaderboard`,
+        href: `/league/${effectiveLeagueId}/leaderboard`,
         current: location.pathname.includes("/leaderboard"),
         icon: Trophy,
       });
       items.push({
         name: "Schedule",
-        href: `/league/${leagueId}/schedule`,
+        href: `/league/${effectiveLeagueId}/schedule`,
         current: location.pathname.includes("/schedule"),
         icon: Calendar,
       });
@@ -73,7 +76,7 @@ export function useAppNavigation(league: League) {
     if (league.isParticipant && league.participant) {
       items.push({
         name: "My Team",
-        href: `/league/${leagueId}/team/${league.participant._id}`,
+        href: `/league/${effectiveLeagueId}/team/${league.participant._id}`,
         current: location.pathname.includes("/team/"),
         icon: User,
       });
@@ -83,7 +86,7 @@ export function useAppNavigation(league: League) {
     if (league.isAdmin) {
       items.push({
         name: "Admin",
-        href: `/league/${leagueId}/admin`,
+        href: `/league/${effectiveLeagueId}/admin`,
         current: location.pathname.includes("/admin"),
         icon: Settings,
       });
