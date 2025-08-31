@@ -13,6 +13,7 @@ import {
 } from "react-router-dom";
 import { LeagueProvider } from "./contexts/LeagueContext";
 import { ThemeProvider, useTheme } from "./contexts/ThemeContext";
+import { FontProvider } from "./contexts/FontContext";
 import { NotificationProvider } from "./contexts/NotificationContext";
 import { LeagueSelectionPageShadCN as LeagueSelectionPage } from "./pages/LeagueSelectionPageShadCN";
 import { DraftPageShadCN as DraftPage } from "./pages/DraftPageShadCN";
@@ -102,7 +103,8 @@ function App() {
 
   return (
     <ThemeProvider>
-      <Router>
+      <FontProvider>
+        <Router>
         <Routes>
           {/* Public routes that work regardless of auth status */}
           <Route path="/forgot-password" element={<ForgotPasswordPage />} />
@@ -145,8 +147,9 @@ function App() {
             }
           />
         </Routes>
-        <Toaster position="top-center" />
-      </Router>
+          <Toaster position="top-center" />
+        </Router>
+      </FontProvider>
     </ThemeProvider>
   );
 }

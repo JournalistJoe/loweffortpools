@@ -2,6 +2,7 @@ import { Link, useParams, useNavigate } from "react-router-dom";
 import { SignOutButtonShadCN } from "../SignOutButtonShadCN";
 import { useState } from "react";
 import { useTheme } from "../contexts/ThemeContext";
+import { useFont } from "../contexts/FontContext";
 import { useMutation } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import { toast } from "sonner";
@@ -35,6 +36,8 @@ import {
   Sun,
   Moon,
   User,
+  Type,
+  AlignLeft,
 } from "lucide-react";
 import { ThemeToggle } from "./ThemeToggle";
 import { DraftCountdown } from "./DraftCountdown";
@@ -67,6 +70,7 @@ interface LeagueNavigationProps {
 export function LeagueNavigation({ league }: LeagueNavigationProps) {
   const { leagueId } = useParams<{ leagueId: string }>();
   const { theme } = useTheme();
+  const { font, toggleFont } = useFont();
   const navigate = useNavigate();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [showNotificationSettings, setShowNotificationSettings] = useState(false);
@@ -244,6 +248,22 @@ export function LeagueNavigation({ league }: LeagueNavigationProps) {
                 <Moon className="h-4 w-4" />
               )}
               {theme === "dark" ? "Light" : "Dark"} Theme
+            </Button>
+
+            <Button
+              onClick={() => {
+                toggleFont();
+                setIsMobileMenuOpen(false);
+              }}
+              variant="ghost"
+              className="w-full justify-start gap-3 h-12"
+            >
+              {font === "custom" ? (
+                <Type className="h-4 w-4" />
+              ) : (
+                <AlignLeft className="h-4 w-4" />
+              )}
+              {font === "custom" ? "Eli Mode" : "LowEffort Mode"}
             </Button>
 
             <SignOutButtonShadCN />

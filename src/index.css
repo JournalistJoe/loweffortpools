@@ -28,7 +28,6 @@ body {
 
 @layer base {
   .theme {
-    --font-sans: Architects Daughter, cursive;
     --font-mono: Geist Mono, ui-monospace, monospace;
     --font-serif: Lora, ui-serif, serif;
     --radius: 0.025rem;
@@ -72,7 +71,6 @@ body {
     --sidebar-accent-foreground: 0.1684 0 0;
     --sidebar-border: 0.9219 0 0;
     --sidebar-ring: 0.3785 0.0753 237.8048;
-    --font-sans: Architects Daughter, cursive;
     --font-serif: Lora, ui-serif, serif;
     --font-mono: Geist Mono, ui-monospace, monospace;
     --shadow-color: #013369;
@@ -127,7 +125,6 @@ body {
     --sidebar-accent-foreground: 0.9851 0 0;
     --sidebar-border: 0.2686 0 0;
     --sidebar-ring: 0.3785 0.0753 237.8048;
-    --font-sans: Architects Daughter, cursive;
     --font-serif: Lora, ui-serif, serif;
     --font-mono: Geist Mono, ui-monospace, monospace;
     --shadow-color: #000000;
@@ -146,6 +143,12 @@ body {
     --shadow-lg: 0px 4px 8px -2px hsl(0 0% 0% / 0.20), 0px 4px 6px -3px hsl(0 0% 0% / 0.20);
     --shadow-xl: 0px 4px 8px -2px hsl(0 0% 0% / 0.20), 0px 8px 10px -3px hsl(0 0% 0% / 0.20);
     --shadow-2xl: 0px 4px 8px -2px hsl(0 0% 0% / 0.50);
+  }
+  .custom-font {
+    --font-sans: Architects Daughter, cursive;
+  }
+  .standard-font {
+    --font-sans: Arial, sans-serif;
   }
   body {
     letter-spacing: var(--tracking-normal);
