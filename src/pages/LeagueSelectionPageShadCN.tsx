@@ -581,15 +581,6 @@ export function LeagueSelectionPageShadCN() {
       <footer className="border-t py-8 px-4">
         <div className="container text-left md:text-center">
           <div className="space-y-4">
-            <div className="flex flex-col sm:flex-row gap-4 justify-center items-start sm:items-center text-sm text-muted-foreground">
-              <button
-                onClick={() => navigate("/terms")}
-                className="text-primary hover:underline"
-              >
-                Terms of Service & Privacy Policy
-              </button>
-            </div>
-            
             <div className="flex justify-center py-4">
               <a 
                 href="https://www.producthunt.com/products/loweffort-bet?embed=true&utm_source=badge-featured&utm_medium=badge&utm_source=badge-loweffort-bet" 
@@ -604,6 +595,15 @@ export function LeagueSelectionPageShadCN() {
                   height="54" 
                 />
               </a>
+            </div>
+            
+            <div className="flex flex-col sm:flex-row gap-4 justify-center items-start sm:items-center text-sm text-muted-foreground">
+              <button
+                onClick={() => navigate("/terms")}
+                className="text-primary hover:underline"
+              >
+                Terms of Service & Privacy Policy
+              </button>
             </div>
             
             <div className="text-xs text-muted-foreground space-y-2">
