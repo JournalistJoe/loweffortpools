@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useQuery, useMutation } from "convex/react";
 import { api } from "../../convex/_generated/api";
+import { Id, Doc } from "../../convex/_generated/dataModel";
 import { toast } from "sonner";
 import { Button } from "./ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
@@ -10,18 +11,18 @@ import { Label } from "./ui/label";
 import { ChevronUp, ChevronDown, Star, Settings } from "lucide-react";
 
 interface DraftPreferenceManagerProps {
-  leagueId: string;
+  leagueId: Id<"leagues">;
 }
 
 export function DraftPreferenceManager({ leagueId }: DraftPreferenceManagerProps) {
-  const [teams, setTeams] = useState<any[]>([]);
+  const [teams, setTeams] = useState<Doc<"nflTeams">[]>([]);
   const [enableAutoDraft, setEnableAutoDraft] = useState(true);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
 
-  const league = useQuery(api.leagues.getLeague, { leagueId: leagueId as any });
+  const league = useQuery(api.leagues.getLeague, { leagueId });
   const currentUser = useQuery(api.users.getCurrentUser);
-  const draftState = useQuery(api.draft.getDraftState, { leagueId: leagueId as any });
-  const preferences = useQuery(api.draft.getDraftPreferences, { leagueId: leagueId as any });
+  const draftState = useQuery(api.draft.getDraftState, { leagueId });
+  const preferences = useQuery(api.draft.getDraftPreferences, { leagueId });
   
   const setDraftPreferences = useMutation(api.draft.setDraftPreferences);
 
@@ -30,7 +31,7 @@ export function DraftPreferenceManager({ leagueId }: DraftPreferenceManagerProps
     if (draftState?.availableTeams && teams.length === 0) {
       if (preferences?.rankedTeams) {
         // Use existing preferences order
-        setTeams([...preferences.rankedTeams]);
+        setTeams(preferences.rankedTeams.filter((team): team is Doc<"nflTeams"> => team !== null));
         setEnableAutoDraft(preferences.enableAutoDraft);
       } else {
         // Initialize with available teams in alphabetical order
@@ -65,7 +66,7 @@ export function DraftPreferenceManager({ leagueId }: DraftPreferenceManagerProps
 
     try {
       await setDraftPreferences({
-        leagueId: leagueId as any,
+        leagueId,
         rankings: teams.map(team => team._id),
         enableAutoDraft,
       });

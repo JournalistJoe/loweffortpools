@@ -1,5 +1,6 @@
 import { v } from "convex/values";
-import { query, mutation, internalMutation } from "./_generated/server";
+import { query, mutation, internalMutation, MutationCtx } from "./_generated/server";
+import { Doc } from "./_generated/dataModel";
 import { getAuthUserId } from "@convex-dev/auth/server";
 import { api, internal } from "./_generated/api";
 
@@ -249,6 +250,55 @@ export const getActivity = query({
   },
 });
 
+// Helper query to get preferences by league and participant (ensures consistency)
+export const getPreferencesByLeagueAndParticipant = query({
+  args: {
+    leagueId: v.id("leagues"),
+    participantId: v.id("participants"),
+  },
+  handler: async (ctx, args) => {
+    const preferences = await ctx.db
+      .query("draftPreferences")
+      .withIndex("by_league_and_participant", (q) =>
+        q.eq("leagueId", args.leagueId).eq("participantId", args.participantId),
+      )
+      .first();
+
+    return preferences;
+  },
+});
+
+// Helper function to ensure unique preference (internal use)
+async function ensureUniquePreference(
+  ctx: MutationCtx,
+  leagueId: Doc<"leagues">['_id'],
+  participantId: Doc<"participants">['_id']
+) {
+  const allPreferences = await ctx.db
+    .query("draftPreferences")
+    .withIndex("by_league_and_participant", (q) =>
+      q.eq("leagueId", leagueId).eq("participantId", participantId),
+    )
+    .collect();
+
+  if (allPreferences.length > 1) {
+    // Keep the most recently updated preference, delete the rest
+    const mostRecent = allPreferences.reduce((latest, current) =>
+      current.updatedAt > latest.updatedAt ? current : latest
+    );
+
+    for (const preference of allPreferences) {
+      if (preference._id !== mostRecent._id) {
+        await ctx.db.delete(preference._id);
+      }
+    }
+
+    return mostRecent;
+  }
+
+  return allPreferences[0] || null;
+}
+
 export const setDraftPreferences = mutation({
   args: {
     leagueId: v.id("leagues"),
@@ -299,13 +349,12 @@ export const setDraftPreferences = mutation({
 
     const now = Date.now();
 
-    // Check for existing preferences
-    const existingPreferences = await ctx.db
-      .query("draftPreferences")
-      .withIndex("by_league_and_participant", (q) =>
-        q.eq("leagueId", args.leagueId).eq("participantId", participant._id),
-      )
-      .first();
+    // Ensure uniqueness first - clean up any duplicates before proceeding
+    let existingPreferences = await ensureUniquePreference(
+      ctx,
+      args.leagueId,
+      participant._id
+    );
 
     if (existingPreferences) {
       // Update existing preferences
@@ -323,6 +372,9 @@ export const setDraftPreferences = mutation({
         enableAutoDraft: args.enableAutoDraft,
         updatedAt: now,
       });
+
+      // Double-check for uniqueness after insert (race condition protection)
+      await ensureUniquePreference(ctx, args.leagueId, participant._id);
     }
 
     // Log activity
@@ -355,6 +407,7 @@ export const getDraftPreferences = query({
 
     if (!participant) return null;
 
+    // Get preferences directly to avoid circular reference
     const preferences = await ctx.db
       .query("draftPreferences")
       .withIndex("by_league_and_participant", (q) =>
@@ -366,7 +419,7 @@ export const getDraftPreferences = query({
 
     // Enrich with team data
     const rankedTeams = await Promise.all(
-      preferences.rankings.map(async (teamId) => {
+      preferences.rankings.map(async (teamId: Doc<"nflTeams">['_id']) => {
         const team = await ctx.db.get(teamId);
         return team;
       })
@@ -493,7 +546,7 @@ export const scheduleNextAutoPick = internalMutation({
 });
 
 // Helper function to schedule an auto-pick for the current turn
-async function scheduleAutoPick(ctx: any, league: any) {
+async function scheduleAutoPick(ctx: MutationCtx, league: Doc<"leagues">) {
   // Cancel existing scheduled auto-pick if there is one
   if (league.scheduledAutopickId) {
     try {
@@ -512,14 +565,18 @@ async function scheduleAutoPick(ctx: any, league: any) {
   }
 
   // Find current participant to check if they have auto-draft enabled
+  if (league.currentPickIndex === undefined) {
+    return; // No current pick to schedule
+  }
+  
   const currentDraftPosition = getParticipantForPick(league.currentPickIndex);
   const participants = await ctx.db
     .query("participants")
-    .withIndex("by_league", (q: any) => q.eq("leagueId", league._id))
+    .withIndex("by_league", (q) => q.eq("leagueId", league._id))
     .collect();
   
   const currentParticipant = participants.find(
-    (p: any) => p.draftPosition === currentDraftPosition,
+    (p) => p.draftPosition === currentDraftPosition,
   );
 
   // Determine delay based on auto-draft status
@@ -550,9 +607,9 @@ async function scheduleAutoPick(ctx: any, league: any) {
 
 // Helper function to make an auto-pick for a participant
 async function makeAutoPick(
-  ctx: any,
-  league: any,
-  currentParticipant: any,
+  ctx: MutationCtx,
+  league: Doc<"leagues">,
+  currentParticipant: Doc<"participants">,
   reason: "timeout" | "auto_enabled"
 ) {
   const now = Date.now();
@@ -560,38 +617,37 @@ async function makeAutoPick(
   // Get available teams
   const picks = await ctx.db
     .query("draftPicks")
-    .withIndex("by_league", (q: any) => q.eq("leagueId", league._id))
+    .withIndex("by_league", (q) => q.eq("leagueId", league._id))
     .collect();
 
   const nflTeams = await ctx.db
     .query("nflTeams")
-    .withIndex("by_season", (q: any) => q.eq("seasonYear", league.seasonYear))
+    .withIndex("by_season", (q) => q.eq("seasonYear", league.seasonYear))
     .collect();
 
-  const pickedTeamIds = new Set(picks.map((p: any) => p.nflTeamId));
+  const pickedTeamIds = new Set(picks.map((p) => p.nflTeamId));
   const availableTeams = nflTeams.filter(
-    (team: any) => !pickedTeamIds.has(team._id),
+    (team) => !pickedTeamIds.has(team._id),
   );
 
   if (availableTeams.length === 0) {
     return null; // No teams available
   }
 
-  // Try to get participant's draft preferences
+  // Try to get participant's draft preferences (ensure uniqueness)
   let selectedTeam;
   let usedPreferences = false;
   
-  const preferences = await ctx.db
-    .query("draftPreferences")
-    .withIndex("by_league_and_participant", (q: any) =>
-      q.eq("leagueId", league._id).eq("participantId", currentParticipant._id),
-    )
-    .first();
+  const preferences = await ensureUniquePreference(
+    ctx,
+    league._id,
+    currentParticipant._id
+  );
 
   if (preferences && preferences.rankings.length > 0) {
     // Find the highest ranked available team
     for (const teamId of preferences.rankings) {
-      const team = availableTeams.find((t: any) => t._id === teamId);
+      const team = availableTeams.find((t) => t._id === teamId);
       if (team) {
         selectedTeam = team;
         usedPreferences = true;
@@ -607,6 +663,10 @@ async function makeAutoPick(
   }
 
   // Make the pick
+  if (league.currentPickIndex === undefined) {
+    return null; // No current pick index
+  }
+  
   const round = Math.floor(league.currentPickIndex / 8) + 1;
   const pickNumber = league.currentPickIndex + 1;
 
@@ -659,8 +719,8 @@ async function makeAutoPick(
   }
 
   // Log auto-pick activity with appropriate message based on reason and preferences
-  let activityType;
-  let message;
+  let activityType: "draft_autopick" | "draft_preference_autopick";
+  let message: string;
 
   if (reason === "auto_enabled") {
     activityType = usedPreferences ? "draft_preference_autopick" : "draft_autopick";
@@ -686,7 +746,7 @@ async function makeAutoPick(
   // Send push notifications for autopick
   await ctx.scheduler.runAfter(0, api.notificationActions.notifyLeagueActivity, {
     leagueId: league._id,
-    activityType,
+    activityType: "draft_autopick", // Use generic autopick type for notifications
     message,
     participantId: currentParticipant._id,
     nflTeamId: selectedTeam._id,

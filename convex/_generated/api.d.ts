@@ -22,6 +22,7 @@ import type * as email from "../email.js";
 import type * as http from "../http.js";
 import type * as leagues from "../leagues.js";
 import type * as lib_pushNotificationSender from "../lib/pushNotificationSender.js";
+import type * as migrations from "../migrations.js";
 import type * as nflData from "../nflData.js";
 import type * as notificationActions from "../notificationActions.js";
 import type * as pushNotifications from "../pushNotifications.js";
@@ -49,6 +50,7 @@ declare const fullApi: ApiFromModules<{
   http: typeof http;
   leagues: typeof leagues;
   "lib/pushNotificationSender": typeof lib_pushNotificationSender;
+  migrations: typeof migrations;
   nflData: typeof nflData;
   notificationActions: typeof notificationActions;
   pushNotifications: typeof pushNotifications;

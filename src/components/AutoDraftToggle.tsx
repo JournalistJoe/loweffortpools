@@ -1,17 +1,22 @@
 import React, { useState } from 'react';
 import { useMutation } from "convex/react";
 import { api } from "../../convex/_generated/api";
+import { Id, Doc } from "../../convex/_generated/dataModel";
+
+// Minimal user type for current user context
+interface User {
+  _id: Id<"users">;
+}
 import { toast } from "sonner";
-import { Button } from "./ui/button";
 import { Switch } from "./ui/switch";
 import { Label } from "./ui/label";
 import { Card, CardContent } from "./ui/card";
 import { Bot, User, AlertTriangle } from "lucide-react";
 
 interface AutoDraftToggleProps {
-  leagueId: string;
-  participant?: any;
-  currentUser?: any;
+  leagueId: Id<"leagues">;
+  participant?: Doc<"participants">;
+  currentUser?: User;
   isCurrentParticipantTurn?: boolean;
 }
 
@@ -37,13 +42,13 @@ export function AutoDraftToggle({
     setIsLoading(true);
     try {
       await toggleAutoDraft({
-        leagueId: leagueId as any,
+        leagueId,
         enabled,
         reason: enabled ? "user_request" : undefined,
       });
       
       const message = enabled 
-        ? "Auto-draft enabled! You'll be automatically drafted when it's your turn."
+        ? "Auto-draft enabled! Your picks will be made automatically when it's your turn."
         : "Auto-draft disabled. You'll need to make picks manually.";
       
       toast.success(message);
@@ -101,7 +106,7 @@ export function AutoDraftToggle({
 }
 
 // Component to show auto-draft status for other participants in the draft board
-export function ParticipantAutoDraftStatus({ participant }: { participant: any }) {
+export function ParticipantAutoDraftStatus({ participant }: { participant: Doc<"participants"> }) {
   if (!participant.isAutoDrafting) {
     return null;
   }
