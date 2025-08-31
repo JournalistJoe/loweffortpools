@@ -590,6 +590,22 @@ export function LeagueSelectionPageShadCN() {
               </button>
             </div>
             
+            <div className="flex justify-center py-4">
+              <a 
+                href="https://www.producthunt.com/products/loweffort-bet?embed=true&utm_source=badge-featured&utm_medium=badge&utm_source=badge-loweffort-bet" 
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <img 
+                  src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=1011152&theme=neutral&t=1756667284548" 
+                  alt="LowEffort.bet - Because Fantasy Football is Too Much Work | Product Hunt" 
+                  style={{ width: '250px', height: '54px' }}
+                  width="250" 
+                  height="54" 
+                />
+              </a>
+            </div>
+            
             <div className="text-xs text-muted-foreground space-y-2">
               <p>
                 Created & Maintained by{" "}
