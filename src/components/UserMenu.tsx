@@ -1,9 +1,5 @@
-import { useState } from "react";
-import { useQuery } from "convex/react";
-import { api } from "../../convex/_generated/api";
-import { useTheme } from "../contexts/ThemeContext";
-import { useNotification } from "../contexts/NotificationContext";
 import { useNavigate } from "react-router-dom";
+import { useUserMenu } from "../hooks/useUserMenu";
 import { Button } from "./ui/button";
 import { Badge } from "./ui/badge";
 import {
@@ -33,29 +29,32 @@ import { PushNotificationManager } from "./PushNotificationManager";
 import { NotificationSettings } from "./NotificationSettings";
 
 export function UserMenu() {
-  const [showNotifications, setShowNotifications] = useState(false);
-  const currentUser = useQuery(api.auth.loggedInUser);
-  const { theme, toggleTheme } = useTheme();
-  const { subscriptionStatus, unreadCount, permission } = useNotification();
   const navigate = useNavigate();
+  const {
+    showNotifications,
+    setShowNotifications,
+    currentUser,
+    theme,
+    toggleTheme,
+    unreadCount,
+    permission,
+    subscriptionStatus,
+    getNotificationIconType,
+    getNotificationStatus,
+  } = useUserMenu();
 
   const getNotificationIcon = () => {
-    if (permission === "denied" || permission === "unsupported") {
+    const iconType = getNotificationIconType();
+    
+    if (iconType === "off") {
       return <BellOff className="w-4 h-4 text-muted-foreground" />;
     }
     
-    if (subscriptionStatus === "subscribed") {
+    if (iconType === "active") {
       return <Bell className="w-4 h-4 text-green-600" />;
     }
     
     return <Bell className="w-4 h-4 text-muted-foreground" />;
-  };
-
-  const getNotificationStatus = () => {
-    if (permission === "denied") return "Denied";
-    if (permission === "unsupported") return "Not Supported";
-    if (subscriptionStatus === "subscribed") return "Active";
-    return "Inactive";
   };
 
   return (

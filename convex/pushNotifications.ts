@@ -252,7 +252,7 @@ export const updateNotificationPreferences = mutation({
     enableDraftPicks: v.optional(v.boolean()),
     enableMyTurn: v.optional(v.boolean()),
     enableImportantOnly: v.optional(v.boolean()),
-    mutedUntil: v.optional(v.number()),
+    mutedUntil: v.optional(v.union(v.number(), v.null())),
   },
   handler: async (ctx, args) => {
     const userId = await getAuthUserId(ctx);
@@ -267,30 +267,44 @@ export const updateNotificationPreferences = mutation({
       )
       .first();
 
-    const updates = {
+    const updates: any = {
       ...(args.enableChatMessages !== undefined && { enableChatMessages: args.enableChatMessages }),
       ...(args.enableDraftPicks !== undefined && { enableDraftPicks: args.enableDraftPicks }),
       ...(args.enableMyTurn !== undefined && { enableMyTurn: args.enableMyTurn }),
       ...(args.enableImportantOnly !== undefined && { enableImportantOnly: args.enableImportantOnly }),
-      ...(args.mutedUntil !== undefined && { mutedUntil: args.mutedUntil }),
       updatedAt: now,
     };
+    
+    // Handle mutedUntil specially to allow clearing it
+    if (args.mutedUntil !== undefined) {
+      if (args.mutedUntil === null) {
+        updates.mutedUntil = undefined; // This will remove the field from the document
+      } else {
+        updates.mutedUntil = args.mutedUntil;
+      }
+    }
 
     if (existing) {
       await ctx.db.patch(existing._id, updates);
       return existing._id;
     } else {
-      const preferencesId = await ctx.db.insert("notificationPreferences", {
+      const insertData: any = {
         userId,
         leagueId: args.leagueId,
         enableChatMessages: args.enableChatMessages ?? true,
         enableDraftPicks: args.enableDraftPicks ?? true,
         enableMyTurn: args.enableMyTurn ?? true,
         enableImportantOnly: args.enableImportantOnly ?? false,
-        mutedUntil: args.mutedUntil,
         createdAt: now,
         updatedAt: now,
-      });
+      };
+      
+      // Only include mutedUntil if it's a valid number
+      if (args.mutedUntil && typeof args.mutedUntil === 'number') {
+        insertData.mutedUntil = args.mutedUntil;
+      }
+      
+      const preferencesId = await ctx.db.insert("notificationPreferences", insertData);
       return preferencesId;
     }
   },

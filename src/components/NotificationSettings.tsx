@@ -1,7 +1,6 @@
 import { useState, ReactNode } from "react";
 import { useMutation, useQuery, useAction } from "convex/react";
 import { api } from "../../convex/_generated/api";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/card";
 import { Button } from "./ui/button";
 import { Switch } from "./ui/switch";
 import { Label } from "./ui/label";
@@ -36,19 +35,19 @@ function NotificationToggleItem({
   disabled = false,
 }: NotificationToggleItemProps) {
   return (
-    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 p-3 sm:p-0 rounded-lg border sm:border-none bg-muted/30 sm:bg-transparent min-h-[60px] sm:min-h-[auto]">
-      <div className="flex items-start gap-3">
-        <div className={`w-5 h-5 sm:w-4 sm:h-4 ${iconColor} mt-0.5`}>
+    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 p-3 sm:p-0 rounded-lg border sm:border-none bg-muted/30 sm:bg-transparent w-full">
+      <div className="flex items-start gap-3 flex-1 min-w-0">
+        <div className={`w-5 h-5 sm:w-4 sm:h-4 ${iconColor} mt-0.5 flex-shrink-0`}>
           {icon}
         </div>
-        <div className="flex-1">
-          <Label className="font-medium text-base sm:text-sm">{title}</Label>
-          <p className="text-sm text-muted-foreground mt-1 leading-relaxed">
+        <div className="flex-1 min-w-0">
+          <Label className="font-medium text-base sm:text-sm break-words">{title}</Label>
+          <p className="text-sm text-muted-foreground mt-1 leading-relaxed break-words">
             {description}
           </p>
         </div>
       </div>
-      <div className="flex justify-end sm:justify-center">
+      <div className="flex justify-end sm:justify-center flex-shrink-0">
         <Switch
           checked={checked}
           onCheckedChange={onCheckedChange}
@@ -84,7 +83,7 @@ export function NotificationSettings({ leagueId, showGlobalSettings = false }: N
 
   const handleMuteFor = async (hours: string) => {
     const hoursNum = parseInt(hours);
-    const mutedUntil = hoursNum > 0 ? Date.now() + (hoursNum * 60 * 60 * 1000) : undefined;
+    const mutedUntil = hoursNum > 0 ? Date.now() + (hoursNum * 60 * 60 * 1000) : null;
     
     try {
       await updatePreferences({
@@ -106,22 +105,20 @@ export function NotificationSettings({ leagueId, showGlobalSettings = false }: N
 
   if (!preferences) {
     return (
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Bell className="w-5 h-5" />
-            Notification Settings
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="flex items-center justify-center p-6">
+      <div className="space-y-4">
+        <h3 className="flex items-center gap-2 text-lg font-semibold">
+          <Bell className="w-5 h-5" />
+          Notification Settings
+        </h3>
+        <div className="border rounded-lg p-6">
+          <div className="flex items-center justify-center">
             <div className="text-center text-muted-foreground">
               <Bell className="w-8 h-8 mx-auto mb-2" />
               <p>Loading notification settings...</p>
             </div>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     );
   }
 
@@ -131,49 +128,48 @@ export function NotificationSettings({ leagueId, showGlobalSettings = false }: N
     : 0;
 
   return (
-    <Card>
-      <CardHeader>
-        <div className="space-y-3 sm:space-y-0 sm:flex sm:items-center sm:justify-between">
-          <div className="space-y-2">
-            <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
-              <Bell className="w-4 h-4 sm:w-5 sm:h-5" />
-              <span>Notification Settings</span>
-              {!showGlobalSettings && leagueId && (
-                <Badge variant="secondary" className="text-xs ml-2">League Specific</Badge>
-              )}
-            </CardTitle>
-            <CardDescription className="text-sm">
-              {showGlobalSettings 
-                ? "Default notification preferences for all leagues"
-                : preferences?.isUsingGlobalDefaults
-                  ? "Using global defaults - customize below to override for this league"
-                  : "Customize notifications for this league"
-              }
-            </CardDescription>
-          </div>
-          <div className="flex flex-col gap-2 sm:flex-row sm:gap-3 sm:items-center">
-            {preferences?.isUsingGlobalDefaults && !showGlobalSettings && (
-              <Badge variant="outline" className="text-blue-600 border-blue-600 self-start sm:self-center">
-                <Bell className="w-3 h-3 mr-1" />
-                Using Global Defaults
-              </Badge>
+    <div className="space-y-6 w-full">
+      <div className="space-y-3 sm:space-y-0 sm:flex sm:items-center sm:justify-between">
+        <div className="space-y-2 flex-1 min-w-0">
+          <h3 className="flex items-center gap-2 text-lg font-semibold flex-wrap">
+            <Bell className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" />
+            <span>Notification Settings</span>
+            {!showGlobalSettings && leagueId && (
+              <Badge variant="secondary" className="text-xs">League Specific</Badge>
             )}
-            {isMuted && (
-              <Badge variant="outline" className="text-orange-600 border-orange-600 self-start sm:self-center">
-                <BellOff className="w-3 h-3 mr-1" />
-                Muted ({muteTimeRemaining}h left)
-              </Badge>
-            )}
-          </div>
+          </h3>
+          <p className="text-sm text-muted-foreground break-words">
+            {showGlobalSettings 
+              ? "Default notification preferences for all leagues"
+              : preferences?.isUsingGlobalDefaults
+                ? "Using global defaults - customize below to override for this league"
+                : "Customize notifications for this league"
+            }
+          </p>
         </div>
-      </CardHeader>
-      <CardContent className="space-y-6">
+        <div className="flex flex-col gap-2 sm:flex-row sm:gap-3 sm:items-center flex-shrink-0">
+          {preferences?.isUsingGlobalDefaults && !showGlobalSettings && (
+            <Badge variant="outline" className="text-blue-600 border-blue-600 self-start sm:self-center">
+              <Bell className="w-3 h-3 mr-1" />
+              Using Global Defaults
+            </Badge>
+          )}
+          {isMuted && (
+            <Badge variant="outline" className="text-orange-600 border-orange-600 self-start sm:self-center">
+              <BellOff className="w-3 h-3 mr-1" />
+              Muted ({muteTimeRemaining}h left)
+            </Badge>
+          )}
+        </div>
+      </div>
+
+      <div className="border rounded-lg p-4 space-y-6 w-full overflow-hidden">
         {/* Mute Controls */}
-        <div className="space-y-3">
+        <div className="space-y-3 w-full">
           <Label className="text-sm font-medium">Temporary Mute</Label>
-          <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-3 w-full">
             <Select value={muteFor} onValueChange={setMuteFor}>
-              <SelectTrigger className="w-full sm:w-40 min-h-[44px]">
+              <SelectTrigger className="w-full sm:w-40">
                 <SelectValue placeholder="Mute for..." />
               </SelectTrigger>
               <SelectContent>
@@ -188,7 +184,7 @@ export function NotificationSettings({ leagueId, showGlobalSettings = false }: N
             <Button 
               variant="outline" 
               onClick={() => handleMuteFor(muteFor)}
-              className="min-h-[44px] w-full sm:w-auto"
+              className="w-full sm:w-auto"
             >
               Apply
             </Button>
@@ -263,7 +259,7 @@ export function NotificationSettings({ leagueId, showGlobalSettings = false }: N
             )}
           </div>
         </div>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 }

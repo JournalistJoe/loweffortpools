@@ -83,11 +83,11 @@ define(['./workbox-e7681877'], (function (workbox) { 'use strict';
     "revision": "3ca0b8505b4bec776b69afdba2768812"
   }, {
     "url": "index.html",
-    "revision": "0.9vg79s33c18"
+    "revision": "0.mcj824gcg8"
   }], {});
   workbox.cleanupOutdatedCaches();
   workbox.registerRoute(new workbox.NavigationRoute(workbox.createHandlerBoundToURL("index.html"), {
-    denylist: [/^\/api\//, /^\/static\//, /^\/assets\//, /^\/.*\.(js|css|png|jpg|jpeg|gif|svg|ico|woff|woff2|ttf|eot)$/]
+    allowlist: [/^\/$/]
   }));
   workbox.registerRoute(/^https:\/\/api\.convex\.cloud/, new workbox.NetworkFirst({
     "cacheName": "convex-api",

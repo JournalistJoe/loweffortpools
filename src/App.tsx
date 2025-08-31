@@ -22,7 +22,7 @@ import { LeaderboardPage } from "./pages/LeaderboardPage";
 import { TeamPage } from "./pages/TeamPage";
 import { SchedulePage } from "./pages/SchedulePage";
 import { ParticipantsPage } from "./pages/ParticipantsPage";
-import { LeagueWrapper } from "./components/LeagueWrapper";
+import { LeagueLayout } from "./components/LeagueLayout";
 import { ForgotPasswordPage } from "./pages/ForgotPasswordPage";
 import { PasswordResetPage } from "./pages/PasswordResetPage";
 import { EmailVerificationPage } from "./pages/EmailVerificationPage";
@@ -73,54 +73,14 @@ function AuthenticatedRoutes() {
           <Routes>
             <Route path="/" element={<LeagueSelectionPage />} />
             <Route path="/system-admin" element={<SystemAdminPage />} />
-            <Route
-              path="/league/:leagueId/draft"
-              element={
-                <LeagueWrapper>
-                  <DraftPage />
-                </LeagueWrapper>
-              }
-            />
-            <Route
-              path="/league/:leagueId/admin"
-              element={
-                <LeagueWrapper>
-                  <AdminPage />
-                </LeagueWrapper>
-              }
-            />
-            <Route
-              path="/league/:leagueId/leaderboard"
-              element={
-                <LeagueWrapper>
-                  <LeaderboardPage />
-                </LeagueWrapper>
-              }
-            />
-            <Route
-              path="/league/:leagueId/team/:participantId"
-              element={
-                <LeagueWrapper>
-                  <TeamPage />
-                </LeagueWrapper>
-              }
-            />
-            <Route
-              path="/league/:leagueId/schedule"
-              element={
-                <LeagueWrapper>
-                  <SchedulePage />
-                </LeagueWrapper>
-              }
-            />
-            <Route
-              path="/league/:leagueId/participants"
-              element={
-                <LeagueWrapper>
-                  <ParticipantsPage />
-                </LeagueWrapper>
-              }
-            />
+            <Route path="/league/:leagueId" element={<LeagueLayout />}>
+              <Route path="draft" element={<DraftPage />} />
+              <Route path="admin" element={<AdminPage />} />
+              <Route path="leaderboard" element={<LeaderboardPage />} />
+              <Route path="team/:participantId" element={<TeamPage />} />
+              <Route path="schedule" element={<SchedulePage />} />
+              <Route path="participants" element={<ParticipantsPage />} />
+            </Route>
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </LeagueProvider>

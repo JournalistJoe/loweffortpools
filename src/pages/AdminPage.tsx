@@ -3,7 +3,7 @@ import { api } from "../../convex/_generated/api";
 import { useState } from "react";
 import { toast } from "sonner";
 import { useParams } from "react-router-dom";
-import { MobileNavigationShadCN as Navigation } from "../components/MobileNavigationShadCN";
+import { LeagueNavigation as Navigation } from "../components/LeagueNavigation";
 
 export function AdminPage() {
   const { leagueId } = useParams<{ leagueId: string }>();

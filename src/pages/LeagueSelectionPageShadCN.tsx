@@ -40,6 +40,7 @@ import { DraftCountdown } from "../components/DraftCountdown";
 import { EmptyLeaguesState } from "../components/EmptyLeaguesState";
 import { SignOutButton } from "../SignOutButton";
 import { UserMenu } from "../components/UserMenu";
+import { AppHeader } from "../components/AppHeader";
 
 export function LeagueSelectionPageShadCN() {
   const leagues = useQuery(api.leagues.getUserLeagues);
@@ -253,35 +254,21 @@ export function LeagueSelectionPageShadCN() {
     );
   }
 
+  const systemAdminAction = currentUser?.isSuperuser ? (
+    <Button
+      onClick={() => navigate("/system-admin")}
+      variant="ghost"
+      size="sm"
+      className="gap-2"
+    >
+      <Settings className="h-4 w-4" />
+      System Admin
+    </Button>
+  ) : null;
+
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div className="container flex h-16 items-center justify-between">
-          <div className="flex items-center space-x-2">
-            <img 
-              src={theme === "dark" ? "/lowEffortLogo-darkmode.png" : "/lowEffortLogo.png"}
-              alt="LowEffort.bet Logo" 
-              className="h-8 w-8"
-            />
-            <span className="text-xl font-bold">LowEffort.bet</span>
-          </div>
-          <div className="flex items-center space-x-2">
-            {currentUser?.isSuperuser && (
-              <Button
-                onClick={() => navigate("/system-admin")}
-                variant="ghost"
-                size="sm"
-                className="gap-2"
-              >
-                <Settings className="h-4 w-4" />
-                System Admin
-              </Button>
-            )}
-            <UserMenu />
-          </div>
-        </div>
-      </header>
+      <AppHeader actions={systemAdminAction} />
 
       {/* Main Content */}
       <main className="max-w-6xl mx-auto p-6 pb-20">

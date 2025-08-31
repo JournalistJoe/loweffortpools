@@ -3,7 +3,6 @@ import { api } from "../../convex/_generated/api";
 import { useState } from "react";
 import { toast } from "sonner";
 import { useParams } from "react-router-dom";
-import { MobileNavigationShadCN as Navigation } from "../components/MobileNavigationShadCN";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
@@ -305,7 +304,6 @@ export function AdminPageShadCN() {
   if (!league?.isAdmin) {
     return (
       <div>
-        {league && <Navigation league={league} />}
         <div className="max-w-2xl mx-auto text-center py-12">
           <Shield className="h-16 w-16 mx-auto text-muted-foreground mb-4" />
           <h1 className="text-2xl font-bold text-foreground mb-4">
@@ -321,7 +319,6 @@ export function AdminPageShadCN() {
 
   return (
     <div>
-      <Navigation league={league} />
       <div className="max-w-4xl mx-auto p-4 pb-20">
         <div className="mb-6">
           <div className="flex items-center justify-between">

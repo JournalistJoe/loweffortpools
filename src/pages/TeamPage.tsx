@@ -1,7 +1,6 @@
 import { useQuery, useMutation } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import { useParams } from "react-router-dom";
-import { MobileNavigationShadCN as Navigation } from "../components/MobileNavigationShadCN";
 import { useState } from "react";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
@@ -76,7 +75,6 @@ export function TeamPage() {
 
   return (
     <div>
-      <Navigation league={league} />
       <div className="max-w-6xl mx-auto p-4 pb-20">
         {/* Team Settings Section for Setup Phase */}
         {league.status === "setup" && canEditParticipant && (

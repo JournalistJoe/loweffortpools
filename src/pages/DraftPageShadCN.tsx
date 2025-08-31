@@ -3,7 +3,6 @@ import { api } from "../../convex/_generated/api";
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { useParams } from "react-router-dom";
-import { MobileNavigationShadCN as Navigation } from "../components/MobileNavigationShadCN";
 import { Button } from "../components/ui/button";
 import { Badge } from "../components/ui/badge";
 import {
@@ -80,7 +79,6 @@ export function DraftPageShadCN() {
   if (isCommissionerAlone) {
     return (
       <div>
-        <Navigation league={league} />
         <CommissionerWelcome league={league} currentUser={currentUser} />
       </div>
     );
@@ -89,7 +87,6 @@ export function DraftPageShadCN() {
   if (isPartialLeague) {
     return (
       <div>
-        <Navigation league={league} />
         <PartialLeagueWelcome 
           league={league} 
           currentUser={currentUser} 
@@ -110,7 +107,6 @@ export function DraftPageShadCN() {
 
   return (
     <div>
-      <Navigation league={league} />
       <div className="max-w-7xl mx-auto p-4 pb-20">
         <div className="mb-6">
           <div className="flex justify-between items-start">

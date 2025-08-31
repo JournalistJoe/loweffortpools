@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import { useMutation, useQuery } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import { Button } from "./ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/card";
 import { Badge } from "./ui/badge";
 import { Bell, BellOff, AlertCircle, CheckCircle2 } from "lucide-react";
 import { toast } from "sonner";
@@ -270,36 +269,36 @@ export function PushNotificationManager() {
     }
 
     return (
-      <div className="space-y-4">
+      <div className="space-y-4 w-full">
         <div className="text-center">
           <Bell className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
           {subscriptionStatus === "subscribed" ? (
-            <div>
-              <p className="font-medium text-green-600 mb-2">
+            <div className="space-y-2">
+              <p className="font-medium text-green-600">
                 Push notifications are active!
               </p>
-              <p className="text-sm text-muted-foreground">
+              <p className="text-sm text-muted-foreground break-words">
                 You'll receive notifications for draft picks, your turn, and chat messages.
               </p>
             </div>
           ) : (
-            <div>
-              <p className="font-medium mb-2">Enable Push Notifications</p>
-              <p className="text-sm text-muted-foreground">
+            <div className="space-y-2">
+              <p className="font-medium">Enable Push Notifications</p>
+              <p className="text-sm text-muted-foreground break-words">
                 Get notified about draft picks, your turn, and important league updates even when the app is closed.
               </p>
             </div>
           )}
         </div>
 
-        <div className="flex justify-center">
+        <div className="flex justify-center w-full">
           {subscriptionStatus === "subscribed" ? (
-            <Button variant="outline" onClick={handleUnsubscribe}>
+            <Button variant="outline" onClick={handleUnsubscribe} className="w-full sm:w-auto">
               <BellOff className="w-4 h-4 mr-2" />
               Disable Notifications
             </Button>
           ) : (
-            <Button onClick={handleSubscribe} disabled={subscriptionStatus === "checking"}>
+            <Button onClick={handleSubscribe} disabled={subscriptionStatus === "checking"} className="w-full sm:w-auto">
               <Bell className="w-4 h-4 mr-2" />
               Enable Notifications
             </Button>
@@ -307,14 +306,14 @@ export function PushNotificationManager() {
         </div>
 
         {userSubscriptions && userSubscriptions.length > 0 && (
-          <div className="pt-4 border-t">
+          <div className="pt-4 border-t w-full">
             <p className="text-sm text-muted-foreground mb-2">
               Active on {userSubscriptions.length} device{userSubscriptions.length !== 1 ? "s" : ""}
             </p>
-            <div className="space-y-2">
+            <div className="space-y-2 w-full">
               {userSubscriptions.map((sub) => (
-                <div key={sub._id} className="text-xs bg-muted p-2 rounded">
-                  <p className="font-mono truncate">
+                <div key={sub._id} className="text-xs bg-muted p-2 rounded w-full overflow-hidden">
+                  <p className="truncate w-full" title={sub.userAgent || "Unknown device"}>
                     {sub.userAgent || "Unknown device"}
                   </p>
                   <p className="text-muted-foreground">
@@ -330,24 +329,25 @@ export function PushNotificationManager() {
   };
 
   return (
-    <Card>
-      <CardHeader>
-        <div className="flex items-center justify-between">
-          <div>
-            <CardTitle className="flex items-center gap-2">
-              <Bell className="w-5 h-5" />
-              Push Notifications
-            </CardTitle>
-            <CardDescription>
-              Get notified about league activity and your draft turns
-            </CardDescription>
-          </div>
+    <div className="space-y-4 w-full">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+        <div className="space-y-1 flex-1 min-w-0">
+          <h3 className="flex items-center gap-2 text-lg font-semibold">
+            <Bell className="w-5 h-5" />
+            Push Notifications
+          </h3>
+          <p className="text-sm text-muted-foreground break-words">
+            Get notified about league activity and your draft turns
+          </p>
+        </div>
+        <div className="flex-shrink-0">
           {renderStatus()}
         </div>
-      </CardHeader>
-      <CardContent>
+      </div>
+      
+      <div className="border rounded-lg p-4 w-full overflow-hidden">
         {renderContent()}
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 }
