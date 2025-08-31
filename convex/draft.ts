@@ -268,36 +268,6 @@ export const getPreferencesByLeagueAndParticipant = query({
   },
 });
 
-// Helper function to ensure unique preference (internal use)
-async function ensureUniquePreference(
-  ctx: MutationCtx,
-  leagueId: Doc<"leagues">['_id'],
-  participantId: Doc<"participants">['_id']
-) {
-  const allPreferences = await ctx.db
-    .query("draftPreferences")
-    .withIndex("by_league_and_participant", (q) =>
-      q.eq("leagueId", leagueId).eq("participantId", participantId),
-    )
-    .collect();
-
-  if (allPreferences.length > 1) {
-    // Keep the most recently updated preference, delete the rest
-    const mostRecent = allPreferences.reduce((latest, current) =>
-      current.updatedAt > latest.updatedAt ? current : latest
-    );
-
-    for (const preference of allPreferences) {
-      if (preference._id !== mostRecent._id) {
-        await ctx.db.delete(preference._id);
-      }
-    }
-
-    return mostRecent;
-  }
-
-  return allPreferences[0] || null;
-}
 
 export const setDraftPreferences = mutation({
   args: {
@@ -349,12 +319,13 @@ export const setDraftPreferences = mutation({
 
     const now = Date.now();
 
-    // Ensure uniqueness first - clean up any duplicates before proceeding
-    let existingPreferences = await ensureUniquePreference(
-      ctx,
-      args.leagueId,
-      participant._id
-    );
+    // Check for existing preferences
+    const existingPreferences = await ctx.db
+      .query("draftPreferences")
+      .withIndex("by_league_and_participant", (q) =>
+        q.eq("leagueId", args.leagueId).eq("participantId", participant._id)
+      )
+      .first();
 
     if (existingPreferences) {
       // Update existing preferences
@@ -372,9 +343,6 @@ export const setDraftPreferences = mutation({
         enableAutoDraft: args.enableAutoDraft,
         updatedAt: now,
       });
-
-      // Double-check for uniqueness after insert (race condition protection)
-      await ensureUniquePreference(ctx, args.leagueId, participant._id);
     }
 
     // Log activity
@@ -634,15 +602,16 @@ async function makeAutoPick(
     return null; // No teams available
   }
 
-  // Try to get participant's draft preferences (ensure uniqueness)
+  // Try to get participant's draft preferences
   let selectedTeam;
   let usedPreferences = false;
   
-  const preferences = await ensureUniquePreference(
-    ctx,
-    league._id,
-    currentParticipant._id
-  );
+  const preferences = await ctx.db
+    .query("draftPreferences")
+    .withIndex("by_league_and_participant", (q) =>
+      q.eq("leagueId", league._id).eq("participantId", currentParticipant._id)
+    )
+    .first();
 
   if (preferences && preferences.rankings.length > 0) {
     // Find the highest ranked available team
