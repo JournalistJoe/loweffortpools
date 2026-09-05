@@ -18,7 +18,7 @@ export function TermsOfServicePage() {
         <div className="container flex h-16 items-center justify-between">
           <div className="flex items-center space-x-2">
             <button
-              onClick={() => navigate("/")}
+              onClick={() => void navigate("/")}
               className="flex items-center space-x-2 hover:opacity-75 transition-opacity"
             >
               <img 
@@ -42,7 +42,7 @@ export function TermsOfServicePage() {
                 <Sun className="h-4 w-4" />
               )}
             </Button>
-            <Button variant="ghost" onClick={() => navigate("/")} className="gap-2">
+            <Button variant="ghost" onClick={() => void navigate("/")} className="gap-2">
               <ArrowLeft className="h-4 w-4" />
               Back to Home
             </Button>
@@ -281,7 +281,7 @@ export function TermsOfServicePage() {
                 </div>
 
                 <div className="text-center">
-                  <Button onClick={() => navigate("/")} variant="outline" className="gap-2">
+                  <Button onClick={() => void navigate("/")} variant="outline" className="gap-2">
                     <ArrowLeft className="h-4 w-4" />
                     Back to Home
                   </Button>

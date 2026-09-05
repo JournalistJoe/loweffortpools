@@ -45,14 +45,14 @@ export function PasswordResetPage() {
           
           <div className="space-y-4">
             <Button 
-              onClick={() => navigate("/forgot-password")}
+              onClick={() => void navigate("/forgot-password")}
               className="w-full"
             >
               Request New Reset Link
             </Button>
             <Button 
               variant="ghost" 
-              onClick={() => navigate(-1)}
+              onClick={() => void navigate(-1)}
               className="w-full"
             >
               Back to Sign In
@@ -89,7 +89,7 @@ export function PasswordResetPage() {
         <div className="text-center mt-6">
           <Button 
             variant="ghost" 
-            onClick={() => navigate("/forgot-password")}
+            onClick={() => void navigate("/forgot-password")}
             className="text-sm"
           >
             ← Back to Forgot Password

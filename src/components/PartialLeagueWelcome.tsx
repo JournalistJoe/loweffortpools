@@ -1,10 +1,9 @@
 import { Button } from "./ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { Badge } from "./ui/badge";
-import { Separator } from "./ui/separator";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
-import { Share, Calendar, Users, Crown, Trophy, Clock, CheckCircle, AlertCircle } from "lucide-react";
+import { Share, Calendar, Users, CheckCircle, AlertCircle } from "lucide-react";
 import { toast } from "sonner";
 import { useState, useEffect, useMemo } from "react";
 import { useMutation } from "convex/react";
@@ -100,7 +99,7 @@ export function PartialLeagueWelcome({ league, currentUser, participants }: Part
       );
       setShowDraftDateInput(true);
     } else {
-      saveDraftDate();
+      void saveDraftDate();
     }
   };
   
@@ -422,7 +421,7 @@ Don't make me be the guy who couldn't get 8 people together for something this s
                 </p>
               </div>
               <div className="flex gap-2 justify-center">
-                <Button onClick={saveDraftDate} size="sm">
+                <Button onClick={() => void saveDraftDate()} size="sm">
                   Save Draft Date
                 </Button>
                 <Button variant="outline" onClick={cancelDraftDate} size="sm">

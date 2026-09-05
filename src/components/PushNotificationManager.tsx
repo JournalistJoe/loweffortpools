@@ -19,13 +19,13 @@ export function PushNotificationManager() {
 
   // Check push notification support and permission status
   useEffect(() => {
-    checkNotificationSupport();
+    void checkNotificationSupport();
   }, []);
 
   // Verify existing subscription when userSubscriptions data is available
   useEffect(() => {
     if (userSubscriptions !== undefined) {
-      verifyExistingSubscription();
+      void verifyExistingSubscription();
     }
   }, [userSubscriptions]);
 
@@ -293,12 +293,12 @@ export function PushNotificationManager() {
 
         <div className="flex justify-center w-full">
           {subscriptionStatus === "subscribed" ? (
-            <Button variant="outline" onClick={handleUnsubscribe} className="w-full sm:w-auto">
+            <Button variant="outline" onClick={() => void handleUnsubscribe()} className="w-full sm:w-auto">
               <BellOff className="w-4 h-4 mr-2" />
               Disable Notifications
             </Button>
           ) : (
-            <Button onClick={handleSubscribe} disabled={subscriptionStatus === "checking"} className="w-full sm:w-auto">
+            <Button onClick={() => void handleSubscribe()} disabled={subscriptionStatus === "checking"} className="w-full sm:w-auto">
               <Bell className="w-4 h-4 mr-2" />
               Enable Notifications
             </Button>

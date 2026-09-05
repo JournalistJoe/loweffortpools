@@ -95,7 +95,7 @@ export function AutoDraftToggle({
           <div className="flex items-center space-x-2">
             <Switch
               checked={isAutoDrafting}
-              onCheckedChange={handleToggle}
+              onCheckedChange={(enabled) => void handleToggle(enabled)}
               disabled={isLoading}
             />
           </div>

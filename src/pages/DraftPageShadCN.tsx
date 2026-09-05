@@ -15,7 +15,7 @@ import {
 import { Clock, Trophy, Users, Bot } from "lucide-react";
 import { CommissionerWelcome } from "../components/CommissionerWelcome";
 import { PartialLeagueWelcome } from "../components/PartialLeagueWelcome";
-import { AutoDraftToggle, ParticipantAutoDraftStatus } from "../components/AutoDraftToggle";
+import { AutoDraftToggle } from "../components/AutoDraftToggle";
 
 export function DraftPageShadCN() {
   const { leagueId } = useParams<{ leagueId: string }>();
@@ -314,7 +314,7 @@ export function DraftPageShadCN() {
                       {/* Desktop version - centered in card */}
                       <div className="mt-4 flex justify-center sm:block hidden">
                         <Button
-                          onClick={handleMakePick}
+                          onClick={() => void handleMakePick()}
                           size="lg"
                           className="gap-2"
                         >
@@ -334,7 +334,7 @@ export function DraftPageShadCN() {
         {(isUserTurn || canAdminPick) && selectedTeam && draftState.league.status === "draft" && (
           <div className="sm:hidden fixed bottom-20 left-4 right-4 z-50">
             <Button
-              onClick={handleMakePick}
+              onClick={() => void handleMakePick()}
               size="lg"
               className="gap-2 w-full shadow-lg"
             >

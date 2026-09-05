@@ -6,7 +6,7 @@ import { isValidJoinCode } from "../utils/joinCodeUtils";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
-import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
+import { Card, CardContent, CardHeader } from "./ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
 import { useNavigate } from "react-router-dom";
 
@@ -159,7 +159,7 @@ export function MobileSignInFormShadCN({ joinCode }: MobileSignInFormShadCNProps
                 </div>
               ) : (
                 // Regular form for sign-in or sign-up
-                <form onSubmit={handleSubmit} className="space-y-6">
+                <form onSubmit={(e) => void handleSubmit(e)} className="space-y-6">
                 <div className="space-y-2">
                   <Label htmlFor="email" className="text-base font-medium">
                     Email
@@ -219,7 +219,7 @@ export function MobileSignInFormShadCN({ joinCode }: MobileSignInFormShadCNProps
                   <div className="text-center">
                     <button
                       type="button"
-                      onClick={() => navigate("/forgot-password")}
+                      onClick={() => void navigate("/forgot-password")}
                       className="text-sm text-blue-600 hover:text-blue-800 hover:underline"
                     >
                       Forgot your password?

@@ -26,7 +26,6 @@ const sendEmail = async (to: string, subject: string, html: string, text: string
 export async function sendPasswordResetEmail({
   identifier,
   token,
-  url,
 }: {
   identifier: string;
   token: string;
@@ -87,7 +86,6 @@ This link will expire in 1 hour. If you didn't request this, you can safely igno
 export async function sendVerificationEmail({
   identifier,
   token,
-  url,
 }: {
   identifier: string;
   token: string;

@@ -1,5 +1,5 @@
 import { v } from "convex/values";
-import { action, internalAction } from "./_generated/server";
+import { action } from "./_generated/server";
 import { api } from "./_generated/api";
 
 // Notify about league activity
@@ -44,7 +44,6 @@ export const notifyLeagueActivity = action({
 
     // Determine notification priority and settings
     const isHighPriority = ["draft_started", "draft_pick", "draft_autopick"].includes(args.activityType);
-    const isMyTurn = args.activityType === "draft_started" || args.activityType === "draft_pick";
 
     // Get NFL team info if available
     let nflTeam = null;
@@ -222,7 +221,7 @@ export const notifyChatMessage = action({
         console.log(`Processing chat notification for user ${userId} in league ${args.leagueId}`);
         
         // Check user's notification preferences
-        let preferences = await ctx.runQuery(api.pushNotifications.getUserNotificationPreferences, {
+        const preferences = await ctx.runQuery(api.pushNotifications.getUserNotificationPreferences, {
           userId: userId,
           leagueId: args.leagueId,
         });
@@ -241,7 +240,7 @@ export const notifyChatMessage = action({
 
         // Skip if user has notifications muted
         if (preferences.mutedUntil && Date.now() < preferences.mutedUntil) {
-          console.log(`Skipping user ${userId}: notifications muted until ${new Date(preferences.mutedUntil)}`);
+          console.log(`Skipping user ${userId}: notifications muted until ${new Date(preferences.mutedUntil).toISOString()}`);
           continue;
         }
 

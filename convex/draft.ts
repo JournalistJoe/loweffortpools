@@ -201,7 +201,7 @@ export const makePick = mutation({
       if (league.scheduledAutopickId) {
         try {
           await ctx.scheduler.cancel(league.scheduledAutopickId);
-        } catch (error) {
+        } catch {
           // Function may have already executed or been cancelled, ignore error
         }
       }
@@ -532,7 +532,7 @@ async function scheduleAutoPick(ctx: MutationCtx, league: Doc<"leagues">) {
   if (league.scheduledAutopickId) {
     try {
       await ctx.scheduler.cancel(league.scheduledAutopickId);
-    } catch (error) {
+    } catch {
       // Function may have already executed or been cancelled, ignore error
     }
   }

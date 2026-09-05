@@ -33,13 +33,13 @@ export function EmailVerificationPage() {
     newParams.delete("token");
     newParams.delete("email");
     const newUrl = window.location.pathname + (newParams.toString() ? "?" + newParams.toString() : "");
-    navigate(newUrl, { replace: true });
+    void navigate(newUrl, { replace: true });
   }, [searchParams, navigate]);
 
   useEffect(() => {
     if (token && email && !isVerifying && !isVerified && !error) {
       setIsVerifying(true);
-      handleEmailVerification();
+      void handleEmailVerification();
     }
   }, [token, email, isVerifying, isVerified, error]);
 
@@ -60,7 +60,7 @@ export function EmailVerificationPage() {
       });
       // Redirect to home page after a short delay
       setTimeout(() => {
-        navigate("/");
+        void navigate("/");
       }, 2000);
     } catch (error) {
       console.error("Email verification error:", error);
@@ -96,7 +96,7 @@ export function EmailVerificationPage() {
           
           <div className="space-y-4">
             <Button 
-              onClick={() => navigate("/")}
+              onClick={() => void navigate("/")}
               className="w-full"
             >
               Back to Sign In

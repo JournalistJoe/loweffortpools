@@ -48,7 +48,7 @@ export function PasswordResetForm({ token, email }: PasswordResetFormProps) {
     try {
       await signIn("password", resetFormData);
       toast.success("Password reset successful! You are now signed in.");
-      navigate("/"); // Redirect to home page
+      void navigate("/"); // Redirect to home page
     } catch (error) {
       console.error("Password reset verification error:", error);
       if (error instanceof Error && error.message.includes("expired")) {
@@ -73,7 +73,7 @@ export function PasswordResetForm({ token, email }: PasswordResetFormProps) {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <form onSubmit={(e) => void handleSubmit(e)} className="space-y-6">
             <div className="space-y-2">
               <Label htmlFor="email-display" className="text-base font-medium">
                 Email Address

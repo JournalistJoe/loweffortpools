@@ -138,7 +138,7 @@ export function DraftPreferenceManager({ leagueId }: DraftPreferenceManagerProps
             {hasUnsavedChanges && (
               <div className="flex items-center justify-between bg-yellow-50 border border-yellow-200 rounded-md p-3">
                 <p className="text-sm text-yellow-800">You have unsaved changes</p>
-                <Button onClick={handleSavePreferences} size="sm">
+                <Button onClick={() => void handleSavePreferences()} size="sm">
                   Save Changes
                 </Button>
               </div>
@@ -209,7 +209,7 @@ export function DraftPreferenceManager({ leagueId }: DraftPreferenceManagerProps
 
           <div className="mt-6 flex gap-3">
             <Button 
-              onClick={handleSavePreferences}
+              onClick={() => void handleSavePreferences()}
               disabled={!hasUnsavedChanges || teams.length === 0}
               className="flex-1"
             >

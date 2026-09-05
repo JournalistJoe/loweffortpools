@@ -1,10 +1,10 @@
 import { Button } from "./ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
+import { Card, CardContent } from "./ui/card";
 import { Badge } from "./ui/badge";
 import { Separator } from "./ui/separator";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
-import { Share, Calendar, Users, Crown, Trophy, Clock } from "lucide-react";
+import { Share, Calendar, Users, Crown, Trophy } from "lucide-react";
 import { toast } from "sonner";
 import { useState, useEffect, useMemo } from "react";
 import { useMutation } from "convex/react";
@@ -90,7 +90,7 @@ export function CommissionerWelcome({ league, currentUser }: CommissionerWelcome
       );
       setShowDraftDateInput(true);
     } else {
-      saveDraftDate();
+      void saveDraftDate();
     }
   };
   
@@ -347,7 +347,7 @@ export function CommissionerWelcome({ league, currentUser }: CommissionerWelcome
                   </p>
                 </div>
                 <div className="flex gap-2 justify-center">
-                  <Button onClick={saveDraftDate} size="sm">
+                  <Button onClick={() => void saveDraftDate()} size="sm">
                     Save Draft Date
                   </Button>
                   <Button variant="outline" onClick={cancelDraftDate} size="sm">

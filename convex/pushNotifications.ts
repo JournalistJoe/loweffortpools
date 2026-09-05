@@ -6,7 +6,6 @@ import { api } from "./_generated/api";
 // VAPID keys from environment variables with validation
 const VAPID_PUBLIC_KEY = process.env.VAPID_PUBLIC_KEY;
 const VAPID_PRIVATE_KEY = process.env.VAPID_PRIVATE_KEY;
-const VAPID_SUBJECT = process.env.VAPID_SUBJECT || "mailto:noreply@loweffort.bet";
 
 // Validate VAPID keys at module initialization
 if (!VAPID_PUBLIC_KEY || !VAPID_PRIVATE_KEY) {

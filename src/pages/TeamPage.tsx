@@ -95,11 +95,11 @@ export function TeamPage() {
                         placeholder="Enter your team name"
                         className="flex-1"
                         onKeyDown={(e) => {
-                          if (e.key === "Enter") handleSaveName();
+                          if (e.key === "Enter") void handleSaveName();
                           if (e.key === "Escape") handleCancelEdit();
                         }}
                       />
-                      <Button size="sm" onClick={handleSaveName}>
+                      <Button size="sm" onClick={() => void handleSaveName()}>
                         <Save className="h-4 w-4" />
                       </Button>
                       <Button size="sm" variant="outline" onClick={handleCancelEdit}>
