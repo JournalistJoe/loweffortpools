@@ -28,22 +28,31 @@ export function DraftPreferenceManager({ leagueId }: DraftPreferenceManagerProps
   
   const setDraftPreferences = useMutation(api.draft.setDraftPreferences);
 
-  // Initialize teams from available teams in draft state
+  // Build the list once both queries have settled. Saved rankings win over the
+  // alphabetical default, and they still apply if they arrive after the default
+  // was shown (as long as the user hasn't started reordering).
   useEffect(() => {
-    if (draftState?.availableTeams && teams.length === 0) {
-      if (preferences?.rankedTeams) {
-        // Use existing preferences order
-        setTeams(preferences.rankedTeams.filter((team): team is Doc<"nflTeams"> => team !== null));
-        setEnableAutoDraft(preferences.enableAutoDraft);
-      } else {
-        // Initialize with available teams in alphabetical order
-        const sortedTeams = [...draftState.availableTeams].sort((a, b) => 
-          a.fullName.localeCompare(b.fullName)
-        );
-        setTeams(sortedTeams);
-      }
+    if (!draftState?.availableTeams || preferences === undefined) return;
+    if (hasUnsavedChanges) return;
+
+    const available = draftState.availableTeams;
+    if (preferences?.rankedTeams) {
+      const ranked = preferences.rankedTeams.filter(
+        (team): team is Doc<"nflTeams"> => team !== null,
+      );
+      // Any team missing from a saved list (e.g. re-imported) goes to the bottom.
+      const rankedIds = new Set(ranked.map((t) => t._id));
+      const missing = available
+        .filter((t) => !rankedIds.has(t._id))
+        .sort((a, b) => a.fullName.localeCompare(b.fullName));
+      setTeams([...ranked, ...missing]);
+      setEnableAutoDraft(preferences.enableAutoDraft);
+    } else if (teams.length === 0) {
+      setTeams([...available].sort((a, b) => a.fullName.localeCompare(b.fullName)));
     }
-  }, [draftState, preferences, teams.length]);
+    // teams.length is intentionally omitted: this effect should react to data, not to its own writes.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [draftState, preferences, hasUnsavedChanges]);
 
   const moveTeam = (index: number, direction: 'up' | 'down') => {
     if ((direction === 'up' && index === 0) || (direction === 'down' && index === teams.length - 1)) {

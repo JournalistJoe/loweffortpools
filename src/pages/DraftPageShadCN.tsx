@@ -16,6 +16,7 @@ import { Clock, Trophy, Users, Bot } from "lucide-react";
 import { CommissionerWelcome } from "../components/CommissionerWelcome";
 import { PartialLeagueWelcome } from "../components/PartialLeagueWelcome";
 import { AutoDraftToggle } from "../components/AutoDraftToggle";
+import { RankTeamsPrompt } from "../components/RankTeamsPrompt";
 import { Spinner } from "@/components/ui/spinner";
 import { errorMessage } from "@/utils/errors";
 
@@ -79,9 +80,21 @@ export function DraftPageShadCN() {
   const isPartialLeague = draftState.participants.length >= 2 && draftState.participants.length <= 7;
   const numParticipants = draftState.participants.length;
 
+  const rankPromptCard =
+    league.status === "setup" && league.participant ? (
+      <RankTeamsPrompt
+        leagueId={leagueId as Id<"leagues">}
+        participantId={league.participant._id}
+      />
+    ) : null;
+  const rankPrompt = rankPromptCard ? (
+    <div className="max-w-6xl mx-auto px-6 pt-6">{rankPromptCard}</div>
+  ) : null;
+
   if (isCommissionerAlone) {
     return (
       <div>
+        {rankPrompt}
         <CommissionerWelcome league={league} currentUser={currentUser} />
       </div>
     );
@@ -90,6 +103,7 @@ export function DraftPageShadCN() {
   if (isPartialLeague) {
     return (
       <div>
+        {rankPrompt}
         <PartialLeagueWelcome 
           league={league} 
           currentUser={currentUser} 
@@ -116,6 +130,7 @@ export function DraftPageShadCN() {
   return (
     <div>
       <div className="max-w-7xl mx-auto p-4 pb-20">
+        {rankPromptCard && <div className="mb-6">{rankPromptCard}</div>}
         <div className="mb-6">
           <div className="flex justify-between items-start">
             <div>
