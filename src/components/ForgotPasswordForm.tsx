@@ -6,6 +6,7 @@ import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/card";
+import { Spinner } from "@/components/ui/spinner";
 
 export function ForgotPasswordForm() {
   const { signIn } = useAuthActions();
@@ -39,7 +40,7 @@ export function ForgotPasswordForm() {
       <div className="w-full max-w-md mx-auto">
         <Card className="border-none shadow-lg">
           <CardHeader className="text-center pb-6">
-            <CardTitle className="text-2xl font-bold text-green-600">
+            <CardTitle className="text-2xl font-bold text-green-600 dark:text-green-400">
               Email Sent!
             </CardTitle>
             <CardDescription className="text-base">
@@ -48,11 +49,11 @@ export function ForgotPasswordForm() {
           </CardHeader>
           <CardContent>
             <div className="text-center space-y-4">
-              <p className="text-sm text-gray-600">
+              <p className="text-sm text-muted-foreground">
                 We've sent a password reset link to:
               </p>
-              <p className="font-semibold text-gray-900">{email}</p>
-              <p className="text-sm text-gray-500">
+              <p className="font-semibold text-foreground">{email}</p>
+              <p className="text-sm text-muted-foreground">
                 The link will expire in 1 hour. If you don't see the email, check your spam folder.
               </p>
               <Button 
@@ -106,7 +107,7 @@ export function ForgotPasswordForm() {
             >
               {submitting ? (
                 <div className="flex items-center justify-center">
-                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
+                  <Spinner size="sm" onPrimary className="mr-2" />
                   Sending...
                 </div>
               ) : (

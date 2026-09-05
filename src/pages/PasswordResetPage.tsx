@@ -3,6 +3,7 @@ import { PasswordResetForm } from "../components/PasswordResetForm";
 import { Button } from "../components/ui/button";
 import { useEffect, useState } from "react";
 import { useTheme } from "../contexts/ThemeContext";
+import { Spinner } from "@/components/ui/spinner";
 
 export function PasswordResetPage() {
   const navigate = useNavigate();
@@ -38,9 +39,9 @@ export function PasswordResetPage() {
             <h1 className="text-3xl font-bold text-foreground mb-2">LowEffort.bet</h1>
           </div>
           
-          <div className="bg-red-50 border border-red-200 rounded-lg p-6 mb-6">
-            <h2 className="text-lg font-semibold text-red-800 mb-2">Invalid Reset Link</h2>
-            <p className="text-red-600">{error}</p>
+          <div className="bg-red-50 border border-red-200 rounded-lg p-6 mb-6 dark:bg-red-950/20 dark:border-red-800">
+            <h2 className="text-lg font-semibold text-red-800 mb-2 dark:text-red-200">Invalid Reset Link</h2>
+            <p className="text-red-600 dark:text-red-400">{error}</p>
           </div>
           
           <div className="space-y-4">
@@ -66,7 +67,7 @@ export function PasswordResetPage() {
   if (!token || !email) {
     return (
       <div className="flex justify-center items-center min-h-screen">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+        <Spinner />
       </div>
     );
   }

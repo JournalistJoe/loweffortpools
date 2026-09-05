@@ -2,6 +2,7 @@
 import { useAuthActions } from "@convex-dev/auth/react";
 import { useState } from "react";
 import { toast } from "sonner";
+import { Spinner } from "@/components/ui/spinner";
 
 export function MobileSignInForm() {
   const { signIn } = useAuthActions();
@@ -63,7 +64,7 @@ export function MobileSignInForm() {
         >
           {submitting ? (
             <div className="flex items-center justify-center">
-              <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-primary-foreground mr-2"></div>
+              <Spinner size="sm" onPrimary className="mr-2" />
               {flow === "signIn" ? "Signing in..." : "Signing up..."}
             </div>
           ) : flow === "signIn" ? (

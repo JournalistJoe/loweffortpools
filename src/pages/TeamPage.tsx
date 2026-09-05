@@ -9,6 +9,7 @@ import { Label } from "../components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
 import { Edit, Save, X } from "lucide-react";
 import { DraftPreferenceManager } from "../components/DraftPreferenceManager";
+import { Spinner } from "@/components/ui/spinner";
 
 export function TeamPage() {
   const { leagueId, participantId } = useParams<{
@@ -58,7 +59,7 @@ export function TeamPage() {
   if (!league || !teamData) {
     return (
       <div className="flex justify-center items-center min-h-96">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+        <Spinner />
       </div>
     );
   }
@@ -102,10 +103,10 @@ export function TeamPage() {
                           if (e.key === "Escape") handleCancelEdit();
                         }}
                       />
-                      <Button size="sm" onClick={() => void handleSaveName()}>
+                      <Button size="sm" aria-label="Save team name" onClick={() => void handleSaveName()}>
                         <Save className="h-4 w-4" />
                       </Button>
-                      <Button size="sm" variant="outline" onClick={handleCancelEdit}>
+                      <Button size="sm" variant="outline" aria-label="Cancel" onClick={handleCancelEdit}>
                         <X className="h-4 w-4" />
                       </Button>
                     </div>
@@ -142,7 +143,7 @@ export function TeamPage() {
               <span className="text-lg text-muted-foreground">
                 Draft Position: {teamData.participant.draftPosition}
               </span>
-              <span className="text-lg font-semibold text-blue-600">
+              <span className="text-lg font-semibold text-blue-600 dark:text-blue-400">
                 Total Wins: {totalWins}
               </span>
             </div>

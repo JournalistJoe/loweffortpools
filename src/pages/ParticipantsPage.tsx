@@ -7,6 +7,8 @@ import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
 import { UserPlus } from "lucide-react";
+import { Spinner } from "@/components/ui/spinner";
+import { errorMessage } from "@/utils/errors";
 
 export function ParticipantsPage() {
   const { leagueId } = useParams<{ leagueId: string }>();
@@ -40,7 +42,7 @@ export function ParticipantsPage() {
       setShowJoinForm(false);
       setTeamName("");
     } catch (error) {
-      toast.error(String(error));
+      toast.error(errorMessage(error));
     }
   };
 
@@ -55,7 +57,7 @@ export function ParticipantsPage() {
   if (!league || !participants) {
     return (
       <div className="flex justify-center items-center min-h-96">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+        <Spinner />
       </div>
     );
   }
@@ -74,9 +76,9 @@ export function ParticipantsPage() {
 
         {/* Admin Join Section */}
         {league.isAdmin && !league.isParticipant && league.status === "setup" && (
-          <Card className="mb-6 border-blue-200 bg-blue-50">
+          <Card className="mb-6 border-blue-200 bg-blue-50 dark:border-blue-800 dark:bg-blue-950/20">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-blue-800">
+              <CardTitle className="flex items-center gap-2 text-blue-800 dark:text-blue-200">
                 <UserPlus className="h-5 w-5" />
                 Join as Participant
               </CardTitle>
@@ -84,7 +86,7 @@ export function ParticipantsPage() {
             <CardContent>
               {!showJoinForm ? (
                 <div className="space-y-4">
-                  <p className="text-blue-700">
+                  <p className="text-blue-700 dark:text-blue-300">
                     You're the admin of this league but not yet a participant. 
                     Join the league to participate in the draft!
                   </p>
@@ -98,7 +100,7 @@ export function ParticipantsPage() {
               ) : (
                 <div className="space-y-4">
                   <div>
-                    <label htmlFor="team-name" className="block text-sm font-medium text-blue-800 mb-2">
+                    <label htmlFor="team-name" className="block text-sm font-medium text-blue-800 mb-2 dark:text-blue-200">
                       Enter your team name:
                     </label>
                     <Input

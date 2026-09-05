@@ -2,6 +2,7 @@ import { useQuery } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import { useParams } from "react-router-dom";
 import { useState } from "react";
+import { Spinner } from "@/components/ui/spinner";
 
 export function SchedulePage() {
   const { leagueId } = useParams<{ leagueId: string }>();
@@ -27,7 +28,7 @@ export function SchedulePage() {
   if (!league) {
     return (
       <div className="flex justify-center items-center min-h-96">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+        <Spinner />
       </div>
     );
   }
@@ -90,7 +91,7 @@ export function SchedulePage() {
               <div className="p-4">
                 {isLoadingUpcoming ? (
                   <div className="flex justify-center py-8">
-                    <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
+                    <Spinner size="md" />
                   </div>
                 ) : upcomingGames && upcomingGames.games.length > 0 ? (
                   <div className="space-y-4">
@@ -189,7 +190,7 @@ export function SchedulePage() {
               </h3>
               {isLoadingSchedule ? (
                 <div className="flex justify-center py-4">
-                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-primary"></div>
+                  <Spinner size="sm" />
                 </div>
               ) : (
                 <div className="space-y-2 text-sm">
@@ -229,7 +230,7 @@ export function SchedulePage() {
               <h3 className="font-semibold mb-3">View by Week</h3>
               {isLoadingSchedule ? (
                 <div className="flex justify-center py-4">
-                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-primary"></div>
+                  <Spinner size="sm" />
                 </div>
               ) : (
                 <select
@@ -264,7 +265,7 @@ export function SchedulePage() {
               <div className="p-4">
                 {isLoadingSchedule ? (
                   <div className="flex justify-center py-4">
-                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-primary"></div>
+                    <Spinner size="sm" />
                   </div>
                 ) : weekSchedule &&
                   weekSchedule.participantMatchups.length > 0 ? (

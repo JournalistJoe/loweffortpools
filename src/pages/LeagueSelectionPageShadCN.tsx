@@ -30,6 +30,8 @@ import { DraftCountdown } from "../components/DraftCountdown";
 import { EmptyLeaguesState } from "../components/EmptyLeaguesState";
 import { AppHeader } from "../components/AppHeader";
 import { CURRENT_SEASON_YEAR } from "../lib/nflSeason";
+import { Spinner } from "@/components/ui/spinner";
+import { errorMessage } from "@/utils/errors";
 
 export function LeagueSelectionPageShadCN() {
   const leagues = useQuery(api.leagues.getUserLeagues);
@@ -118,7 +120,7 @@ export function LeagueSelectionPageShadCN() {
       }
     } catch (error) {
       console.error("Auto-join error:", error);
-      toast.error(String(error));
+      toast.error(errorMessage(error));
       // Fallback: show join form with pre-filled code
       setJoinCode(joinCode);
       setShowJoinForm(true);
@@ -160,7 +162,7 @@ export function LeagueSelectionPageShadCN() {
       setTeamName("");
       setSelectedLeagueId(leagueId, "setup");
     } catch (error) {
-      toast.error(String(error));
+      toast.error(errorMessage(error));
     } finally {
       setIsCreating(false);
     }
@@ -185,7 +187,7 @@ export function LeagueSelectionPageShadCN() {
       // joinLeague only succeeds for leagues in setup
       setSelectedLeagueId(result.leagueId, "setup");
     } catch (error) {
-      toast.error(String(error));
+      toast.error(errorMessage(error));
     } finally {
       setIsJoining(false);
     }
@@ -209,7 +211,7 @@ export function LeagueSelectionPageShadCN() {
       setDisplayName("");
       setSelectedLeagueId(result.leagueId, result.status);
     } catch (error) {
-      toast.error(String(error));
+      toast.error(errorMessage(error));
     } finally {
       setIsJoining(false);
     }
@@ -239,7 +241,7 @@ export function LeagueSelectionPageShadCN() {
   if (leagues === undefined) {
     return (
       <div className="flex justify-center items-center min-h-96">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+        <Spinner />
       </div>
     );
   }
@@ -667,7 +669,7 @@ function LeagueCard({
           </div>
           {league.status === "completed" && league.champion && (
             <div className="flex items-center gap-2 text-sm font-medium">
-              <Trophy className="h-4 w-4 text-yellow-600" />
+              <Trophy className="h-4 w-4 text-yellow-600 dark:text-yellow-400" />
               <span>
                 {league.champion.displayName} · {league.champion.totalWins} wins
               </span>
