@@ -10,6 +10,7 @@ import { useState, useEffect, useMemo } from "react";
 import { useMutation } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import { defaultDraftDatetimeLocal } from "../lib/nflSeason";
+import { errorMessage } from "@/utils/errors";
 
 interface League {
   _id: string;
@@ -115,7 +116,7 @@ export function CommissionerWelcome({ league, currentUser }: CommissionerWelcome
       toast.success("Draft date set successfully!");
       setShowDraftDateInput(false);
     } catch (error) {
-      toast.error(String(error));
+      toast.error(errorMessage(error));
     }
   };
   

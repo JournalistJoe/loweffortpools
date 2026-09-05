@@ -28,6 +28,7 @@ import { EmailVerificationPage } from "./pages/EmailVerificationPage";
 import { HomePage } from "./pages/HomePage";
 import { TermsOfServicePage } from "./pages/TermsOfServicePage";
 import { Toaster } from "sonner";
+import { Spinner } from "@/components/ui/spinner";
 
 function SignInPage() {
   const location = useLocation();
@@ -94,7 +95,7 @@ function App() {
   if (isLoading) {
     return (
       <div className="flex justify-center items-center min-h-screen">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+        <Spinner />
       </div>
     );
   }

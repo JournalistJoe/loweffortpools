@@ -12,6 +12,7 @@ import { Switch } from "./ui/switch";
 import { Label } from "./ui/label";
 import { Card, CardContent } from "./ui/card";
 import { Bot, User, AlertTriangle } from "lucide-react";
+import { errorMessage } from "@/utils/errors";
 
 interface AutoDraftToggleProps {
   leagueId: Id<"leagues">;
@@ -53,7 +54,7 @@ export function AutoDraftToggle({
       
       toast.success(message);
     } catch (error) {
-      toast.error(String(error));
+      toast.error(errorMessage(error));
     } finally {
       setIsLoading(false);
     }
@@ -69,9 +70,9 @@ export function AutoDraftToggle({
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-3">
             {isAutoDrafting ? (
-              <Bot className="h-5 w-5 text-blue-600" />
+              <Bot className="h-5 w-5 text-blue-600 dark:text-blue-400" />
             ) : (
-              <User className="h-5 w-5 text-gray-600" />
+              <User className="h-5 w-5 text-muted-foreground" />
             )}
             <div>
               <Label className="text-base font-medium">
@@ -112,7 +113,7 @@ export function ParticipantAutoDraftStatus({ participant }: { participant: Doc<"
   }
 
   return (
-    <div className="flex items-center gap-1 text-xs text-blue-600 mt-1">
+    <div className="flex items-center gap-1 text-xs text-blue-600 mt-1 dark:text-blue-400">
       <Bot className="h-3 w-3" />
       <span>Auto-drafting</span>
     </div>

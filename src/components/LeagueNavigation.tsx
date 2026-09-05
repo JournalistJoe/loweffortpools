@@ -44,6 +44,7 @@ import { PushNotificationManager } from "./PushNotificationManager";
 import { AppHeader } from "./AppHeader";
 import { useAppNavigation } from "../hooks/useAppNavigation";
 import { useUserMenu } from "../hooks/useUserMenu";
+import { errorMessage } from "@/utils/errors";
 
 interface LeagueNavigationProps {
   league: {
@@ -100,7 +101,7 @@ export function LeagueNavigation({ league }: LeagueNavigationProps) {
       toast.success("Successfully left the league");
       // Navigation will be handled by the context
     } catch (error) {
-      toast.error(String(error));
+      toast.error(errorMessage(error));
     }
   };
 
@@ -117,7 +118,7 @@ export function LeagueNavigation({ league }: LeagueNavigationProps) {
     }
     
     if (iconType === "active") {
-      return <Bell className="h-4 w-4 text-green-600" />;
+      return <Bell className="h-4 w-4 text-green-600 dark:text-green-400" />;
     }
     
     return <Bell className="h-4 w-4 text-muted-foreground" />;
