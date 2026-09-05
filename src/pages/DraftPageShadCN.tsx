@@ -17,6 +17,7 @@ import { CommissionerWelcome } from "../components/CommissionerWelcome";
 import { PartialLeagueWelcome } from "../components/PartialLeagueWelcome";
 import { AutoDraftToggle } from "../components/AutoDraftToggle";
 import { RankTeamsPrompt } from "../components/RankTeamsPrompt";
+import { NotificationNudge } from "../components/NotificationNudge";
 import { Spinner } from "@/components/ui/spinner";
 import { errorMessage } from "@/utils/errors";
 
@@ -81,11 +82,16 @@ export function DraftPageShadCN() {
   const numParticipants = draftState.participants.length;
 
   const rankPromptCard =
-    league.status === "setup" && league.participant ? (
-      <RankTeamsPrompt
-        leagueId={leagueId as Id<"leagues">}
-        participantId={league.participant._id}
-      />
+    league.participant && (league.status === "setup" || league.status === "draft") ? (
+      <div className="space-y-3">
+        <NotificationNudge leagueId={leagueId as string} />
+        {league.status === "setup" && (
+          <RankTeamsPrompt
+            leagueId={leagueId as Id<"leagues">}
+            participantId={league.participant._id}
+          />
+        )}
+      </div>
     ) : null;
   const rankPrompt = rankPromptCard ? (
     <div className="max-w-6xl mx-auto px-6 pt-6">{rankPromptCard}</div>
