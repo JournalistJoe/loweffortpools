@@ -122,7 +122,7 @@ export function NotificationSettings({ leagueId, showGlobalSettings = false }: N
     );
   }
 
-  const isMuted = preferences.mutedUntil && preferences.mutedUntil > Date.now();
+  const isMuted = !!preferences.mutedUntil && preferences.mutedUntil > Date.now();
   const muteTimeRemaining = isMuted 
     ? Math.ceil((preferences.mutedUntil! - Date.now()) / (60 * 60 * 1000))
     : 0;

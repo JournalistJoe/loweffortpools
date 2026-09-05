@@ -510,7 +510,7 @@ export function LeagueSelectionPageShadCN() {
                         isJoining ||
                         !joinCode.trim() ||
                         !displayName.trim() ||
-                        (leagueByJoinCode && !leagueByJoinCode.canJoin)
+                        !!(leagueByJoinCode && !leagueByJoinCode.canJoin)
                       }
                       className="flex-1"
                     >

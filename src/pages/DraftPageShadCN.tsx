@@ -1,5 +1,6 @@
 import { useQuery, useMutation } from "convex/react";
 import { api } from "../../convex/_generated/api";
+import { Id } from "../../convex/_generated/dataModel";
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { useParams } from "react-router-dom";
@@ -157,7 +158,7 @@ export function DraftPageShadCN() {
         {draftState.league.status === "draft" && league.participant && !league.participant.isAdminManaged && (
           <div className="mb-6">
             <AutoDraftToggle
-              leagueId={leagueId!}
+              leagueId={leagueId as Id<"leagues">}
               participant={league.participant}
               currentUser={currentUser}
               isCurrentParticipantTurn={isUserTurn}

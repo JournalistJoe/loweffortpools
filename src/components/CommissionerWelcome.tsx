@@ -14,14 +14,15 @@ import { defaultDraftDatetimeLocal } from "../lib/nflSeason";
 interface League {
   _id: string;
   name: string;
-  joinCode: string;
+  joinCode?: string;
   scheduledDraftDate?: number;
   adminUserId: string;
   isAdmin: boolean;
 }
 
 interface User {
-  username: string;
+  name?: string;
+  email?: string;
 }
 
 interface CommissionerWelcomeProps {
@@ -46,7 +47,7 @@ export function CommissionerWelcome({ league, currentUser }: CommissionerWelcome
   const defaultDraftDate = useMemo(() => defaultDraftDatetimeLocal(), []);
 
   const handleShareJoinCode = () => {
-    navigator.clipboard.writeText(league.joinCode);
+    navigator.clipboard.writeText(league.joinCode ?? "");
     toast.success("Join code copied to clipboard!");
   };
 
@@ -123,7 +124,7 @@ export function CommissionerWelcome({ league, currentUser }: CommissionerWelcome
             </p>
             <p>
               <strong>But hey,</strong> at least you have a fancy title now. Commissioner{" "}
-              {currentUser?.username}. Has a nice ring to it, right? Like you actually know 
+              {currentUser?.name || currentUser?.email}. Has a nice ring to it, right? Like you actually know 
               what you're doing.
             </p>
           </div>

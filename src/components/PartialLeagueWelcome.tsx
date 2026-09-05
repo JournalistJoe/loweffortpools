@@ -14,14 +14,15 @@ import { defaultDraftDatetimeLocal } from "../lib/nflSeason";
 interface League {
   _id: string;
   name: string;
-  joinCode: string;
+  joinCode?: string;
   scheduledDraftDate?: number;
   adminUserId: string;
   isAdmin: boolean;
 }
 
 interface User {
-  username: string;
+  name?: string;
+  email?: string;
 }
 
 interface Participant {
@@ -56,7 +57,7 @@ export function PartialLeagueWelcome({ league, currentUser, participants }: Part
   const defaultDraftDate = useMemo(() => defaultDraftDatetimeLocal(), []);
 
   const handleShareJoinCode = () => {
-    navigator.clipboard.writeText(league.joinCode);
+    navigator.clipboard.writeText(league.joinCode ?? "");
     toast.success("Join code copied to clipboard!");
   };
 
@@ -253,7 +254,7 @@ Don't make me be the guy who couldn't get 8 people together for something this s
         
         <div className="space-y-6 text-muted-foreground leading-relaxed">
           <p>
-            Alright, Commissioner {currentUser?.username}, time to earn that fancy title. You've 
+            Alright, Commissioner {currentUser?.name || currentUser?.email}, time to earn that fancy title. You've 
             done the hard part - you got people to actually join. But now comes the even harder 
             part: getting the REST of your friends to stop making excuses and commit to 3 minutes 
             of their lives once a week.

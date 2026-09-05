@@ -59,11 +59,11 @@ interface LeagueNavigationProps {
     participant?: {
       _id: string;
       displayName: string;
-    };
+    } | null;
     spectator?: {
       _id: string;
       displayName: string;
-    };
+    } | null;
   };
 }
 

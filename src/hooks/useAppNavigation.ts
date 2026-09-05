@@ -18,11 +18,11 @@ interface League {
   participant?: {
     _id: string;
     displayName: string;
-  };
+  } | null;
   spectator?: {
     _id: string;
     displayName: string;
-  };
+  } | null;
 }
 
 export function useAppNavigation(league: League) {

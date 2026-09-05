@@ -24,12 +24,13 @@ import {
   Moon,
   LogOut,
 } from "lucide-react";
-import { SignOutButton } from "../SignOutButton";
+import { useAuthActions } from "@convex-dev/auth/react";
 import { PushNotificationManager } from "./PushNotificationManager";
 import { NotificationSettings } from "./NotificationSettings";
 
 export function UserMenu() {
   const navigate = useNavigate();
+  const { signOut } = useAuthActions();
   const {
     showNotifications,
     setShowNotifications,
@@ -121,11 +122,9 @@ export function UserMenu() {
 
           <DropdownMenuSeparator />
           
-          <DropdownMenuItem asChild>
-            <SignOutButton>
-              <LogOut className="w-4 h-4 mr-2" />
-              Sign Out
-            </SignOutButton>
+          <DropdownMenuItem onClick={() => void signOut()}>
+            <LogOut className="w-4 h-4 mr-2" />
+            Sign Out
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
