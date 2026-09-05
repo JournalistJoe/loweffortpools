@@ -9,7 +9,7 @@ import { toast } from "sonner";
 import { useState, useEffect, useMemo } from "react";
 import { useMutation } from "convex/react";
 import { api } from "../../convex/_generated/api";
-import { defaultDraftDatetimeUtcLocal } from "../lib/nflSeason";
+import { defaultDraftDatetimeLocal } from "../lib/nflSeason";
 
 interface League {
   _id: string;
@@ -53,7 +53,7 @@ export function PartialLeagueWelcome({ league, currentUser, participants }: Part
     setMinLocalDatetime(localTime.toISOString().slice(0, 16));
   }, []);
   
-  const defaultDraftDate = useMemo(() => defaultDraftDatetimeUtcLocal(), []);
+  const defaultDraftDate = useMemo(() => defaultDraftDatetimeLocal(), []);
 
   const handleShareJoinCode = () => {
     navigator.clipboard.writeText(league.joinCode);

@@ -106,20 +106,21 @@ async function writeTeamsForSeason(ctx: MutationCtx, seasonYear: number) {
     .withIndex("by_season", (q) => q.eq("seasonYear", seasonYear))
     .collect();
 
-  for (const team of existingTeams) {
-    await ctx.db.delete(team._id);
-  }
+  // Upsert by espnId so existing team IDs (referenced by draftPicks and games) survive a re-import.
+  const existingByEspnId = new Map(existingTeams.map((team) => [team.espnId, team]));
 
-  const teamIds = [];
+  let imported = 0;
   for (const teamData of NFL_TEAMS) {
-    const teamId = await ctx.db.insert("nflTeams", {
-      ...teamData,
-      seasonYear,
-    });
-    teamIds.push(teamId);
+    const existing = existingByEspnId.get(teamData.espnId);
+    if (existing) {
+      await ctx.db.patch(existing._id, teamData);
+    } else {
+      await ctx.db.insert("nflTeams", { ...teamData, seasonYear });
+    }
+    imported++;
   }
 
-  return { imported: teamIds.length };
+  return { imported };
 }
 
 export const importTeams = mutation({

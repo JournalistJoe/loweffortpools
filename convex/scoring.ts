@@ -84,8 +84,13 @@ export async function getChampionForLeague(
   const standings = await computeStandings(ctx, leagueId);
   const top = standings?.[0];
   if (!top) return null;
+  // Standings are sorted by totalWins only, so everyone tied at the top is a co-champion.
+  const coChampions = standings.filter((entry) => entry.totalWins === top.totalWins);
   return {
-    displayName: top.participant.displayName,
+    displayName: coChampions
+      .map((entry) => entry.participant.displayName)
+      .sort()
+      .join(" & "),
     totalWins: top.totalWins,
   };
 }

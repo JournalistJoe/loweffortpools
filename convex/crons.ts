@@ -58,7 +58,9 @@ export const weeklyFinalize = internalAction({
   returns: v.null(),
   handler: async (ctx) => {
     const seasonYear = CURRENT_SEASON_YEAR;
-    const previousWeek = getCurrentNFLWeek() - 1;
+    // getCurrentNFLWeek clamps at 18, so once the season is over the week to
+    // finalize is 18 itself; otherwise it is the week that just ended.
+    const previousWeek = isRegularSeasonComplete() ? 18 : getCurrentNFLWeek() - 1;
 
     let syncSucceeded = previousWeek < 1;
     if (previousWeek >= 1) {

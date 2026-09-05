@@ -188,7 +188,7 @@ export function LeagueSelectionPageShadCN() {
       setShowJoinForm(false);
       setJoinCode("");
       setDisplayName("");
-      setSelectedLeagueId(result.leagueId);
+      setSelectedLeagueId(result.leagueId, result.status);
     } catch (error) {
       toast.error(String(error));
     } finally {

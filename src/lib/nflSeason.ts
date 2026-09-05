@@ -24,21 +24,6 @@ export function defaultDraftDatetimeLocal(): string {
   );
 }
 
-/** Kickoff at SEASON_KICKOFF.hour UTC, converted to the browser's local time. */
-export function defaultDraftDatetimeUtcLocal(): string {
-  return toDatetimeLocalString(
-    new Date(
-      Date.UTC(
-        SEASON_KICKOFF.year,
-        SEASON_KICKOFF.month,
-        SEASON_KICKOFF.day,
-        SEASON_KICKOFF.hour,
-        SEASON_KICKOFF.minute,
-      ),
-    ),
-  );
-}
-
 export function leagueEntryPath(leagueId: string, status?: string): string {
   if (status === "live" || status === "completed") {
     return `/league/${leagueId}/leaderboard`;

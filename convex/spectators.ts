@@ -70,7 +70,7 @@ export const joinAsSpectator = mutation({
       createdAt: Date.now(),
     });
 
-    return { leagueId: league._id, spectatorId };
+    return { leagueId: league._id, spectatorId, status: league.status };
   },
 });
 

@@ -69,9 +69,9 @@ export const createTestLeague = mutation({
       .collect();
 
     const nflTeams = existingTeams;
-    if (nflTeams.length === 0) {
+    if (nflTeams.length < 32) {
       throw new Error(
-        `No NFL teams found for ${seasonYear}. Import teams first from System Admin.`,
+        `Found ${nflTeams.length} of 32 NFL teams for ${seasonYear}. Import teams first from System Admin.`,
       );
     }
 
