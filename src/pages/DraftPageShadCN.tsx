@@ -18,6 +18,7 @@ import { PartialLeagueWelcome } from "../components/PartialLeagueWelcome";
 import { AutoDraftToggle } from "../components/AutoDraftToggle";
 import { RankTeamsPrompt } from "../components/RankTeamsPrompt";
 import { NotificationNudge } from "../components/NotificationNudge";
+import { AiPickSuggestion } from "../components/AiPickSuggestion";
 import { Spinner } from "@/components/ui/spinner";
 import { errorMessage } from "@/utils/errors";
 
@@ -65,6 +66,19 @@ export function DraftPageShadCN() {
       toast.success("Pick made successfully!");
     } catch (error) {
       toast.error(errorMessage(error));
+    }
+  };
+
+  // Used by the superuser AI helper: pick a specific team without going through selection state.
+  const handlePickTeam = async (nflTeamId: Id<"nflTeams">) => {
+    if (!leagueId) return;
+    try {
+      await makePick({ leagueId: leagueId as Id<"leagues">, nflTeamId });
+      setSelectedTeam(null);
+      toast.success("Pick made successfully!");
+    } catch (error) {
+      toast.error(errorMessage(error));
+      throw error;
     }
   };
 
@@ -290,6 +304,16 @@ export function DraftPageShadCN() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
+                  {currentUser.isSuperuser &&
+                    (isUserTurn || canAdminPick) &&
+                    draftState.league.status === "draft" && (
+                      <div className="mb-4">
+                        <AiPickSuggestion
+                          leagueId={leagueId as Id<"leagues">}
+                          onUse={handlePickTeam}
+                        />
+                      </div>
+                    )}
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
                     {draftState.availableTeams.map((team) => (
                       <Button

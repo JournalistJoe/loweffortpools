@@ -8,11 +8,13 @@
  * @module
  */
 
+import type * as aiDraft from "../aiDraft.js";
 import type * as auth from "../auth.js";
 import type * as chat from "../chat.js";
 import type * as constants from "../constants.js";
 import type * as crons from "../crons.js";
 import type * as draft from "../draft.js";
+import type * as draftContext from "../draftContext.js";
 import type * as email from "../email.js";
 import type * as http from "../http.js";
 import type * as leagues from "../leagues.js";
@@ -35,11 +37,13 @@ import type {
 } from "convex/server";
 
 declare const fullApi: ApiFromModules<{
+  aiDraft: typeof aiDraft;
   auth: typeof auth;
   chat: typeof chat;
   constants: typeof constants;
   crons: typeof crons;
   draft: typeof draft;
+  draftContext: typeof draftContext;
   email: typeof email;
   http: typeof http;
   leagues: typeof leagues;
