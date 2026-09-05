@@ -22,13 +22,13 @@ export const notifyLeagueActivity = action({
     excludeUserId: v.optional(v.id("users")), // Don't notify the user who triggered the action
   },
   handler: async (ctx, args) => {
-    // Get league details
-    const league = await ctx.runQuery(api.leagues.getLeague, { leagueId: args.leagueId });
+    // This runs from the scheduler with no signed-in user, so it must use the
+    // internal query variants; the public ones return null/[] without auth.
+    const league = await ctx.runQuery(api.leagues.getLeagueInternal, { leagueId: args.leagueId });
     if (!league) return;
 
-    // Get all participants and spectators in the league
-    const participants = await ctx.runQuery(api.leagues.getParticipants, { leagueId: args.leagueId });
-    const spectators = await ctx.runQuery(api.spectators.getSpectators, { leagueId: args.leagueId });
+    const participants = await ctx.runQuery(api.leagues.getParticipantsInternal, { leagueId: args.leagueId });
+    const spectators = await ctx.runQuery(api.spectators.getSpectatorsInternal, { leagueId: args.leagueId });
 
     // Combine all users who should be notified
     const allUsers = [
@@ -42,8 +42,18 @@ export const notifyLeagueActivity = action({
       user.userId !== args.excludeUserId
     );
 
-    // Determine notification priority and settings
-    const isHighPriority = ["draft_started", "draft_pick", "draft_autopick"].includes(args.activityType);
+    // Work out whose turn it is once, so per-user gating can treat "your turn" specially.
+    const currentTurnUserId =
+      args.activityType === "draft_pick" || args.activityType === "draft_autopick"
+        ? (await ctx.runQuery(api.draft.getDraftState, { leagueId: args.leagueId }))
+            ?.currentParticipant?.userId ?? null
+        : null;
+
+    // Where a tap on the notification should land.
+    const leagueUrl =
+      league.status === "live" || league.status === "completed"
+        ? `/league/${args.leagueId}/leaderboard`
+        : `/league/${args.leagueId}/draft`;
 
     // Get NFL team info if available
     let nflTeam = null;
@@ -77,14 +87,21 @@ export const notifyLeagueActivity = action({
           continue;
         }
 
-        // Check if this type of notification is enabled
-        if (preferences.enableImportantOnly && !isHighPriority) {
-          continue;
-        }
+        const isCurrentUserTurn = user.isParticipant && currentTurnUserId === user.userId;
 
-        if (!preferences.enableDraftPicks && 
-            ["draft_pick", "draft_autopick", "draft_completed"].includes(args.activityType)) {
-          continue;
+        // "Your turn" has its own toggle and counts as important; other draft
+        // picks follow the draft-picks toggle and are filtered by important-only.
+        if (isCurrentUserTurn) {
+          if (!preferences.enableMyTurn) continue;
+        } else {
+          const isImportant = ["draft_started", "draft_completed"].includes(args.activityType);
+          if (preferences.enableImportantOnly && !isImportant) continue;
+          if (
+            !preferences.enableDraftPicks &&
+            ["draft_pick", "draft_autopick"].includes(args.activityType)
+          ) {
+            continue;
+          }
         }
 
         // Create notification content
@@ -133,15 +150,6 @@ export const notifyLeagueActivity = action({
             body = args.message;
         }
 
-        // Check if it's the user's turn (for participants only)
-        let isCurrentUserTurn = false;
-        if (user.isParticipant && args.activityType === "draft_pick" && league.status === "draft") {
-          const draftState = await ctx.runQuery(api.draft.getDraftState, {
-            leagueId: args.leagueId,
-          });
-          isCurrentUserTurn = draftState?.currentParticipant?.userId === user.userId;
-        }
-
         if (isCurrentUserTurn) {
           title = "🔥 Your Turn!";
           body = `It's your turn to pick in ${league.name}`;
@@ -162,7 +170,7 @@ export const notifyLeagueActivity = action({
             type: "league_activity",
             leagueId: args.leagueId,
             activityType: args.activityType,
-            url: `/leagues/${args.leagueId}`,
+            url: leagueUrl,
           },
           actions,
         });
@@ -269,7 +277,10 @@ export const notifyChatMessage = action({
             type: "chat_message",
             leagueId: args.leagueId,
             messageId: args.messageId,
-            url: `/leagues/${args.leagueId}`,
+            url:
+              league.status === "live" || league.status === "completed"
+                ? `/league/${args.leagueId}/leaderboard`
+                : `/league/${args.leagueId}/draft`,
           },
           actions: [
             { action: "reply", title: "Reply", icon: "/icon-192x192.png" },
