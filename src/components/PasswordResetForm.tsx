@@ -7,6 +7,7 @@ import { Input } from "./ui/input";
 import { Label } from "./ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/card";
 import { useNavigate } from "react-router-dom";
+import { Spinner } from "@/components/ui/spinner";
 
 interface PasswordResetFormProps {
   token: string;
@@ -83,7 +84,7 @@ export function PasswordResetForm({ token, email }: PasswordResetFormProps) {
                 type="email"
                 value={email}
                 disabled
-                className="h-12 text-base bg-gray-50"
+                className="h-12 text-base bg-muted"
               />
             </div>
 
@@ -127,7 +128,7 @@ export function PasswordResetForm({ token, email }: PasswordResetFormProps) {
             >
               {submitting ? (
                 <div className="flex items-center justify-center">
-                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
+                  <Spinner size="sm" onPrimary className="mr-2" />
                   Resetting...
                 </div>
               ) : (

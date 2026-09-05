@@ -7,6 +7,8 @@ import { Input } from "./ui/input";
 import { ScrollArea } from "./ui/scroll-area";
 import { Avatar, AvatarFallback } from "./ui/avatar";
 import { Send, Trash2, Crown, Activity, Users, Trophy, Clock, Eye } from "lucide-react";
+import { Spinner } from "@/components/ui/spinner";
+import { errorMessage } from "@/utils/errors";
 
 interface FloatingChatContentProps {
   leagueId: string;
@@ -49,7 +51,7 @@ export function FloatingChatContent({ leagueId }: FloatingChatContentProps) {
       });
       setMessage("");
     } catch (error) {
-      toast.error(String(error));
+      toast.error(errorMessage(error));
     }
   };
 
@@ -60,7 +62,7 @@ export function FloatingChatContent({ leagueId }: FloatingChatContentProps) {
       await deleteMessage({ messageId: messageId as any });
       toast.success("Message deleted");
     } catch (error) {
-      toast.error(String(error));
+      toast.error(errorMessage(error));
     }
   };
 
@@ -103,7 +105,7 @@ export function FloatingChatContent({ leagueId }: FloatingChatContentProps) {
   if (!feedItems) {
     return (
       <div className="flex-1 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
+        <Spinner size="md" />
       </div>
     );
   }
@@ -208,6 +210,7 @@ export function FloatingChatContent({ leagueId }: FloatingChatContentProps) {
           <Button
             type="submit"
             size="sm"
+            aria-label="Send message"
             disabled={!message.trim()}
             className="px-3"
           >

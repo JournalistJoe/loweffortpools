@@ -37,6 +37,7 @@ import {
   Shuffle,
   Bot,
 } from "lucide-react";
+import { errorMessage } from "@/utils/errors";
 
 function formatLocalForDateTimeLocal(d: Date) {
   const offset = d.getTimezoneOffset();
@@ -101,7 +102,7 @@ export function AdminPageShadCN() {
       await startDraft({ leagueId: leagueId as any });
       toast.success("Draft started!");
     } catch (error) {
-      toast.error(String(error));
+      toast.error(errorMessage(error));
     }
   };
 
@@ -118,7 +119,7 @@ export function AdminPageShadCN() {
       });
       toast.success("Participant removed successfully");
     } catch (error) {
-      toast.error(String(error));
+      toast.error(errorMessage(error));
     }
   };
 
@@ -133,7 +134,7 @@ export function AdminPageShadCN() {
       toast.success("Position updated successfully");
       setEditingParticipant(null);
     } catch (error) {
-      toast.error(String(error));
+      toast.error(errorMessage(error));
     }
   };
 
@@ -148,7 +149,7 @@ export function AdminPageShadCN() {
       toast.success("Team name updated successfully");
       setEditingTeamName(null);
     } catch (error) {
-      toast.error(String(error));
+      toast.error(errorMessage(error));
     }
   };
 
@@ -167,7 +168,7 @@ export function AdminPageShadCN() {
       });
       toast.success("Draft order randomized successfully");
     } catch (error) {
-      toast.error(String(error));
+      toast.error(errorMessage(error));
     }
   };
 
@@ -184,7 +185,7 @@ export function AdminPageShadCN() {
       setAdminManagedTeamName("");
       setAdminManagedDraftPosition("1");
     } catch (error) {
-      toast.error(String(error));
+      toast.error(errorMessage(error));
     }
   };
 
@@ -200,7 +201,7 @@ export function AdminPageShadCN() {
       setShowAdminJoinForm(false);
       setAdminTeamName("");
     } catch (error) {
-      toast.error(String(error));
+      toast.error(errorMessage(error));
     }
   };
 
@@ -216,7 +217,7 @@ export function AdminPageShadCN() {
       await resetDraft({ leagueId: leagueId as any });
       toast.success("Draft reset successfully!");
     } catch (error) {
-      toast.error(String(error));
+      toast.error(errorMessage(error));
     }
   };
 
@@ -233,7 +234,7 @@ export function AdminPageShadCN() {
       toast.success("League updated successfully");
       setEditingLeague(false);
     } catch (error) {
-      toast.error(String(error));
+      toast.error(errorMessage(error));
     }
   };
 
@@ -250,7 +251,7 @@ export function AdminPageShadCN() {
       toast.success("League deleted successfully");
       // Navigate back to leagues page will be handled by the context
     } catch (error) {
-      toast.error(String(error));
+      toast.error(errorMessage(error));
     }
   };
 
@@ -266,7 +267,7 @@ export function AdminPageShadCN() {
       const newCode = await regenerateJoinCode({ leagueId: leagueId as any });
       toast.success(`New join code generated: ${newCode}`);
     } catch (error) {
-      toast.error(String(error));
+      toast.error(errorMessage(error));
     }
   };
 
@@ -575,14 +576,14 @@ export function AdminPageShadCN() {
             <CardContent>
               {/* Admin Join Section */}
               {!league.isParticipant && league.status === "setup" && (
-                <div className="mb-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                <div className="mb-4 p-4 bg-blue-50 border border-blue-200 rounded-lg dark:bg-blue-950/20 dark:border-blue-800">
                   <div className="flex items-center gap-2 mb-3">
-                    <UserPlus className="h-4 w-4 text-blue-600" />
-                    <span className="font-medium text-blue-800">Join as Participant</span>
+                    <UserPlus className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                    <span className="font-medium text-blue-800 dark:text-blue-200">Join as Participant</span>
                   </div>
                   {!showAdminJoinForm ? (
                     <div className="space-y-2">
-                      <p className="text-sm text-blue-700">
+                      <p className="text-sm text-blue-700 dark:text-blue-300">
                         You're not yet a participant in your own league. Join to participate in the draft!
                       </p>
                       <Button 
@@ -921,7 +922,7 @@ export function AdminPageShadCN() {
                               });
                               toast.success("Spectator removed");
                             } catch (error) {
-                              toast.error(String(error));
+                              toast.error(errorMessage(error));
                             }
                           }
                         })()}

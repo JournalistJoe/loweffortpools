@@ -16,6 +16,8 @@ import { Clock, Trophy, Users, Bot } from "lucide-react";
 import { CommissionerWelcome } from "../components/CommissionerWelcome";
 import { PartialLeagueWelcome } from "../components/PartialLeagueWelcome";
 import { AutoDraftToggle } from "../components/AutoDraftToggle";
+import { Spinner } from "@/components/ui/spinner";
+import { errorMessage } from "@/utils/errors";
 
 export function DraftPageShadCN() {
   const { leagueId } = useParams<{ leagueId: string }>();
@@ -60,7 +62,7 @@ export function DraftPageShadCN() {
       setSelectedTeam(null);
       toast.success("Pick made successfully!");
     } catch (error) {
-      toast.error(String(error));
+      toast.error(errorMessage(error));
     }
   };
 
@@ -68,7 +70,7 @@ export function DraftPageShadCN() {
   if (!league || !draftState || !currentUser) {
     return (
       <div className="flex justify-center items-center min-h-96">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+        <Spinner />
       </div>
     );
   }

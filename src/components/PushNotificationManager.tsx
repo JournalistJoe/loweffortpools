@@ -274,7 +274,7 @@ export function PushNotificationManager() {
           <Bell className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
           {subscriptionStatus === "subscribed" ? (
             <div className="space-y-2">
-              <p className="font-medium text-green-600">
+              <p className="font-medium text-green-600 dark:text-green-400">
                 Push notifications are active!
               </p>
               <p className="text-sm text-muted-foreground break-words">

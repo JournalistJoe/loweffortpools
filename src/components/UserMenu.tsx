@@ -49,7 +49,7 @@ export function UserMenu() {
     }
     
     if (iconType === "active") {
-      return <Bell className="w-4 h-4 text-green-600" />;
+      return <Bell className="w-4 h-4 text-green-600 dark:text-green-400" />;
     }
     
     return <Bell className="w-4 h-4 text-muted-foreground" />;

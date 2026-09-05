@@ -9,6 +9,8 @@ import { Badge } from "./ui/badge";
 import { Switch } from "./ui/switch";
 import { Label } from "./ui/label";
 import { ChevronUp, ChevronDown, Star, Settings } from "lucide-react";
+import { Spinner } from "@/components/ui/spinner";
+import { errorMessage } from "@/utils/errors";
 
 interface DraftPreferenceManagerProps {
   leagueId: Id<"leagues">;
@@ -74,7 +76,7 @@ export function DraftPreferenceManager({ leagueId }: DraftPreferenceManagerProps
       setHasUnsavedChanges(false);
       toast.success("Draft preferences saved successfully!");
     } catch (error) {
-      toast.error(String(error));
+      toast.error(errorMessage(error));
     }
   };
 
@@ -86,7 +88,7 @@ export function DraftPreferenceManager({ leagueId }: DraftPreferenceManagerProps
   if (!league || !draftState || !currentUser) {
     return (
       <div className="flex justify-center items-center min-h-96">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+        <Spinner />
       </div>
     );
   }
@@ -136,8 +138,8 @@ export function DraftPreferenceManager({ leagueId }: DraftPreferenceManagerProps
             </div>
             
             {hasUnsavedChanges && (
-              <div className="flex items-center justify-between bg-yellow-50 border border-yellow-200 rounded-md p-3">
-                <p className="text-sm text-yellow-800">You have unsaved changes</p>
+              <div className="flex items-center justify-between bg-yellow-50 border border-yellow-200 rounded-md p-3 dark:bg-yellow-950/20 dark:border-yellow-800">
+                <p className="text-sm text-yellow-800 dark:text-yellow-200">You have unsaved changes</p>
                 <Button onClick={() => void handleSavePreferences()} size="sm">
                   Save Changes
                 </Button>
@@ -157,7 +159,7 @@ export function DraftPreferenceManager({ leagueId }: DraftPreferenceManagerProps
         <CardContent>
           {teams.length === 0 ? (
             <div className="text-center py-8">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
+              <Spinner className="mx-auto" />
               <p className="mt-2 text-sm text-muted-foreground">Loading teams...</p>
             </div>
           ) : (
@@ -165,7 +167,7 @@ export function DraftPreferenceManager({ leagueId }: DraftPreferenceManagerProps
               {teams.map((team, index) => (
                 <div
                   key={team._id}
-                  className="flex items-center gap-3 p-3 bg-white border border-gray-200 rounded-lg hover:border-gray-300 transition-colors"
+                  className="flex items-center gap-3 p-3 bg-white border border-border rounded-lg hover:border-gray-300 transition-colors"
                 >
                   <div className="flex flex-col gap-1">
                     <Button

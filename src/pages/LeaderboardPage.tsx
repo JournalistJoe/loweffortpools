@@ -1,6 +1,7 @@
 import { useQuery } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import { useParams, Link } from "react-router-dom";
+import { Spinner } from "@/components/ui/spinner";
 
 export function LeaderboardPage() {
   const { leagueId } = useParams<{ leagueId: string }>();
@@ -16,7 +17,7 @@ export function LeaderboardPage() {
   if (!league || !leaderboard) {
     return (
       <div className="flex justify-center items-center min-h-96">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+        <Spinner />
       </div>
     );
   }

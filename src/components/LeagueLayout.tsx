@@ -5,6 +5,7 @@ import { LeagueNavigation } from "./LeagueNavigation";
 import { FloatingChat } from "./FloatingChat";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { Button } from "./ui/button";
+import { Spinner } from "@/components/ui/spinner";
 
 export function LeagueLayout() {
   const { leagueId } = useParams<{ leagueId: string }>();
@@ -17,7 +18,7 @@ export function LeagueLayout() {
   if (league === undefined) {
     return (
       <div className="flex justify-center items-center min-h-screen">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+        <Spinner />
       </div>
     );
   }

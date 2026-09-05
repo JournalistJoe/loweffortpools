@@ -9,6 +9,7 @@ import { Label } from "./ui/label";
 import { Card, CardContent, CardHeader } from "./ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
 import { useNavigate } from "react-router-dom";
+import { Spinner } from "@/components/ui/spinner";
 
 interface MobileSignInFormShadCNProps {
   joinCode?: string | null;
@@ -120,28 +121,28 @@ export function MobileSignInFormShadCN({ joinCode }: MobileSignInFormShadCNProps
               {flow === "signUp" && signUpSuccess ? (
                 // Success state for sign-up
                 <div className="space-y-6 text-center">
-                  <div className="bg-green-50 border border-green-200 rounded-lg p-6">
+                  <div className="bg-green-50 border border-green-200 rounded-lg p-6 dark:bg-green-950/20 dark:border-green-800">
                     <div className="flex items-center justify-center mb-4">
-                      <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
+                      <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center dark:bg-green-950/40">
                         <span className="text-2xl">✉️</span>
                       </div>
                     </div>
-                    <h3 className="text-lg font-semibold text-green-800 mb-2">
+                    <h3 className="text-lg font-semibold text-green-800 mb-2 dark:text-green-200">
                       Check Your Email!
                     </h3>
-                    <p className="text-green-700 mb-2">
+                    <p className="text-green-700 mb-2 dark:text-green-300">
                       We've sent a verification link to:
                     </p>
-                    <p className="font-medium text-green-800 mb-4">
+                    <p className="font-medium text-green-800 mb-4 dark:text-green-200">
                       {signUpEmail}
                     </p>
-                    <p className="text-sm text-green-600">
+                    <p className="text-sm text-green-600 dark:text-green-400">
                       Click the link in your email to activate your account and start creating leagues!
                     </p>
                   </div>
                   
                   <div className="space-y-3">
-                    <p className="text-sm text-gray-600">
+                    <p className="text-sm text-muted-foreground">
                       Don't see the email? Check your spam folder.
                     </p>
                     <Button
@@ -205,7 +206,7 @@ export function MobileSignInFormShadCN({ joinCode }: MobileSignInFormShadCNProps
                 >
                   {submitting ? (
                     <div className="flex items-center justify-center">
-                      <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
+                      <Spinner size="sm" onPrimary className="mr-2" />
                       {flow === "signIn" ? "Signing in..." : "Signing up..."}
                     </div>
                   ) : flow === "signIn" ? (
@@ -220,7 +221,7 @@ export function MobileSignInFormShadCN({ joinCode }: MobileSignInFormShadCNProps
                     <button
                       type="button"
                       onClick={() => void navigate("/forgot-password")}
-                      className="text-sm text-blue-600 hover:text-blue-800 hover:underline"
+                      className="text-sm text-blue-600 hover:text-blue-800 hover:underline dark:text-blue-400"
                     >
                       Forgot your password?
                     </button>

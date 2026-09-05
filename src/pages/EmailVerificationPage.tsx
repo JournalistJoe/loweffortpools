@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useAuthActions } from "@convex-dev/auth/react";
 import { toast } from "sonner";
 import { useTheme } from "../contexts/ThemeContext";
+import { Spinner } from "@/components/ui/spinner";
 
 export function EmailVerificationPage() {
   const navigate = useNavigate();
@@ -89,9 +90,9 @@ export function EmailVerificationPage() {
             <h1 className="text-3xl font-bold text-foreground mb-2">LowEffort.bet</h1>
           </div>
           
-          <div className="bg-red-50 border border-red-200 rounded-lg p-6 mb-6">
-            <h2 className="text-lg font-semibold text-red-800 mb-2">Verification Failed</h2>
-            <p className="text-red-600">{error}</p>
+          <div className="bg-red-50 border border-red-200 rounded-lg p-6 mb-6 dark:bg-red-950/20 dark:border-red-800">
+            <h2 className="text-lg font-semibold text-red-800 mb-2 dark:text-red-200">Verification Failed</h2>
+            <p className="text-red-600 dark:text-red-400">{error}</p>
           </div>
           
           <div className="space-y-4">
@@ -120,10 +121,10 @@ export function EmailVerificationPage() {
             <h1 className="text-3xl font-bold text-foreground mb-2">LowEffort.bet</h1>
           </div>
           
-          <div className="bg-green-50 border border-green-200 rounded-lg p-6 mb-6">
-            <h2 className="text-lg font-semibold text-green-800 mb-2">✅ Email Verified!</h2>
-            <p className="text-green-600">Your email has been successfully verified. You are now signed in.</p>
-            <p className="text-sm text-green-600 mt-2">Redirecting to home page...</p>
+          <div className="bg-green-50 border border-green-200 rounded-lg p-6 mb-6 dark:bg-green-950/20 dark:border-green-800">
+            <h2 className="text-lg font-semibold text-green-800 mb-2 dark:text-green-200">✅ Email Verified!</h2>
+            <p className="text-green-600 dark:text-green-400">Your email has been successfully verified. You are now signed in.</p>
+            <p className="text-sm text-green-600 mt-2 dark:text-green-400">Redirecting to home page...</p>
           </div>
         </div>
       </div>
@@ -143,12 +144,12 @@ export function EmailVerificationPage() {
             <h1 className="text-3xl font-bold text-foreground mb-2">LowEffort.bet</h1>
           </div>
           
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 dark:bg-blue-950/20 dark:border-blue-800">
             <div className="flex items-center justify-center mb-4">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+              <Spinner />
             </div>
-            <h2 className="text-lg font-semibold text-blue-800 mb-2">Verifying Email...</h2>
-            <p className="text-blue-600">Please wait while we verify your email address.</p>
+            <h2 className="text-lg font-semibold text-blue-800 mb-2 dark:text-blue-200">Verifying Email...</h2>
+            <p className="text-blue-600 dark:text-blue-400">Please wait while we verify your email address.</p>
           </div>
         </div>
       </div>

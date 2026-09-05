@@ -41,6 +41,7 @@ import {
   DialogTrigger,
 } from "../components/ui/dialog";
 import { CURRENT_SEASON_YEAR } from "../lib/nflSeason";
+import { errorMessage } from "@/utils/errors";
 
 export function SystemAdminPage() {
   const currentUser = useQuery(api.users.getCurrentUser);
@@ -92,7 +93,7 @@ export function SystemAdminPage() {
       toast.success(`Imported ${result.imported} NFL teams for ${CURRENT_SEASON_YEAR}`);
       setShowImportDialog(false);
     } catch (error) {
-      toast.error(String(error));
+      toast.error(errorMessage(error));
     } finally {
       setIsImporting(false);
     }
@@ -111,7 +112,7 @@ export function SystemAdminPage() {
       toast.success(`Resynced week ${weekNumber} game data for all leagues`);
       setShowResyncDialog(false);
     } catch (error) {
-      toast.error(String(error));
+      toast.error(errorMessage(error));
     } finally {
       setIsResyncing(false);
     }
@@ -128,7 +129,7 @@ export function SystemAdminPage() {
       );
       setShowCompleteDialog(false);
     } catch (error) {
-      toast.error(String(error));
+      toast.error(errorMessage(error));
     } finally {
       setIsCompletingSeason(false);
     }
@@ -140,7 +141,7 @@ export function SystemAdminPage() {
       const result = await createTestLeague({});
       toast.success(result.message);
     } catch (error) {
-      toast.error(String(error));
+      toast.error(errorMessage(error));
     } finally {
       setIsCreatingTestLeague(false);
     }
@@ -168,7 +169,7 @@ export function SystemAdminPage() {
         toast.error(`Failed to send notification: ${result.errors?.join(", ") || "Unknown error"}`);
       }
     } catch (error) {
-      toast.error(String(error));
+      toast.error(errorMessage(error));
     } finally {
       setIsSendingTest(false);
     }
@@ -196,12 +197,12 @@ export function SystemAdminPage() {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 dark:bg-yellow-950/20 dark:border-yellow-800">
               <div className="flex items-start gap-2">
-                <AlertTriangle className="h-5 w-5 text-yellow-600 mt-0.5" />
+                <AlertTriangle className="h-5 w-5 text-yellow-600 mt-0.5 dark:text-yellow-400" />
                 <div>
-                  <h4 className="font-medium text-yellow-800">Global Operations Warning</h4>
-                  <p className="text-sm text-yellow-700 mt-1">
+                  <h4 className="font-medium text-yellow-800 dark:text-yellow-200">Global Operations Warning</h4>
+                  <p className="text-sm text-yellow-700 mt-1 dark:text-yellow-300">
                     These operations affect ALL leagues in the system. Use with caution.
                   </p>
                 </div>
@@ -345,12 +346,12 @@ export function SystemAdminPage() {
           <CardContent className="space-y-4">
             {/* Notification Stats */}
             {notificationStats && (
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 dark:bg-blue-950/20 dark:border-blue-800">
                 <div className="flex items-start gap-2">
-                  <Activity className="h-5 w-5 text-blue-600 mt-0.5" />
+                  <Activity className="h-5 w-5 text-blue-600 mt-0.5 dark:text-blue-400" />
                   <div>
-                    <h4 className="font-medium text-blue-800">System Notification Stats</h4>
-                    <div className="text-sm text-blue-700 mt-1 space-y-1">
+                    <h4 className="font-medium text-blue-800 dark:text-blue-200">System Notification Stats</h4>
+                    <div className="text-sm text-blue-700 mt-1 space-y-1 dark:text-blue-300">
                       <p>Total Deliveries: {notificationStats.stats.total}</p>
                       <p>Success Rate: {(notificationStats.stats.successRate * 100).toFixed(1)}%</p>
                       <p>Recent Sent: {notificationStats.stats.sent} | Failed: {notificationStats.stats.failed}</p>

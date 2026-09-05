@@ -148,13 +148,13 @@ export function NotificationSettings({ leagueId, showGlobalSettings = false }: N
         </div>
         <div className="flex flex-col gap-2 sm:flex-row sm:gap-3 sm:items-center flex-shrink-0">
           {preferences?.isUsingGlobalDefaults && !showGlobalSettings && (
-            <Badge variant="outline" className="text-blue-600 border-blue-600 self-start sm:self-center">
+            <Badge variant="outline" className="text-blue-600 border-blue-600 self-start sm:self-center dark:text-blue-400">
               <Bell className="w-3 h-3 mr-1" />
               Using Global Defaults
             </Badge>
           )}
           {isMuted && (
-            <Badge variant="outline" className="text-orange-600 border-orange-600 self-start sm:self-center">
+            <Badge variant="outline" className="text-orange-600 border-orange-600 self-start sm:self-center dark:text-orange-400">
               <BellOff className="w-3 h-3 mr-1" />
               Muted ({muteTimeRemaining}h left)
             </Badge>
