@@ -2,15 +2,16 @@ import { v } from "convex/values";
 import {
   query,
   mutation,
-  action,
   internalMutation,
   internalAction,
+  MutationCtx,
 } from "./_generated/server";
 import { internal } from "./_generated/api";
 import { getAuthUserId } from "@convex-dev/auth/server";
+import { CURRENT_SEASON_YEAR } from "./lib/nflSeason";
 
-// NFL team data for 2025 season
-const NFL_TEAMS_2025 = [
+// NFL team roster (season-agnostic). Import per seasonYear in the database.
+export const NFL_TEAMS = [
   { espnId: 1, abbrev: "ATL", name: "Falcons", fullName: "Atlanta Falcons", logoUrl: "https://a.espncdn.com/i/teamlogos/nfl/500/atl.png" },
   { espnId: 2, abbrev: "BUF", name: "Bills", fullName: "Buffalo Bills", logoUrl: "https://a.espncdn.com/i/teamlogos/nfl/500/buf.png" },
   { espnId: 3, abbrev: "CHI", name: "Bears", fullName: "Chicago Bears", logoUrl: "https://a.espncdn.com/i/teamlogos/nfl/500/chi.png" },
@@ -99,39 +100,52 @@ const NFL_TEAMS_2025 = [
   { espnId: 34, abbrev: "HOU", name: "Texans", fullName: "Houston Texans", logoUrl: "https://a.espncdn.com/i/teamlogos/nfl/500/hou.png" },
 ];
 
+async function writeTeamsForSeason(ctx: MutationCtx, seasonYear: number) {
+  const existingTeams = await ctx.db
+    .query("nflTeams")
+    .withIndex("by_season", (q) => q.eq("seasonYear", seasonYear))
+    .collect();
+
+  // Upsert by espnId so existing team IDs (referenced by draftPicks and games) survive a re-import.
+  const existingByEspnId = new Map(existingTeams.map((team) => [team.espnId, team]));
+
+  let imported = 0;
+  for (const teamData of NFL_TEAMS) {
+    const existing = existingByEspnId.get(teamData.espnId);
+    if (existing) {
+      await ctx.db.patch(existing._id, teamData);
+    } else {
+      await ctx.db.insert("nflTeams", { ...teamData, seasonYear });
+    }
+    imported++;
+  }
+
+  return { imported };
+}
+
 export const importTeams = mutation({
   args: {
     seasonYear: v.number(),
   },
+  returns: v.object({ imported: v.number() }),
   handler: async (ctx, args) => {
-    // Check if user is a superuser
     const userId = await getAuthUserId(ctx);
     if (!userId) throw new Error("Must be logged in");
-    
+
     const user = await ctx.db.get(userId);
     if (!user?.isSuperuser) throw new Error("Must be a superuser to import NFL teams (affects all leagues)");
 
-    // Clear existing teams for this season
-    const existingTeams = await ctx.db
-      .query("nflTeams")
-      .withIndex("by_season", (q) => q.eq("seasonYear", args.seasonYear))
-      .collect();
+    return await writeTeamsForSeason(ctx, args.seasonYear);
+  },
+});
 
-    for (const team of existingTeams) {
-      await ctx.db.delete(team._id);
-    }
-
-    // Insert new teams
-    const teamIds = [];
-    for (const teamData of NFL_TEAMS_2025) {
-      const teamId = await ctx.db.insert("nflTeams", {
-        ...teamData,
-        seasonYear: args.seasonYear,
-      });
-      teamIds.push(teamId);
-    }
-
-    return { imported: teamIds.length };
+export const importTeamsForSeason = internalMutation({
+  args: {
+    seasonYear: v.number(),
+  },
+  returns: v.object({ imported: v.number() }),
+  handler: async (ctx, args) => {
+    return await writeTeamsForSeason(ctx, args.seasonYear);
   },
 });
 
@@ -308,7 +322,7 @@ export const manualResync = mutation({
     const user = await ctx.db.get(userId);
     if (!user?.isSuperuser) throw new Error("Must be a superuser to manually resync game data (affects all leagues)");
 
-    const seasonYear = 2025; // Current season
+    const seasonYear = CURRENT_SEASON_YEAR;
 
     try {
       await ctx.scheduler.runAfter(0, internal.nflData.syncGamesFromESPN, {

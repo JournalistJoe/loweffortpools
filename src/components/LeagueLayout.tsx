@@ -35,7 +35,7 @@ export function LeagueLayout() {
               This league doesn't exist or you don't have permission to view it.
             </p>
             <Button asChild className="w-full">
-              <Link to="/leagues">Back to Leagues</Link>
+              <Link to="/">Back to Leagues</Link>
             </Button>
           </CardContent>
         </Card>

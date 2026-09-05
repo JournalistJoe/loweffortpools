@@ -9,6 +9,7 @@ import { toast } from "sonner";
 import { useState, useEffect, useMemo } from "react";
 import { useMutation } from "convex/react";
 import { api } from "../../convex/_generated/api";
+import { defaultDraftDatetimeLocal } from "../lib/nflSeason";
 
 interface League {
   _id: string;
@@ -52,17 +53,7 @@ export function PartialLeagueWelcome({ league, currentUser, participants }: Part
     setMinLocalDatetime(localTime.toISOString().slice(0, 16));
   }, []);
   
-  // Helper function to convert UTC Date instant to local datetime string for datetime-local input
-  const convertUTCToLocalDatetimeString = (utcDate: Date): string => {
-    const localDate = new Date(utcDate.getTime() - utcDate.getTimezoneOffset() * 60000);
-    return localDate.toISOString().slice(0, 16);
-  };
-
-  // Default to September 4, 2025 8:00 PM UTC converted to user's local time
-  const defaultDraftDate = useMemo(() => {
-    const utcDate = new Date(Date.UTC(2025, 8, 4, 20, 0)); // September 4, 2025, 8:00 PM UTC
-    return convertUTCToLocalDatetimeString(utcDate);
-  }, []);
+  const defaultDraftDate = useMemo(() => defaultDraftDatetimeLocal(), []);
 
   const handleShareJoinCode = () => {
     navigator.clipboard.writeText(league.joinCode);
@@ -70,7 +61,7 @@ export function PartialLeagueWelcome({ league, currentUser, participants }: Part
   };
 
   const handleShareLeagueLink = () => {
-    const url = `${window.location.origin}/leagues?joinCode=${league.joinCode}`;
+    const url = `${window.location.origin}/signin?joinCode=${league.joinCode}`;
     navigator.clipboard.writeText(url);
     toast.success("League invitation link copied to clipboard!");
   };
@@ -123,7 +114,7 @@ export function PartialLeagueWelcome({ league, currentUser, participants }: Part
 
   const copyMessage = `"${league.name}" NFL draft league - it's free, takes 5 seconds to join, and I promise it's not as nerdy as regular fantasy football. Just pick 4 NFL teams and talk trash for 4 months. Draft is ${league.scheduledDraftDate ? new Date(league.scheduledDraftDate).toLocaleDateString() + " at " + new Date(league.scheduledDraftDate).toLocaleTimeString() : "[Date] at [Time]"}.
 
-Join here: ${window.location.origin}/leagues?joinCode=${league.joinCode}
+Join here: ${window.location.origin}/signin?joinCode=${league.joinCode}
 
 Don't make me be the guy who couldn't get 8 people together for something this stupid simple.`;
 
@@ -284,7 +275,7 @@ Don't make me be the guy who couldn't get 8 people together for something this s
                 <div className="flex items-center justify-between">
                   <span className="text-sm font-medium text-muted-foreground">Join Link:</span>
                   <Badge variant="outline" className="text-sm font-mono px-2 py-1 max-w-xs truncate">
-                    loweffort.bet/leagues?joinCode={league.joinCode}
+                    loweffort.bet/signin?joinCode={league.joinCode}
                   </Badge>
                 </div>
                 <div className="flex items-center justify-between">
@@ -402,7 +393,7 @@ Don't make me be the guy who couldn't get 8 people together for something this s
                   className="mt-2"
                 />
                 <p className="text-xs text-muted-foreground mt-1">
-                  Defaults to Sept 4, 2025 8:00 PM (your local time)
+                  Defaults to Sept 9, 2026 8:00 PM (your local time)
                 </p>
               </div>
               <div className="flex gap-2 justify-center">

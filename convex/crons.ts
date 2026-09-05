@@ -2,14 +2,22 @@ import { cronJobs } from "convex/server";
 import { internal } from "./_generated/api";
 import { internalAction, internalMutation } from "./_generated/server";
 import { v } from "convex/values";
+import {
+  CURRENT_SEASON_YEAR,
+  MAX_WEEK,
+  getCurrentNFLWeek,
+  isRegularSeasonComplete,
+} from "./lib/nflSeason";
 
 const crons = cronJobs();
 
 // Nightly sync at 03:00 PT (11:00 UTC)
 crons.cron("nightly sync", "0 11 * * *", internal.crons.nightlySync, {});
 
-// Weekly finalize at Tuesday 03:15 PT (11:15 UTC)
-crons.cron("weekly finalize", "15 11 * * 2", internal.crons.weeklyFinalize, {});
+// Weekly finalize at Wednesday 03:15 PT (11:15 UTC). The NFL week rolls over at
+// Wednesday 00:00 UTC (see getCurrentNFLWeek), so by now getCurrentNFLWeek() - 1
+// is the week whose Monday night game just finished.
+crons.cron("weekly finalize", "15 11 * * 3", internal.crons.weeklyFinalize, {});
 
 // Check for expired draft picks every minute as backup (can't do 30 seconds with standard cron)
 crons.cron("draft autopick", "* * * * *", internal.draft.checkAndMakeAutoPick, {});
@@ -18,8 +26,9 @@ export default crons;
 
 export const nightlySync = internalAction({
   args: {},
+  returns: v.null(),
   handler: async (ctx) => {
-    const seasonYear = 2025;
+    const seasonYear = CURRENT_SEASON_YEAR;
     const currentWeek = getCurrentNFLWeek();
 
     try {
@@ -43,38 +52,55 @@ export const nightlySync = internalAction({
         error: String(error),
       });
     }
+    return null;
   },
 });
 
 export const weeklyFinalize = internalAction({
   args: {},
+  returns: v.null(),
   handler: async (ctx) => {
-    const seasonYear = 2025;
-    const previousWeek = getCurrentNFLWeek() - 1;
+    const seasonYear = CURRENT_SEASON_YEAR;
+    // getCurrentNFLWeek clamps at MAX_WEEK, so once the season is over the week
+    // to finalize is MAX_WEEK itself; otherwise it is the week that just ended.
+    const previousWeek = isRegularSeasonComplete()
+      ? MAX_WEEK
+      : getCurrentNFLWeek() - 1;
 
-    if (previousWeek < 1) return; // No previous week to finalize
+    let syncSucceeded = previousWeek < 1;
+    if (previousWeek >= 1) {
+      try {
+        await ctx.runAction(internal.nflData.syncGamesFromESPN, {
+          week: previousWeek,
+          seasonYear,
+        });
 
-    try {
-      await ctx.runAction(internal.nflData.syncGamesFromESPN, {
-        week: previousWeek,
+        await ctx.runMutation(internal.crons.recordSyncRun, {
+          type: "weekly",
+          summary: `Weekly finalize completed for week ${previousWeek}`,
+          week: previousWeek,
+          success: true,
+        });
+        syncSucceeded = true;
+      } catch (error) {
+        await ctx.runMutation(internal.crons.recordSyncRun, {
+          type: "weekly",
+          summary: `Weekly finalize failed for week ${previousWeek}`,
+          week: previousWeek,
+          success: false,
+          error: String(error),
+        });
+      }
+    }
+
+    // Only close out the season once the final week's results are safely synced.
+    if (syncSucceeded && isRegularSeasonComplete()) {
+      await ctx.runMutation(internal.leagues.completeLiveLeaguesForSeason, {
         seasonYear,
       });
-
-      await ctx.runMutation(internal.crons.recordSyncRun, {
-        type: "weekly",
-        summary: `Weekly finalize completed for week ${previousWeek}`,
-        week: previousWeek,
-        success: true,
-      });
-    } catch (error) {
-      await ctx.runMutation(internal.crons.recordSyncRun, {
-        type: "weekly",
-        summary: `Weekly finalize failed for week ${previousWeek}`,
-        week: previousWeek,
-        success: false,
-        error: String(error),
-      });
     }
+
+    return null;
   },
 });
 
@@ -90,6 +116,7 @@ export const recordSyncRun = internalMutation({
     success: v.boolean(),
     error: v.optional(v.string()),
   },
+  returns: v.null(),
   handler: async (ctx, args) => {
     await ctx.db.insert("syncRuns", {
       ranAt: Date.now(),
@@ -99,18 +126,6 @@ export const recordSyncRun = internalMutation({
       success: args.success,
       error: args.error,
     });
+    return null;
   },
 });
-
-// Helper function to determine current NFL week
-function getCurrentNFLWeek(): number {
-  // NFL 2025 season starts approximately in September
-  // This is a simplified calculation - in production you'd want more precise logic
-  const now = new Date();
-  const seasonStart = new Date(2025, 8, 5); // September 5, 2025 (approximate)
-  const weeksSinceStart = Math.floor(
-    (now.getTime() - seasonStart.getTime()) / (7 * 24 * 60 * 60 * 1000),
-  );
-
-  return Math.max(1, Math.min(18, weeksSinceStart + 1));
-}

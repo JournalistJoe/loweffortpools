@@ -30,6 +30,7 @@ import {
   Users,
   Send,
   Activity,
+  Trophy,
 } from "lucide-react";
 import {
   Dialog,
@@ -40,6 +41,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "../components/ui/dialog";
+import { CURRENT_SEASON_YEAR } from "../lib/nflSeason";
 
 export function SystemAdminPage() {
   const currentUser = useQuery(api.users.getCurrentUser);
@@ -49,11 +51,14 @@ export function SystemAdminPage() {
   const [isCreatingTestLeague, setIsCreatingTestLeague] = useState(false);
   const [showImportDialog, setShowImportDialog] = useState(false);
   const [showResyncDialog, setShowResyncDialog] = useState(false);
+  const [showCompleteDialog, setShowCompleteDialog] = useState(false);
+  const [isCompletingSeason, setIsCompletingSeason] = useState(false);
   const [testUserId, setTestUserId] = useState("");
   const [isSendingTest, setIsSendingTest] = useState(false);
 
   const importTeams = useMutation(api.nflData.importTeams);
   const manualResync = useMutation(api.nflData.manualResync);
+  const completeSeason = useMutation(api.leagues.completeSeason);
   const createTestLeague = useMutation(api.testLeague.createTestLeague);
   const sendTestNotification = useAction(api.notificationActions.sendTestNotification);
   const getAllUsers = useQuery(api.users.getAllUsers);
@@ -83,9 +88,9 @@ export function SystemAdminPage() {
     setIsImporting(true);
     try {
       const result = await importTeams({
-        seasonYear: 2025, // Current season
+        seasonYear: CURRENT_SEASON_YEAR,
       });
-      toast.success(`Imported ${result.imported} NFL teams for all leagues`);
+      toast.success(`Imported ${result.imported} NFL teams for ${CURRENT_SEASON_YEAR}`);
       setShowImportDialog(false);
     } catch (error) {
       toast.error(String(error));
@@ -110,6 +115,23 @@ export function SystemAdminPage() {
       toast.error(String(error));
     } finally {
       setIsResyncing(false);
+    }
+  };
+
+  const previousSeasonYear = CURRENT_SEASON_YEAR - 1;
+
+  const handleCompleteSeason = async () => {
+    setIsCompletingSeason(true);
+    try {
+      const result = await completeSeason({ seasonYear: previousSeasonYear });
+      toast.success(
+        `Marked ${result.completed} live ${previousSeasonYear} league(s) as completed`,
+      );
+      setShowCompleteDialog(false);
+    } catch (error) {
+      toast.error(String(error));
+    } finally {
+      setIsCompletingSeason(false);
     }
   };
 
@@ -195,15 +217,15 @@ export function SystemAdminPage() {
                     className="gap-2"
                   >
                     <Download className="h-4 w-4" />
-                    {isImporting ? "Importing..." : "Import NFL Teams (2025)"}
+                    {isImporting ? "Importing..." : `Import NFL Teams (${CURRENT_SEASON_YEAR})`}
                   </Button>
                 </DialogTrigger>
                 <DialogContent>
                   <DialogHeader>
                     <DialogTitle>Import NFL Teams - Global Operation</DialogTitle>
                     <DialogDescription>
-                      This will replace ALL NFL team data for the 2025 season across the entire system. 
-                      This affects every league using the 2025 season and cannot be undone.
+                      This will replace ALL NFL team data for the {CURRENT_SEASON_YEAR} season across the entire system. 
+                      This affects every league using the {CURRENT_SEASON_YEAR} season and cannot be undone.
                     </DialogDescription>
                   </DialogHeader>
                   <DialogFooter>
@@ -217,7 +239,46 @@ export function SystemAdminPage() {
                 </DialogContent>
               </Dialog>
               <p className="text-sm text-muted-foreground mt-1">
-                Replace all NFL teams for the 2025 season (affects all leagues)
+                Replace all NFL teams for the {CURRENT_SEASON_YEAR} season (affects all leagues)
+              </p>
+            </div>
+
+            <Separator />
+
+            <div>
+              <Dialog open={showCompleteDialog} onOpenChange={setShowCompleteDialog}>
+                <DialogTrigger asChild>
+                  <Button
+                    variant="outline"
+                    disabled={isCompletingSeason}
+                    className="gap-2"
+                  >
+                    <Trophy className="h-4 w-4" />
+                    {isCompletingSeason
+                      ? "Completing..."
+                      : `Complete ${previousSeasonYear} Season`}
+                  </Button>
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>Complete {previousSeasonYear} Season</DialogTitle>
+                    <DialogDescription>
+                      This will mark all live {previousSeasonYear} leagues as completed
+                      so members see final standings and the champion. Drafting and participant joins stay closed; spectators can still view.
+                    </DialogDescription>
+                  </DialogHeader>
+                  <DialogFooter>
+                    <Button variant="outline" onClick={() => setShowCompleteDialog(false)}>
+                      Cancel
+                    </Button>
+                    <Button onClick={handleCompleteSeason} disabled={isCompletingSeason}>
+                      {isCompletingSeason ? "Completing..." : "Complete Season"}
+                    </Button>
+                  </DialogFooter>
+                </DialogContent>
+              </Dialog>
+              <p className="text-sm text-muted-foreground mt-1">
+                Mark live {previousSeasonYear} leagues as completed
               </p>
             </div>
 

@@ -26,7 +26,7 @@ export const joinAsSpectator = mutation({
       throw new Error("Invalid join code");
     }
 
-    if (league.status !== "setup" && league.status !== "draft" && league.status !== "live") {
+    if (league.status !== "setup" && league.status !== "draft" && league.status !== "live" && league.status !== "completed") {
       throw new Error("Cannot join league as spectator");
     }
 
@@ -70,7 +70,7 @@ export const joinAsSpectator = mutation({
       createdAt: Date.now(),
     });
 
-    return { leagueId: league._id, spectatorId };
+    return { leagueId: league._id, spectatorId, status: league.status };
   },
 });
 

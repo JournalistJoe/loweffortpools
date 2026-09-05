@@ -9,6 +9,7 @@ import { toast } from "sonner";
 import { useState, useEffect, useMemo } from "react";
 import { useMutation } from "convex/react";
 import { api } from "../../convex/_generated/api";
+import { defaultDraftDatetimeLocal } from "../lib/nflSeason";
 
 interface League {
   _id: string;
@@ -42,12 +43,7 @@ export function CommissionerWelcome({ league, currentUser }: CommissionerWelcome
     setMinLocalDatetime(localTime.toISOString().slice(0, 16));
   }, []);
   
-  // Default to September 4, 2025 8:00 PM ET (first regular season game)
-  const defaultDraftDate = useMemo(() => {
-    const septDate = new Date(2025, 8, 4, 20, 0); // September 4, 2025, 8:00 PM
-    const localTime = new Date(septDate.getTime() - (septDate.getTimezoneOffset() * 60000));
-    return localTime.toISOString().slice(0, 16);
-  }, []);
+  const defaultDraftDate = useMemo(() => defaultDraftDatetimeLocal(), []);
 
   const handleShareJoinCode = () => {
     navigator.clipboard.writeText(league.joinCode);
@@ -55,7 +51,7 @@ export function CommissionerWelcome({ league, currentUser }: CommissionerWelcome
   };
 
   const handleShareLeagueLink = () => {
-    const url = `${window.location.origin}/leagues?joinCode=${league.joinCode}`;
+    const url = `${window.location.origin}/signin?joinCode=${league.joinCode}`;
     navigator.clipboard.writeText(url);
     toast.success("League invitation link copied to clipboard!");
   };
@@ -325,7 +321,7 @@ export function CommissionerWelcome({ league, currentUser }: CommissionerWelcome
                     className="mt-2"
                   />
                   <p className="text-xs text-muted-foreground mt-1">
-                    Defaults to Sept 4, 2025 (first regular season game)
+                    Defaults to Sept 9, 2026 (first regular season game)
                   </p>
                 </div>
                 <div className="flex gap-2 justify-center">

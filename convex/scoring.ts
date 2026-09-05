@@ -1,85 +1,117 @@
 import { v } from "convex/values";
-import { query } from "./_generated/server";
+import { query, QueryCtx } from "./_generated/server";
 import { getAuthUserId } from "@convex-dev/auth/server";
+import { Doc, Id } from "./_generated/dataModel";
+import { getCurrentNFLWeek } from "./lib/nflSeason";
+
+export async function computeStandings(
+  ctx: QueryCtx,
+  leagueId: Id<"leagues">,
+  preloadedFinalGames?: Doc<"games">[],
+) {
+  const league = await ctx.db.get(leagueId);
+  if (!league) return null;
+
+  const participants = await ctx.db
+    .query("participants")
+    .withIndex("by_league", (q) => q.eq("leagueId", leagueId))
+    .collect();
+
+  const picks = await ctx.db
+    .query("draftPicks")
+    .withIndex("by_league", (q) => q.eq("leagueId", leagueId))
+    .collect();
+
+  const games =
+    preloadedFinalGames ??
+    (await loadFinalGamesForSeason(ctx, league.seasonYear));
+
+  const leaderboard = await Promise.all(
+    participants.map(async (participant) => {
+      const participantPicks = picks.filter(
+        (p) => p.participantId === participant._id,
+      );
+      const teams = await Promise.all(
+        participantPicks.map((pick) => ctx.db.get(pick.nflTeamId)),
+      );
+
+      let totalWins = 0;
+      const teamRecords = await Promise.all(
+        teams.map(async (team) => {
+          if (!team) return { team: null, wins: 0, losses: 0, ties: 0 };
+
+          let wins = 0;
+          let losses = 0;
+          let ties = 0;
+
+          for (const game of games) {
+            if (game.homeTeamId === team._id || game.awayTeamId === team._id) {
+              if (game.tie) {
+                ties++;
+                totalWins += 0.5;
+              } else if (game.winnerTeamId === team._id) {
+                wins++;
+                totalWins += 1;
+              } else {
+                losses++;
+              }
+            }
+          }
+
+          return { team, wins, losses, ties };
+        }),
+      );
+
+      return {
+        participant,
+        totalWins,
+        teamRecords: teamRecords.filter((record) => record.team !== null),
+      };
+    }),
+  );
+
+  leaderboard.sort((a, b) => b.totalWins - a.totalWins);
+  return leaderboard;
+}
+
+export async function loadFinalGamesForSeason(
+  ctx: QueryCtx,
+  seasonYear: number,
+) {
+  return await ctx.db
+    .query("games")
+    .withIndex("by_season_and_week", (q) => q.eq("seasonYear", seasonYear))
+    .filter((q) => q.eq(q.field("status"), "final"))
+    .collect();
+}
+
+export async function getChampionForLeague(
+  ctx: QueryCtx,
+  leagueId: Id<"leagues">,
+  preloadedFinalGames?: Doc<"games">[],
+) {
+  const standings = await computeStandings(ctx, leagueId, preloadedFinalGames);
+  if (!standings || standings.length === 0) return null;
+  const top = standings[0];
+  // No results synced yet: nobody has earned the title.
+  if (top.totalWins === 0) return null;
+  // Standings are sorted by totalWins only, so everyone tied at the top is a co-champion.
+  const coChampions = standings.filter((entry) => entry.totalWins === top.totalWins);
+  return {
+    displayName: coChampions
+      .map((entry) => entry.participant.displayName)
+      .sort()
+      .join(" & "),
+    totalWins: top.totalWins,
+  };
+}
 
 export const getLeaderboard = query({
   args: {
     leagueId: v.id("leagues"),
   },
   handler: async (ctx, args) => {
-    const league = await ctx.db.get(args.leagueId);
-    if (!league) return null;
-
-    const participants = await ctx.db
-      .query("participants")
-      .withIndex("by_league", (q) => q.eq("leagueId", args.leagueId))
-      .collect();
-
-    const picks = await ctx.db
-      .query("draftPicks")
-      .withIndex("by_league", (q) => q.eq("leagueId", args.leagueId))
-      .collect();
-
-    const games = await ctx.db
-      .query("games")
-      .withIndex("by_season_and_week", (q) =>
-        q.eq("seasonYear", league.seasonYear),
-      )
-      .filter((q) => q.eq(q.field("status"), "final"))
-      .collect();
-
-    // Calculate scores for each participant
-    const leaderboard = await Promise.all(
-      participants.map(async (participant) => {
-        const participantPicks = picks.filter(
-          (p) => p.participantId === participant._id,
-        );
-        const teams = await Promise.all(
-          participantPicks.map((pick) => ctx.db.get(pick.nflTeamId)),
-        );
-
-        let totalWins = 0;
-        const teamRecords = await Promise.all(
-          teams.map(async (team) => {
-            if (!team) return { team: null, wins: 0, losses: 0, ties: 0 };
-
-            let wins = 0;
-            let losses = 0;
-            let ties = 0;
-
-            for (const game of games) {
-              if (
-                game.homeTeamId === team._id ||
-                game.awayTeamId === team._id
-              ) {
-                if (game.tie) {
-                  ties++;
-                  totalWins += 0.5;
-                } else if (game.winnerTeamId === team._id) {
-                  wins++;
-                  totalWins += 1;
-                } else {
-                  losses++;
-                }
-              }
-            }
-
-            return { team, wins, losses, ties };
-          }),
-        );
-
-        return {
-          participant,
-          totalWins,
-          teamRecords: teamRecords.filter((record) => record.team !== null),
-        };
-      }),
-    );
-
-    // Sort by total wins (descending)
-    leaderboard.sort((a, b) => b.totalWins - a.totalWins);
-
-    return leaderboard;
+    return await computeStandings(ctx, args.leagueId);
   },
 });
 
@@ -352,15 +384,3 @@ export const getUpcomingGames = query({
     };
   },
 });
-
-// Helper function to get current NFL week (simplified)
-function getCurrentNFLWeek(): number {
-  // This is a simplified version - in a real app you'd want more sophisticated logic
-  // to determine the current NFL week based on the actual season schedule
-  const now = new Date();
-  const seasonStart = new Date(now.getFullYear(), 8, 1); // September 1st
-  const weeksSinceStart = Math.floor(
-    (now.getTime() - seasonStart.getTime()) / (7 * 24 * 60 * 60 * 1000),
-  );
-  return Math.max(1, Math.min(18, weeksSinceStart + 1));
-}
