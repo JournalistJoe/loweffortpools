@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useState, ReactNode, useCallback } from "react";
-import { useQuery, useMutation } from "convex/react";
+import { useQuery } from "convex/react";
 import { api } from "../../convex/_generated/api";
 
 interface NotificationContextType {
@@ -28,7 +28,7 @@ export function NotificationProvider({ children }: NotificationProviderProps) {
 
   // Check notification support and permission on mount
   useEffect(() => {
-    checkSupport();
+    void checkSupport();
   }, []);
 
   // Update subscription status based on user subscriptions

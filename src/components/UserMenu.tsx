@@ -1,4 +1,3 @@
-import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { useUserMenu } from "../hooks/useUserMenu";
 import { Button } from "./ui/button";
@@ -30,7 +29,6 @@ import { PushNotificationManager } from "./PushNotificationManager";
 import { NotificationSettings } from "./NotificationSettings";
 
 export function UserMenu() {
-  const navigate = useNavigate();
   const { signOut } = useAuthActions();
   const {
     showNotifications,
@@ -39,8 +37,6 @@ export function UserMenu() {
     theme,
     toggleTheme,
     unreadCount,
-    permission,
-    subscriptionStatus,
     getNotificationIconType,
     getNotificationStatus,
   } = useUserMenu();

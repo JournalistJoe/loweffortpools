@@ -5,7 +5,6 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { normalizeJoinCode, JOIN_CODE_LENGTH } from "../utils/joinCodeUtils";
 import { toast } from "sonner";
 import { useLeagueContext } from "../contexts/LeagueContext";
-import { useTheme } from "../contexts/ThemeContext";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
@@ -26,13 +25,9 @@ import {
   UserCheck,
   Eye,
   Settings,
-  Sun,
-  Moon,
 } from "lucide-react";
 import { DraftCountdown } from "../components/DraftCountdown";
 import { EmptyLeaguesState } from "../components/EmptyLeaguesState";
-import { SignOutButton } from "../SignOutButton";
-import { UserMenu } from "../components/UserMenu";
 import { AppHeader } from "../components/AppHeader";
 import { CURRENT_SEASON_YEAR } from "../lib/nflSeason";
 
@@ -40,7 +35,6 @@ export function LeagueSelectionPageShadCN() {
   const leagues = useQuery(api.leagues.getUserLeagues);
   const currentUser = useQuery(api.users.getCurrentUser);
   const { setSelectedLeagueId } = useLeagueContext();
-  const { theme, toggleTheme } = useTheme();
   const location = useLocation();
   const navigate = useNavigate();
   const [showCreateForm, setShowCreateForm] = useState(false);
@@ -92,7 +86,7 @@ export function LeagueSelectionPageShadCN() {
       }
       
       // Automatically join the league with default team name
-      handleAutoJoin(pendingJoinCode);
+      void handleAutoJoin(pendingJoinCode);
     }
   }, [location.search]);
 
@@ -259,7 +253,7 @@ export function LeagueSelectionPageShadCN() {
 
   const systemAdminAction = currentUser?.isSuperuser ? (
     <Button
-      onClick={() => navigate("/system-admin")}
+      onClick={() => void navigate("/system-admin")}
       variant="ghost"
       size="sm"
       className="gap-2"
@@ -392,7 +386,7 @@ export function LeagueSelectionPageShadCN() {
 
                 <div className="flex gap-3">
                   <Button
-                    onClick={handleCreateLeague}
+                    onClick={() => void handleCreateLeague()}
                     disabled={isCreating || !leagueName.trim()}
                     className="flex-1 bg-green-600 hover:bg-green-700 dark:bg-green-700 dark:hover:bg-green-600"
                   >
@@ -492,7 +486,7 @@ export function LeagueSelectionPageShadCN() {
                 <div className="flex gap-3">
                   {leagueByJoinCode && !leagueByJoinCode.canJoin ? (
                     <Button
-                      onClick={handleJoinAsSpectator}
+                      onClick={() => void handleJoinAsSpectator()}
                       disabled={
                         isJoining ||
                         !joinCode.trim() ||
@@ -505,7 +499,7 @@ export function LeagueSelectionPageShadCN() {
                     </Button>
                   ) : (
                     <Button
-                      onClick={handleJoinLeague}
+                      onClick={() => void handleJoinLeague()}
                       disabled={
                         isJoining ||
                         !joinCode.trim() ||
@@ -557,7 +551,7 @@ export function LeagueSelectionPageShadCN() {
             
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-start sm:items-center text-sm text-muted-foreground">
               <button
-                onClick={() => navigate("/terms")}
+                onClick={() => void navigate("/terms")}
                 className="text-primary hover:underline"
               >
                 Terms of Service & Privacy Policy

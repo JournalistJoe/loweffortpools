@@ -1,6 +1,4 @@
 import { useConvexAuth } from "convex/react";
-import { useQuery } from "convex/react";
-import { api } from "../convex/_generated/api";
 import { MobileSignInFormShadCN } from "./components/MobileSignInFormShadCN";
 import { normalizeJoinCode } from "./utils/joinCodeUtils";
 import {
@@ -46,7 +44,7 @@ function SignInPage() {
       <div className="w-full max-w-md p-8">
         <div className="text-center mb-8">
           <button
-            onClick={() => navigate("/")}
+            onClick={() => void navigate("/")}
             className="flex items-center justify-center mx-auto mb-4 hover:opacity-75 transition-opacity"
           >
             <img 

@@ -1,6 +1,5 @@
 import { v } from "convex/values";
 import { internalMutation, MutationCtx } from "./_generated/server";
-import { getAuthUserId } from "@convex-dev/auth/server";
 
 // Helper function to avoid circular references
 async function cleanupDuplicatesLogic(ctx: MutationCtx, dryRun: boolean) {

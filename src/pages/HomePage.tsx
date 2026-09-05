@@ -4,7 +4,6 @@ import { Button } from "../components/ui/button";
 import { normalizeJoinCode, isValidJoinCode, JOIN_CODE_LENGTH, JOIN_CODE_PLACEHOLDER, formatJoinCodeInput } from "../utils/joinCodeUtils";
 import { Card, CardContent } from "../components/ui/card";
 import { Input } from "../components/ui/input";
-import { Label } from "../components/ui/label";
 import { Separator } from "../components/ui/separator";
 import { useState } from "react";
 import { Users, Clock, Trophy, MessageCircle, Sun, Moon } from "lucide-react";
@@ -15,20 +14,20 @@ export function HomePage() {
   const [joinCode, setJoinCode] = useState("");
 
   const handleStartLeague = () => {
-    navigate("/signin");
+    void navigate("/signin");
   };
 
   const handleJoinLeague = () => {
     const normalized = normalizeJoinCode(joinCode.trim());
     if (normalized && isValidJoinCode(normalized)) {
-      navigate(`/signin?joinCode=${encodeURIComponent(normalized)}`);
+      void navigate(`/signin?joinCode=${encodeURIComponent(normalized)}`);
     } else {
-      navigate("/signin");
+      void navigate("/signin");
     }
   };
 
   const handleSignIn = () => {
-    navigate("/signin");
+    void navigate("/signin");
   };
 
   return (
@@ -325,7 +324,7 @@ export function HomePage() {
             
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-start sm:items-center text-sm text-muted-foreground">
               <button
-                onClick={() => navigate("/terms")}
+                onClick={() => void navigate("/terms")}
                 className="text-primary hover:underline"
               >
                 Terms of Service & Privacy Policy

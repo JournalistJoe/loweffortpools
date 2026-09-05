@@ -6,8 +6,7 @@ import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { ScrollArea } from "./ui/scroll-area";
 import { Avatar, AvatarFallback } from "./ui/avatar";
-import { Badge } from "./ui/badge";
-import { Send, Trash2, Crown, Activity, Users, Trophy, Clock, LogOut, Eye } from "lucide-react";
+import { Send, Trash2, Crown, Activity, Users, Trophy, Clock, Eye } from "lucide-react";
 
 interface FloatingChatContentProps {
   leagueId: string;
@@ -180,7 +179,7 @@ export function FloatingChatContent({ leagueId }: FloatingChatContentProps) {
                           variant="ghost"
                           size="sm"
                           className="opacity-0 group-hover:opacity-100 transition-opacity h-6 w-6 p-0"
-                          onClick={() => handleDeleteMessage(item._id)}
+                          onClick={() => void handleDeleteMessage(item._id)}
                         >
                           <Trash2 className="h-3 w-3" />
                         </Button>
@@ -197,7 +196,7 @@ export function FloatingChatContent({ leagueId }: FloatingChatContentProps) {
 
       {/* Message Input */}
       <div className="border-t p-3">
-        <form onSubmit={handleSendMessage} className="flex gap-2">
+        <form onSubmit={(e) => void handleSendMessage(e)} className="flex gap-2">
           <Input
             ref={inputRef}
             value={message}

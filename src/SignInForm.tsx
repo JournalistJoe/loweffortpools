@@ -63,7 +63,7 @@ export function SignInForm() {
           <div className="text-center">
             <button
               type="button"
-              onClick={() => navigate("/forgot-password")}
+              onClick={() => void navigate("/forgot-password")}
               className="text-sm text-primary hover:brightness-75 hover:underline"
             >
               Forgot your password?

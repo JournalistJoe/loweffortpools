@@ -25,7 +25,7 @@ export function ForgotPasswordPage() {
         <div className="text-center mt-6">
           <Button 
             variant="ghost" 
-            onClick={() => navigate(-1)}
+            onClick={() => void navigate(-1)}
             className="text-sm"
           >
             ← Back to Sign In

@@ -1,5 +1,5 @@
 import { useState, ReactNode } from "react";
-import { useMutation, useQuery, useAction } from "convex/react";
+import { useMutation, useQuery } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import { Button } from "./ui/button";
 import { Switch } from "./ui/switch";
@@ -66,7 +66,6 @@ export function NotificationSettings({ leagueId, showGlobalSettings = false }: N
   });
   
   const updatePreferences = useMutation(api.pushNotifications.updateNotificationPreferences);
-  const currentUser = useQuery(api.auth.loggedInUser);
 
   const handleToggle = async (setting: string, value: boolean) => {
     try {
@@ -183,7 +182,7 @@ export function NotificationSettings({ leagueId, showGlobalSettings = false }: N
             </Select>
             <Button 
               variant="outline" 
-              onClick={() => handleMuteFor(muteFor)}
+              onClick={() => void handleMuteFor(muteFor)}
               className="w-full sm:w-auto"
             >
               Apply
@@ -204,7 +203,7 @@ export function NotificationSettings({ leagueId, showGlobalSettings = false }: N
               title="Important Only"
               description="Only receive high-priority notifications (draft start, your turn)"
               checked={preferences.enableImportantOnly}
-              onCheckedChange={(checked) => handleToggle("enableImportantOnly", checked)}
+              onCheckedChange={(checked) => void handleToggle("enableImportantOnly", checked)}
               disabled={isMuted}
             />
 
@@ -215,7 +214,7 @@ export function NotificationSettings({ leagueId, showGlobalSettings = false }: N
               title="My Turn"
               description="Get notified when it's your turn to draft"
               checked={preferences.enableMyTurn}
-              onCheckedChange={(checked) => handleToggle("enableMyTurn", checked)}
+              onCheckedChange={(checked) => void handleToggle("enableMyTurn", checked)}
               disabled={isMuted || preferences.enableImportantOnly}
             />
 
@@ -226,7 +225,7 @@ export function NotificationSettings({ leagueId, showGlobalSettings = false }: N
               title="Draft Picks"
               description="Notifications for all draft picks and draft events"
               checked={preferences.enableDraftPicks}
-              onCheckedChange={(checked) => handleToggle("enableDraftPicks", checked)}
+              onCheckedChange={(checked) => void handleToggle("enableDraftPicks", checked)}
               disabled={isMuted || preferences.enableImportantOnly}
             />
 
@@ -237,7 +236,7 @@ export function NotificationSettings({ leagueId, showGlobalSettings = false }: N
               title="Chat Messages"
               description="New messages in league chat"
               checked={preferences.enableChatMessages}
-              onCheckedChange={(checked) => handleToggle("enableChatMessages", checked)}
+              onCheckedChange={(checked) => void handleToggle("enableChatMessages", checked)}
               disabled={isMuted || preferences.enableImportantOnly}
             />
           </div>

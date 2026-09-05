@@ -35,11 +35,9 @@ import {
   BellOff,
   Sun,
   Moon,
-  User,
   Type,
   AlignLeft,
 } from "lucide-react";
-import { ThemeToggle } from "./ThemeToggle";
 import { DraftCountdown } from "./DraftCountdown";
 import { NotificationSettings } from "./NotificationSettings";
 import { PushNotificationManager } from "./PushNotificationManager";
@@ -107,18 +105,6 @@ export function LeagueNavigation({ league }: LeagueNavigationProps) {
   };
 
   // Create breadcrumb with draft countdown if applicable
-  const breadcrumbContent = (
-    <div className="flex flex-col space-y-1">
-      <span>{league.name || "Unnamed League"}</span>
-      {league.status === "setup" && league.scheduledDraftDate && (
-        <DraftCountdown
-          scheduledDraftDate={league.scheduledDraftDate}
-          className="text-xs"
-        />
-      )}
-    </div>
-  );
-
   // Create breadcrumb - just the league name for AppHeader
   const breadcrumb = league.name || "Unnamed League";
 
@@ -197,7 +183,7 @@ export function LeagueNavigation({ league }: LeagueNavigationProps) {
             {league.isParticipant && league.status === "setup" && (
               <Button
                 onClick={() => {
-                  handleLeaveLeague();
+                  void handleLeaveLeague();
                   setIsMobileMenuOpen(false);
                 }}
                 variant="destructive"
@@ -273,7 +259,7 @@ export function LeagueNavigation({ league }: LeagueNavigationProps) {
               <div className="flex flex-col gap-2 text-sm text-muted-foreground">
                 <button
                   onClick={() => {
-                    navigate("/terms");
+                    void navigate("/terms");
                     setIsMobileMenuOpen(false);
                   }}
                   className="text-primary hover:underline text-left"

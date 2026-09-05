@@ -1,7 +1,6 @@
 import { ReactNode } from "react";
 import { Link } from "react-router-dom";
 import { useTheme } from "../contexts/ThemeContext";
-import { Separator } from "./ui/separator";
 import { UserMenu } from "./UserMenu";
 
 interface AppHeaderProps {

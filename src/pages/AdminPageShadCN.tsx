@@ -31,7 +31,6 @@ import {
   X,
   Trash2,
   Play,
-  Code2,
   Users,
   Trophy,
   Shield,
@@ -59,7 +58,6 @@ export function AdminPageShadCN() {
     api.spectators.getSpectators,
     leagueId ? { leagueId: leagueId as any } : "skip",
   );
-  const [draftPosition, setDraftPosition] = useState("1");
   const [editingParticipant, setEditingParticipant] = useState<string | null>(
     null,
   );
@@ -272,7 +270,7 @@ export function AdminPageShadCN() {
 
   const copyJoinCode = () => {
     if (league?.joinCode) {
-      navigator.clipboard.writeText(league.joinCode);
+      void navigator.clipboard.writeText(league.joinCode);
       toast.success("Join code copied to clipboard!");
     }
   };
@@ -450,7 +448,7 @@ export function AdminPageShadCN() {
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={handleRegenerateJoinCode}
+                    onClick={() => void handleRegenerateJoinCode()}
                     className="gap-2"
                   >
                     <RotateCcw className="h-4 w-4" />
@@ -468,7 +466,7 @@ export function AdminPageShadCN() {
                 {editingLeague ? (
                   <>
                     <Button
-                      onClick={handleUpdateLeague}
+                      onClick={() => void handleUpdateLeague()}
                       disabled={!newLeagueName.trim()}
                       className="gap-2"
                     >
@@ -509,7 +507,7 @@ export function AdminPageShadCN() {
                     {league.status === "setup" && (
                       <Button
                         variant="destructive"
-                        onClick={handleDeleteLeague}
+                        onClick={() => void handleDeleteLeague()}
                         className="gap-2"
                       >
                         <Trash2 className="h-4 w-4" />
@@ -533,7 +531,7 @@ export function AdminPageShadCN() {
                 </CardTitle>
                 {participants && participants.length > 1 && league.status === "setup" && (
                   <Button
-                    onClick={handleRandomizeOrder}
+                    onClick={() => void handleRandomizeOrder()}
                     size="sm"
                     className="gap-2 w-full sm:w-auto"
                   >
@@ -572,7 +570,7 @@ export function AdminPageShadCN() {
                         placeholder="Enter your team name"
                         className="max-w-sm"
                         onKeyDown={(e) => {
-                          if (e.key === "Enter") handleAdminJoinLeague();
+                          if (e.key === "Enter") void handleAdminJoinLeague();
                           if (e.key === "Escape") {
                             setShowAdminJoinForm(false);
                             setAdminTeamName("");
@@ -581,7 +579,7 @@ export function AdminPageShadCN() {
                       />
                       <div className="flex gap-2">
                         <Button 
-                          onClick={handleAdminJoinLeague}
+                          onClick={() => void handleAdminJoinLeague()}
                           disabled={!adminTeamName.trim()}
                           size="sm"
                           className="bg-blue-600 hover:bg-blue-700"
@@ -620,7 +618,7 @@ export function AdminPageShadCN() {
                               placeholder="Team name"
                               className="font-medium"
                               onKeyDown={(e) => {
-                                if (e.key === "Enter") handleUpdateTeamName(participant._id);
+                                if (e.key === "Enter") void handleUpdateTeamName(participant._id);
                                 if (e.key === "Escape") setEditingTeamName(null);
                               }}
                             />
@@ -688,7 +686,7 @@ export function AdminPageShadCN() {
                             <>
                               <Button
                                 size="sm"
-                                onClick={() => handleUpdateTeamName(participant._id)}
+                                onClick={() => void handleUpdateTeamName(participant._id)}
                                 className="gap-1 flex-1 sm:flex-initial"
                               >
                                 <Save className="h-3 w-3" />
@@ -708,9 +706,7 @@ export function AdminPageShadCN() {
                             <>
                               <Button
                                 size="sm"
-                                onClick={() =>
-                                  handleUpdatePosition(participant._id)
-                                }
+                                onClick={() => void handleUpdatePosition(participant._id)}
                                 className="gap-1 flex-1 sm:flex-initial"
                               >
                                 <Save className="h-3 w-3" />
@@ -745,9 +741,7 @@ export function AdminPageShadCN() {
                               <Button
                                 variant="destructive"
                                 size="sm"
-                                onClick={() =>
-                                  handleRemoveParticipant(participant._id)
-                                }
+                                onClick={() => void handleRemoveParticipant(participant._id)}
                                 className="gap-1 flex-1 sm:flex-initial"
                               >
                                 <Trash2 className="h-3 w-3" />
@@ -794,7 +788,7 @@ export function AdminPageShadCN() {
                         onChange={(e) => setAdminManagedTeamName(e.target.value)}
                         placeholder="Admin team name (e.g., CPU Team 1)"
                         onKeyDown={(e) => {
-                          if (e.key === "Enter") handleAddAdminManagedTeam();
+                          if (e.key === "Enter") void handleAddAdminManagedTeam();
                           if (e.key === "Escape") {
                             setShowAddAdminTeam(false);
                             setAdminManagedTeamName("");
@@ -825,7 +819,7 @@ export function AdminPageShadCN() {
 
                     <div className="flex gap-2">
                       <Button
-                        onClick={handleAddAdminManagedTeam}
+                        onClick={() => void handleAddAdminManagedTeam()}
                         disabled={!adminManagedTeamName.trim()}
                         className="gap-2"
                       >
@@ -887,7 +881,7 @@ export function AdminPageShadCN() {
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={async () => {
+                        onClick={() => void (async () => {
                           if (confirm(`Remove ${spectator.displayName} as spectator?`)) {
                             try {
                               await removeSpectator({ 
@@ -899,7 +893,7 @@ export function AdminPageShadCN() {
                               toast.error(String(error));
                             }
                           }
-                        }}
+                        })()}
                         className="gap-1 text-destructive hover:text-destructive"
                       >
                         <Trash2 className="h-3 w-3" />
@@ -927,7 +921,7 @@ export function AdminPageShadCN() {
               </CardHeader>
               <CardContent className="space-y-4">
                 <Button
-                  onClick={handleStartDraft}
+                  onClick={() => void handleStartDraft()}
                   disabled={(participants?.length || 0) !== 8}
                   variant="destructive"
                   size="lg"
@@ -963,7 +957,7 @@ export function AdminPageShadCN() {
               </CardHeader>
               <CardContent className="space-y-4">
                 <Button
-                  onClick={handleResetDraft}
+                  onClick={() => void handleResetDraft()}
                   variant="outline"
                   className="gap-2 border-destructive text-destructive hover:bg-destructive hover:text-destructive-foreground"
                 >

@@ -1,6 +1,6 @@
 import { useQuery, useMutation } from "convex/react";
 import { api } from "../../convex/_generated/api";
-import { useParams, Link } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { toast } from "sonner";
 import { useState } from "react";
 import { Button } from "../components/ui/button";
@@ -109,7 +109,7 @@ export function ParticipantsPage() {
                       placeholder="Your team name"
                       className="max-w-md"
                       onKeyDown={(e) => {
-                        if (e.key === "Enter") handleAdminJoin();
+                        if (e.key === "Enter") void handleAdminJoin();
                         if (e.key === "Escape") {
                           setShowJoinForm(false);
                           setTeamName("");
@@ -119,7 +119,7 @@ export function ParticipantsPage() {
                   </div>
                   <div className="flex gap-2">
                     <Button 
-                      onClick={handleAdminJoin}
+                      onClick={() => void handleAdminJoin()}
                       disabled={!teamName.trim()}
                       className="bg-blue-600 hover:bg-blue-700"
                     >

@@ -3,7 +3,6 @@ import { api } from "../../convex/_generated/api";
 import { useState } from "react";
 import { toast } from "sonner";
 import { Button } from "../components/ui/button";
-import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
 import {
   Card,
@@ -232,7 +231,7 @@ export function SystemAdminPage() {
                     <Button variant="outline" onClick={() => setShowImportDialog(false)}>
                       Cancel
                     </Button>
-                    <Button onClick={handleImportTeams} disabled={isImporting}>
+                    <Button onClick={() => void handleImportTeams()} disabled={isImporting}>
                       {isImporting ? "Importing..." : "Import Teams"}
                     </Button>
                   </DialogFooter>
@@ -271,7 +270,7 @@ export function SystemAdminPage() {
                     <Button variant="outline" onClick={() => setShowCompleteDialog(false)}>
                       Cancel
                     </Button>
-                    <Button onClick={handleCompleteSeason} disabled={isCompletingSeason}>
+                    <Button onClick={() => void handleCompleteSeason()} disabled={isCompletingSeason}>
                       {isCompletingSeason ? "Completing..." : "Complete Season"}
                     </Button>
                   </DialogFooter>
@@ -322,7 +321,7 @@ export function SystemAdminPage() {
                     <Button variant="outline" onClick={() => setShowResyncDialog(false)}>
                       Cancel
                     </Button>
-                    <Button onClick={handleManualResync} disabled={isResyncing}>
+                    <Button onClick={() => void handleManualResync()} disabled={isResyncing}>
                       {isResyncing ? "Resyncing..." : `Resync Week ${syncWeek}`}
                     </Button>
                   </DialogFooter>
@@ -383,7 +382,7 @@ export function SystemAdminPage() {
               </div>
 
               <Button
-                onClick={handleSendTestNotification}
+                onClick={() => void handleSendTestNotification()}
                 disabled={isSendingTest || !testUserId}
                 className="gap-2"
               >
@@ -408,7 +407,7 @@ export function SystemAdminPage() {
           <CardContent className="space-y-4">
             <div>
               <Button
-                onClick={handleCreateTestLeague}
+                onClick={() => void handleCreateTestLeague()}
                 disabled={isCreatingTestLeague}
                 variant="outline"
                 className="gap-2"
