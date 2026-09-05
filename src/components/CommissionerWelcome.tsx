@@ -46,14 +46,28 @@ export function CommissionerWelcome({ league, currentUser }: CommissionerWelcome
   
   const defaultDraftDate = useMemo(() => defaultDraftDatetimeLocal(), []);
 
+  // joinCode is optional in the schema; every share action needs a real one.
+  const joinCode = league.joinCode?.trim() || null;
+  const inviteUrl = joinCode
+    ? `${window.location.origin}/signin?joinCode=${joinCode}`
+    : null;
+  const canShare = joinCode !== null;
+
   const handleShareJoinCode = () => {
-    navigator.clipboard.writeText(league.joinCode ?? "");
+    if (!joinCode) {
+      toast.error("This league doesn't have a join code yet");
+      return;
+    }
+    navigator.clipboard.writeText(joinCode);
     toast.success("Join code copied to clipboard!");
   };
 
   const handleShareLeagueLink = () => {
-    const url = `${window.location.origin}/signin?joinCode=${league.joinCode}`;
-    navigator.clipboard.writeText(url);
+    if (!inviteUrl) {
+      toast.error("This league doesn't have a join code yet");
+      return;
+    }
+    navigator.clipboard.writeText(inviteUrl);
     toast.success("League invitation link copied to clipboard!");
   };
   
@@ -124,7 +138,7 @@ export function CommissionerWelcome({ league, currentUser }: CommissionerWelcome
             </p>
             <p>
               <strong>But hey,</strong> at least you have a fancy title now. Commissioner{" "}
-              {currentUser?.name || currentUser?.email}. Has a nice ring to it, right? Like you actually know 
+              {currentUser?.name || currentUser?.email || "User"}. Has a nice ring to it, right? Like you actually know 
               what you're doing.
             </p>
           </div>
@@ -217,15 +231,15 @@ export function CommissionerWelcome({ league, currentUser }: CommissionerWelcome
                 <div className="flex items-center justify-between mb-4">
                   <span className="text-sm font-medium text-muted-foreground">Your Join Code:</span>
                   <Badge variant="secondary" className="text-lg font-mono px-3 py-1">
-                    {league.joinCode}
+                    {joinCode ?? "Not available"}
                   </Badge>
                 </div>
                 <div className="flex gap-2">
-                  <Button onClick={handleShareJoinCode} variant="outline" size="sm" className="gap-2">
+                  <Button onClick={handleShareJoinCode} disabled={!canShare} variant="outline" size="sm" className="gap-2">
                     <Share className="h-4 w-4" />
                     Copy Code
                   </Button>
-                  <Button onClick={handleShareLeagueLink} variant="outline" size="sm" className="gap-2">
+                  <Button onClick={handleShareLeagueLink} disabled={!canShare} variant="outline" size="sm" className="gap-2">
                     <Share className="h-4 w-4" />
                     Copy Invite Link
                   </Button>
@@ -336,7 +350,7 @@ export function CommissionerWelcome({ league, currentUser }: CommissionerWelcome
               </div>
             ) : (
               <div className="flex flex-wrap gap-3 justify-center mb-6">
-                <Button onClick={handleShareJoinCode} className="gap-2">
+                <Button onClick={handleShareJoinCode} disabled={!canShare} className="gap-2">
                   <Share className="h-4 w-4" />
                   Share Join Code
                 </Button>
@@ -344,7 +358,7 @@ export function CommissionerWelcome({ league, currentUser }: CommissionerWelcome
                   <Calendar className="h-4 w-4" />
                   {league.scheduledDraftDate ? "Update Draft Date" : "Set Draft Date"}
                 </Button>
-                <Button variant="outline" className="gap-2" onClick={handleShareLeagueLink}>
+                <Button variant="outline" className="gap-2" disabled={!canShare} onClick={handleShareLeagueLink}>
                   <Users className="h-4 w-4" />
                   Invite Friends
                 </Button>
@@ -353,7 +367,7 @@ export function CommissionerWelcome({ league, currentUser }: CommissionerWelcome
 
             <div className="text-sm text-muted-foreground">
               <p>
-                Your league: <strong>{league.name}</strong> | Your code: <Badge variant="outline">{league.joinCode}</Badge> | Your subjects: <strong>0/7</strong>
+                Your league: <strong>{league.name}</strong> | Your code: <Badge variant="outline">{joinCode ?? "Not available"}</Badge> | Your subjects: <strong>0/7</strong>
                 {league.scheduledDraftDate && (
                   <span className="block mt-2">
                     Draft: <strong>{new Date(league.scheduledDraftDate).toLocaleString()}</strong>
