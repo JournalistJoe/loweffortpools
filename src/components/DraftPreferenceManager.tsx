@@ -167,7 +167,7 @@ export function DraftPreferenceManager({ leagueId }: DraftPreferenceManagerProps
               {teams.map((team, index) => (
                 <div
                   key={team._id}
-                  className="flex items-center gap-3 p-3 bg-white border border-border rounded-lg hover:border-gray-300 transition-colors"
+                  className="flex items-center gap-3 p-3 bg-card border border-border rounded-lg hover:border-muted-foreground/40 transition-colors"
                 >
                   <div className="flex flex-col gap-1">
                     <Button
