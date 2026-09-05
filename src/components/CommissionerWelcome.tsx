@@ -49,7 +49,7 @@ export function CommissionerWelcome({ league, currentUser }: CommissionerWelcome
   // joinCode is optional in the schema; every share action needs a real one.
   const joinCode = league.joinCode?.trim() || null;
   const inviteUrl = joinCode
-    ? `${window.location.origin}/signin?joinCode=${joinCode}`
+    ? `${window.location.origin}/signin?joinCode=${encodeURIComponent(joinCode)}`
     : null;
   const canShare = joinCode !== null;
 

@@ -1,4 +1,5 @@
 import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
 import { useUserMenu } from "../hooks/useUserMenu";
 import { Button } from "./ui/button";
 import { Badge } from "./ui/badge";
@@ -122,7 +123,11 @@ export function UserMenu() {
 
           <DropdownMenuSeparator />
           
-          <DropdownMenuItem onClick={() => void signOut()}>
+          <DropdownMenuItem
+            onClick={() =>
+              void signOut().catch(() => toast.error("Sign out failed. Please try again."))
+            }
+          >
             <LogOut className="w-4 h-4 mr-2" />
             Sign Out
           </DropdownMenuItem>
