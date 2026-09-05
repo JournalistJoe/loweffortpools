@@ -1,7 +1,7 @@
 import { v } from "convex/values";
 import { query, mutation, internalMutation, MutationCtx } from "./_generated/server";
 import { getAuthUserId } from "@convex-dev/auth/server";
-import { JOIN_CODE_LENGTH } from "./constants";
+import { DEFAULT_TIE_POINTS, JOIN_CODE_LENGTH } from "./constants";
 import { api, internal } from "./_generated/api";
 import { CURRENT_SEASON_YEAR } from "./lib/nflSeason";
 import { getChampionForLeague, loadFinalGamesForSeason } from "./scoring";
@@ -322,6 +322,7 @@ export const createLeague = mutation({
     scheduledDraftDate: v.optional(v.number()),
     teamName: v.optional(v.string()),
     draftPickTimeLimit: v.optional(v.number()),
+    tiePoints: v.optional(v.union(v.literal(0), v.literal(0.5))),
   },
   handler: async (ctx, args) => {
     const userId = await getAuthUserId(ctx);
@@ -373,6 +374,7 @@ export const createLeague = mutation({
       joinCode,
       scheduledDraftDate: args.scheduledDraftDate,
       draftPickTimeLimit: args.draftPickTimeLimit || 180000, // Default to 3 minutes
+      tiePoints: args.tiePoints ?? DEFAULT_TIE_POINTS,
     });
 
     // Get the user info to create display name
@@ -559,6 +561,7 @@ export const updateLeague = mutation({
     name: v.string(),
     scheduledDraftDate: v.optional(v.number()),
     draftPickTimeLimit: v.optional(v.number()),
+    tiePoints: v.optional(v.union(v.literal(0), v.literal(0.5))),
   },
   handler: async (ctx, args) => {
     const userId = await getAuthUserId(ctx);
@@ -569,6 +572,16 @@ export const updateLeague = mutation({
 
     if (league.adminUserId !== userId) {
       throw new Error("Only admin can update league");
+    }
+
+    // Tie scoring is locked once the draft starts so standings never change retroactively.
+    const currentTiePoints = league.tiePoints ?? DEFAULT_TIE_POINTS;
+    if (
+      args.tiePoints !== undefined &&
+      args.tiePoints !== currentTiePoints &&
+      league.status !== "setup"
+    ) {
+      throw new Error("Tie scoring can only be changed before the draft starts");
     }
 
     // Validate scheduledDraftDate if provided
@@ -592,6 +605,7 @@ export const updateLeague = mutation({
       name: args.name,
       scheduledDraftDate: args.scheduledDraftDate,
       draftPickTimeLimit: args.draftPickTimeLimit,
+      ...(args.tiePoints !== undefined ? { tiePoints: args.tiePoints } : {}),
     });
 
     await ctx.db.insert("activity", {

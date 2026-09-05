@@ -63,10 +63,7 @@ export function TeamPage() {
     );
   }
 
-  const totalWins = teamData.teams.reduce(
-    (sum, team) => sum + team.wins + team.ties * 0.5,
-    0,
-  );
+  const totalWins = teamData.teams.reduce((sum, team) => sum + team.points, 0);
 
   // Check if current user can edit this participant
   const canEditParticipant = currentUser && teamData && (
@@ -170,7 +167,7 @@ export function TeamPage() {
                       {teamInfo.wins}-{teamInfo.losses}-{teamInfo.ties}
                     </div>
                     <div className="text-sm text-muted-foreground">
-                      {teamInfo.wins + teamInfo.ties * 0.5} points
+                      {teamInfo.points} points
                     </div>
                   </div>
                 </div>

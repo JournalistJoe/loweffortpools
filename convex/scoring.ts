@@ -3,6 +3,7 @@ import { query, QueryCtx } from "./_generated/server";
 import { getAuthUserId } from "@convex-dev/auth/server";
 import { Doc, Id } from "./_generated/dataModel";
 import { getCurrentNFLWeek } from "./lib/nflSeason";
+import { DEFAULT_TIE_POINTS } from "./constants";
 
 export async function computeStandings(
   ctx: QueryCtx,
@@ -25,6 +26,7 @@ export async function computeStandings(
   const games =
     preloadedFinalGames ??
     (await loadFinalGamesForSeason(ctx, league.seasonYear));
+  const tiePoints = league.tiePoints ?? DEFAULT_TIE_POINTS;
 
   const leaderboard = await Promise.all(
     participants.map(async (participant) => {
@@ -48,7 +50,7 @@ export async function computeStandings(
             if (game.homeTeamId === team._id || game.awayTeamId === team._id) {
               if (game.tie) {
                 ties++;
-                totalWins += 0.5;
+                totalWins += tiePoints;
               } else if (game.winnerTeamId === team._id) {
                 wins++;
                 totalWins += 1;
@@ -134,6 +136,8 @@ export const getParticipantTeams = query({
       throw new Error("Not authorized to view this participant's teams");
     }
 
+    const tiePoints = league.tiePoints ?? DEFAULT_TIE_POINTS;
+
     const picks = await ctx.db
       .query("draftPicks")
       .withIndex("by_participant", (q) =>
@@ -200,6 +204,7 @@ export const getParticipantTeams = query({
           wins,
           losses,
           ties,
+          points: wins + ties * tiePoints,
           games: allGames,
         };
       }),
@@ -207,6 +212,7 @@ export const getParticipantTeams = query({
 
     return {
       participant,
+      tiePoints,
       teams: teams.filter((t) => t !== null),
     };
   },
