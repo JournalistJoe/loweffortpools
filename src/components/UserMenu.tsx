@@ -1,4 +1,5 @@
 import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
 import { useUserMenu } from "../hooks/useUserMenu";
 import { Button } from "./ui/button";
 import { Badge } from "./ui/badge";
@@ -24,12 +25,13 @@ import {
   Moon,
   LogOut,
 } from "lucide-react";
-import { SignOutButton } from "../SignOutButton";
+import { useAuthActions } from "@convex-dev/auth/react";
 import { PushNotificationManager } from "./PushNotificationManager";
 import { NotificationSettings } from "./NotificationSettings";
 
 export function UserMenu() {
   const navigate = useNavigate();
+  const { signOut } = useAuthActions();
   const {
     showNotifications,
     setShowNotifications,
@@ -121,11 +123,13 @@ export function UserMenu() {
 
           <DropdownMenuSeparator />
           
-          <DropdownMenuItem asChild>
-            <SignOutButton>
-              <LogOut className="w-4 h-4 mr-2" />
-              Sign Out
-            </SignOutButton>
+          <DropdownMenuItem
+            onClick={() =>
+              void signOut().catch(() => toast.error("Sign out failed. Please try again."))
+            }
+          >
+            <LogOut className="w-4 h-4 mr-2" />
+            Sign Out
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>

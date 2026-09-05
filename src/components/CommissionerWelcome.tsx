@@ -14,14 +14,15 @@ import { defaultDraftDatetimeLocal } from "../lib/nflSeason";
 interface League {
   _id: string;
   name: string;
-  joinCode: string;
+  joinCode?: string;
   scheduledDraftDate?: number;
   adminUserId: string;
   isAdmin: boolean;
 }
 
 interface User {
-  username: string;
+  name?: string;
+  email?: string;
 }
 
 interface CommissionerWelcomeProps {
@@ -45,15 +46,36 @@ export function CommissionerWelcome({ league, currentUser }: CommissionerWelcome
   
   const defaultDraftDate = useMemo(() => defaultDraftDatetimeLocal(), []);
 
-  const handleShareJoinCode = () => {
-    navigator.clipboard.writeText(league.joinCode);
-    toast.success("Join code copied to clipboard!");
+  // joinCode is optional in the schema; every share action needs a real one.
+  const joinCode = league.joinCode?.trim() || null;
+  const inviteUrl = joinCode
+    ? `${window.location.origin}/signin?joinCode=${encodeURIComponent(joinCode)}`
+    : null;
+  const canShare = joinCode !== null;
+
+  const copyToClipboard = async (text: string, successMessage: string) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      toast.success(successMessage);
+    } catch {
+      toast.error("Couldn't copy to clipboard. Please copy it manually.");
+    }
   };
 
-  const handleShareLeagueLink = () => {
-    const url = `${window.location.origin}/signin?joinCode=${league.joinCode}`;
-    navigator.clipboard.writeText(url);
-    toast.success("League invitation link copied to clipboard!");
+  const handleShareJoinCode = async () => {
+    if (!joinCode) {
+      toast.error("This league doesn't have a join code yet");
+      return;
+    }
+    await copyToClipboard(joinCode, "Join code copied to clipboard!");
+  };
+
+  const handleShareLeagueLink = async () => {
+    if (!inviteUrl) {
+      toast.error("This league doesn't have a join code yet");
+      return;
+    }
+    await copyToClipboard(inviteUrl, "League invitation link copied to clipboard!");
   };
   
   const handleSetDraftDate = () => {
@@ -123,7 +145,7 @@ export function CommissionerWelcome({ league, currentUser }: CommissionerWelcome
             </p>
             <p>
               <strong>But hey,</strong> at least you have a fancy title now. Commissioner{" "}
-              {currentUser?.username}. Has a nice ring to it, right? Like you actually know 
+              {currentUser?.name || currentUser?.email || "User"}. Has a nice ring to it, right? Like you actually know 
               what you're doing.
             </p>
           </div>
@@ -216,15 +238,15 @@ export function CommissionerWelcome({ league, currentUser }: CommissionerWelcome
                 <div className="flex items-center justify-between mb-4">
                   <span className="text-sm font-medium text-muted-foreground">Your Join Code:</span>
                   <Badge variant="secondary" className="text-lg font-mono px-3 py-1">
-                    {league.joinCode}
+                    {joinCode ?? "Not available"}
                   </Badge>
                 </div>
                 <div className="flex gap-2">
-                  <Button onClick={handleShareJoinCode} variant="outline" size="sm" className="gap-2">
+                  <Button onClick={() => void handleShareJoinCode()} disabled={!canShare} variant="outline" size="sm" className="gap-2">
                     <Share className="h-4 w-4" />
                     Copy Code
                   </Button>
-                  <Button onClick={handleShareLeagueLink} variant="outline" size="sm" className="gap-2">
+                  <Button onClick={() => void handleShareLeagueLink()} disabled={!canShare} variant="outline" size="sm" className="gap-2">
                     <Share className="h-4 w-4" />
                     Copy Invite Link
                   </Button>
@@ -335,7 +357,7 @@ export function CommissionerWelcome({ league, currentUser }: CommissionerWelcome
               </div>
             ) : (
               <div className="flex flex-wrap gap-3 justify-center mb-6">
-                <Button onClick={handleShareJoinCode} className="gap-2">
+                <Button onClick={() => void handleShareJoinCode()} disabled={!canShare} className="gap-2">
                   <Share className="h-4 w-4" />
                   Share Join Code
                 </Button>
@@ -343,7 +365,7 @@ export function CommissionerWelcome({ league, currentUser }: CommissionerWelcome
                   <Calendar className="h-4 w-4" />
                   {league.scheduledDraftDate ? "Update Draft Date" : "Set Draft Date"}
                 </Button>
-                <Button variant="outline" className="gap-2" onClick={handleShareLeagueLink}>
+                <Button variant="outline" className="gap-2" disabled={!canShare} onClick={() => void handleShareLeagueLink()}>
                   <Users className="h-4 w-4" />
                   Invite Friends
                 </Button>
@@ -352,7 +374,7 @@ export function CommissionerWelcome({ league, currentUser }: CommissionerWelcome
 
             <div className="text-sm text-muted-foreground">
               <p>
-                Your league: <strong>{league.name}</strong> | Your code: <Badge variant="outline">{league.joinCode}</Badge> | Your subjects: <strong>0/7</strong>
+                Your league: <strong>{league.name}</strong> | Your code: <Badge variant="outline">{joinCode ?? "Not available"}</Badge> | Your subjects: <strong>0/7</strong>
                 {league.scheduledDraftDate && (
                   <span className="block mt-2">
                     Draft: <strong>{new Date(league.scheduledDraftDate).toLocaleString()}</strong>

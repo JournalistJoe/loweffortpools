@@ -14,14 +14,15 @@ import { defaultDraftDatetimeLocal } from "../lib/nflSeason";
 interface League {
   _id: string;
   name: string;
-  joinCode: string;
+  joinCode?: string;
   scheduledDraftDate?: number;
   adminUserId: string;
   isAdmin: boolean;
 }
 
 interface User {
-  username: string;
+  name?: string;
+  email?: string;
 }
 
 interface Participant {
@@ -55,15 +56,36 @@ export function PartialLeagueWelcome({ league, currentUser, participants }: Part
   
   const defaultDraftDate = useMemo(() => defaultDraftDatetimeLocal(), []);
 
-  const handleShareJoinCode = () => {
-    navigator.clipboard.writeText(league.joinCode);
-    toast.success("Join code copied to clipboard!");
+  // joinCode is optional in the schema; every share action needs a real one.
+  const joinCode = league.joinCode?.trim() || null;
+  const inviteUrl = joinCode
+    ? `${window.location.origin}/signin?joinCode=${encodeURIComponent(joinCode)}`
+    : null;
+  const canShare = joinCode !== null;
+
+  const copyToClipboard = async (text: string, successMessage: string) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      toast.success(successMessage);
+    } catch {
+      toast.error("Couldn't copy to clipboard. Please copy it manually.");
+    }
   };
 
-  const handleShareLeagueLink = () => {
-    const url = `${window.location.origin}/signin?joinCode=${league.joinCode}`;
-    navigator.clipboard.writeText(url);
-    toast.success("League invitation link copied to clipboard!");
+  const handleShareJoinCode = async () => {
+    if (!joinCode) {
+      toast.error("This league doesn't have a join code yet");
+      return;
+    }
+    await copyToClipboard(joinCode, "Join code copied to clipboard!");
+  };
+
+  const handleShareLeagueLink = async () => {
+    if (!inviteUrl) {
+      toast.error("This league doesn't have a join code yet");
+      return;
+    }
+    await copyToClipboard(inviteUrl, "League invitation link copied to clipboard!");
   };
   
   const handleSetDraftDate = () => {
@@ -114,13 +136,16 @@ export function PartialLeagueWelcome({ league, currentUser, participants }: Part
 
   const copyMessage = `"${league.name}" NFL draft league - it's free, takes 5 seconds to join, and I promise it's not as nerdy as regular fantasy football. Just pick 4 NFL teams and talk trash for 4 months. Draft is ${league.scheduledDraftDate ? new Date(league.scheduledDraftDate).toLocaleDateString() + " at " + new Date(league.scheduledDraftDate).toLocaleTimeString() : "[Date] at [Time]"}.
 
-Join here: ${window.location.origin}/signin?joinCode=${league.joinCode}
+Join here: ${inviteUrl}
 
 Don't make me be the guy who couldn't get 8 people together for something this stupid simple.`;
 
-  const handleCopyMessage = () => {
-    navigator.clipboard.writeText(copyMessage);
-    toast.success("Recruitment message copied to clipboard!");
+  const handleCopyMessage = async () => {
+    if (!inviteUrl) {
+      toast.error("This league doesn't have a join code yet");
+      return;
+    }
+    await copyToClipboard(copyMessage, "Recruitment message copied to clipboard!");
   };
 
   return (
@@ -253,7 +278,7 @@ Don't make me be the guy who couldn't get 8 people together for something this s
         
         <div className="space-y-6 text-muted-foreground leading-relaxed">
           <p>
-            Alright, Commissioner {currentUser?.username}, time to earn that fancy title. You've 
+            Alright, Commissioner {currentUser?.name || currentUser?.email || "User"}, time to earn that fancy title. You've 
             done the hard part - you got people to actually join. But now comes the even harder 
             part: getting the REST of your friends to stop making excuses and commit to 3 minutes 
             of their lives once a week.
@@ -269,13 +294,13 @@ Don't make me be the guy who couldn't get 8 people together for something this s
                 <div className="flex items-center justify-between">
                   <span className="text-sm font-medium text-muted-foreground">Join Code:</span>
                   <Badge variant="secondary" className="text-lg font-mono px-3 py-1">
-                    {league.joinCode}
+                    {joinCode ?? "Not available"}
                   </Badge>
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-sm font-medium text-muted-foreground">Join Link:</span>
                   <Badge variant="outline" className="text-sm font-mono px-2 py-1 max-w-xs truncate">
-                    loweffort.bet/signin?joinCode={league.joinCode}
+                    {inviteUrl ?? "Not available"}
                   </Badge>
                 </div>
                 <div className="flex items-center justify-between">
@@ -289,15 +314,15 @@ Don't make me be the guy who couldn't get 8 people together for something this s
                 </div>
               </div>
               <div className="flex flex-wrap gap-2 mt-4">
-                <Button onClick={handleShareJoinCode} variant="outline" size="sm" className="gap-2">
+                <Button onClick={() => void handleShareJoinCode()} disabled={!canShare} variant="outline" size="sm" className="gap-2">
                   <Share className="h-4 w-4" />
                   Copy Code
                 </Button>
-                <Button onClick={handleShareLeagueLink} variant="outline" size="sm" className="gap-2">
+                <Button onClick={() => void handleShareLeagueLink()} disabled={!canShare} variant="outline" size="sm" className="gap-2">
                   <Share className="h-4 w-4" />
                   Copy Link
                 </Button>
-                <Button onClick={handleCopyMessage} variant="outline" size="sm" className="gap-2">
+                <Button onClick={() => void handleCopyMessage()} disabled={!canShare} variant="outline" size="sm" className="gap-2">
                   <Share className="h-4 w-4" />
                   Copy Recruitment Message
                 </Button>
@@ -407,7 +432,7 @@ Don't make me be the guy who couldn't get 8 people together for something this s
             </div>
           ) : (
             <div className="flex flex-wrap gap-3 justify-center mb-6">
-              <Button onClick={handleShareJoinCode} className="gap-2">
+              <Button onClick={() => void handleShareJoinCode()} disabled={!canShare} className="gap-2">
                 <Share className="h-4 w-4" />
                 Share Join Code
               </Button>
@@ -417,11 +442,11 @@ Don't make me be the guy who couldn't get 8 people together for something this s
                   {league.scheduledDraftDate ? "Update Draft Date" : "Set Draft Date"}
                 </Button>
               )}
-              <Button variant="outline" className="gap-2" onClick={handleShareLeagueLink}>
+              <Button variant="outline" className="gap-2" disabled={!canShare} onClick={() => void handleShareLeagueLink()}>
                 <Users className="h-4 w-4" />
                 Invite Friends
               </Button>
-              <Button variant="outline" className="gap-2" onClick={handleCopyMessage}>
+              <Button variant="outline" className="gap-2" disabled={!canShare} onClick={() => void handleCopyMessage()}>
                 <Share className="h-4 w-4" />
                 Send Reminder
               </Button>

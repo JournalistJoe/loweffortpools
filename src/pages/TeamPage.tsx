@@ -1,5 +1,6 @@
 import { useQuery, useMutation } from "convex/react";
 import { api } from "../../convex/_generated/api";
+import { Id } from "../../convex/_generated/dataModel";
 import { useParams } from "react-router-dom";
 import { useState } from "react";
 import { Button } from "../components/ui/button";
@@ -127,7 +128,7 @@ export function TeamPage() {
             </Card>
             
             {/* Draft Preferences */}
-            <DraftPreferenceManager leagueId={leagueId!} />
+            <DraftPreferenceManager leagueId={leagueId as Id<"leagues">} />
           </div>
         )}
         

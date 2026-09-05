@@ -23,6 +23,7 @@ interface MobileDraftBoardProps {
       team?: {
         abbrev: string;
         name: string;
+        logoUrl?: string;
       };
       participant?: {
         displayName: string;
@@ -32,6 +33,7 @@ interface MobileDraftBoardProps {
       _id: string;
       abbrev: string;
       name: string;
+      logoUrl?: string;
     }>;
     currentParticipant?: {
       userId: string;
