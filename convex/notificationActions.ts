@@ -98,7 +98,7 @@ export const notifyLeagueActivity = action({
           if (preferences.enableImportantOnly && !isImportant) continue;
           if (
             !preferences.enableDraftPicks &&
-            ["draft_pick", "draft_autopick", "draft_completed"].includes(args.activityType)
+            ["draft_pick", "draft_autopick"].includes(args.activityType)
           ) {
             continue;
           }
