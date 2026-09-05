@@ -1,0 +1,41 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  checks:
+    name: Typecheck, lint, build
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install
+        run: npm ci
+
+      - name: Typecheck Convex
+        run: npx tsc -p convex --noEmit --pretty false
+
+      - name: Typecheck frontend
+        run: npx tsc -p tsconfig.app.json --noEmit --pretty false
+
+      - name: Lint
+        run: npx eslint src convex --max-warnings=100
+
+      - name: Build
+        run: npx vite build
+        env:
+          # The client only reads this at runtime; any value lets the bundle build.
+          VITE_CONVEX_URL: https://placeholder.convex.cloud
