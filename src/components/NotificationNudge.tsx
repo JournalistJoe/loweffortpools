@@ -19,13 +19,17 @@ function dismissKey(leagueId: string) {
  */
 export function NotificationNudge({ leagueId }: NotificationNudgeProps) {
   const { status, subscribe } = usePushSubscription();
-  const [dismissed, setDismissed] = useState(() => {
-    try {
-      return localStorage.getItem(dismissKey(leagueId)) === "1";
-    } catch {
-      return false;
-    }
-  });
+  // Keyed by league so switching leagues in place re-evaluates the dismissal.
+  const [dismissedLeagues, setDismissedLeagues] = useState<Record<string, boolean>>({});
+  const dismissed =
+    dismissedLeagues[leagueId] ??
+    (() => {
+      try {
+        return localStorage.getItem(dismissKey(leagueId)) === "1";
+      } catch {
+        return false;
+      }
+    })();
   const [busy, setBusy] = useState(false);
 
   const installFirst = needsHomeScreenInstall();
@@ -38,7 +42,7 @@ export function NotificationNudge({ leagueId }: NotificationNudgeProps) {
     } catch {
       /* storage unavailable; hide for this session only */
     }
-    setDismissed(true);
+    setDismissedLeagues((prev) => ({ ...prev, [leagueId]: true }));
   };
 
   const enable = async () => {

@@ -103,9 +103,15 @@ export function usePushSubscription() {
     }
     try {
       const permission = await Notification.requestPermission();
-      if (permission !== "granted") {
+      if (permission === "denied") {
         setStatus("denied");
-        toast.error("Notification permission denied");
+        toast.error("Notifications are blocked for this site. Allow them in your browser settings to enable.");
+        return false;
+      }
+      if (permission !== "granted") {
+        // "default": the prompt was dismissed without a choice; the user can try again.
+        setStatus("supported");
+        toast.info("No problem. You can enable notifications any time from the menu.");
         return false;
       }
       const registration = await navigator.serviceWorker.ready;
