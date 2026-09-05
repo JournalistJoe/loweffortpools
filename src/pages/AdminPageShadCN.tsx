@@ -72,6 +72,7 @@ export function AdminPageShadCN() {
   const [newLeagueName, setNewLeagueName] = useState("");
   const [scheduledDraftDate, setScheduledDraftDate] = useState("");
   const [draftPickTimeLimit, setDraftPickTimeLimit] = useState("180");
+  const [tiePoints, setTiePoints] = useState("0.5");
   const [showAddAdminTeam, setShowAddAdminTeam] = useState(false);
   const [adminManagedTeamName, setAdminManagedTeamName] = useState("");
   const [adminManagedDraftPosition, setAdminManagedDraftPosition] = useState("1");
@@ -229,6 +230,7 @@ export function AdminPageShadCN() {
         name: newLeagueName.trim(),
         scheduledDraftDate: scheduledDraftDate ? new Date(scheduledDraftDate).getTime() : undefined,
         draftPickTimeLimit: parseInt(draftPickTimeLimit) * 1000, // Convert seconds to milliseconds
+        tiePoints: tiePoints === "0" ? 0 : 0.5,
       });
       toast.success("League updated successfully");
       setEditingLeague(false);
@@ -428,7 +430,35 @@ export function AdminPageShadCN() {
                     </p>
                   )}
                 </div>
-                <div></div>
+                <div>
+                  <Label>Tie Scoring</Label>
+                  {editingLeague ? (
+                    <>
+                      <Select
+                        value={tiePoints}
+                        onValueChange={setTiePoints}
+                        disabled={league.status !== "setup"}
+                      >
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="0.5">Half a win (default)</SelectItem>
+                          <SelectItem value="0">Nothing (harsh mode)</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      {league.status !== "setup" && (
+                        <p className="text-xs text-muted-foreground mt-1">
+                          Locked once the draft starts.
+                        </p>
+                      )}
+                    </>
+                  ) : (
+                    <p className="mt-2 text-sm text-foreground">
+                      {(league.tiePoints ?? 0.5) === 0 ? "Ties count for nothing" : "Ties count as half a win"}
+                    </p>
+                  )}
+                </div>
               </div>
 
               {/* Join Code Section */}
@@ -500,6 +530,7 @@ export function AdminPageShadCN() {
                             : ""
                         );
                         setDraftPickTimeLimit(String((league.draftPickTimeLimit || 180000) / 1000));
+                        setTiePoints(String(league.tiePoints ?? 0.5));
                       }}
                       className="gap-2"
                     >

@@ -106,7 +106,7 @@ export function TermsOfServicePage() {
                         <li>8 people per league max - we're not managing your entire extended family</li>
                         <li>Draft happens when the admin says it happens - democracy is overrated</li>
                         <li>3 minutes per pick - if you need longer to choose between NFL teams, maybe this isn't for you</li>
-                        <li>Our scoring system is final - wins = 1 point, losses = 0, ties = 0.5 because ties are weird</li>
+                        <li>Our scoring system is final - wins = 1 point, losses = 0, ties = 0.5 by default because ties are weird (your commissioner can make them worth nothing)</li>
                       </ul>
                     </div>
 

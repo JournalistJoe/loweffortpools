@@ -34,6 +34,7 @@ const applicationTables = {
     currentPickStartedAt: v.optional(v.number()),
     scheduledDraftDate: v.optional(v.number()),
     draftPickTimeLimit: v.optional(v.number()), // Time limit in milliseconds, defaults to 180000 (3 minutes)
+    tiePoints: v.optional(v.union(v.literal(0), v.literal(0.5))), // Points per tie; defaults to 0.5
     scheduledAutopickId: v.optional(v.id("_scheduled_functions")), // ID of scheduled function for auto-pick cancellation
     champion: v.optional(
       v.object({ displayName: v.string(), totalWins: v.number() }),
