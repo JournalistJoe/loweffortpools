@@ -4,7 +4,7 @@ import { getAuthUserId } from "@convex-dev/auth/server";
 import { JOIN_CODE_LENGTH } from "./constants";
 import { api, internal } from "./_generated/api";
 import { CURRENT_SEASON_YEAR } from "./lib/nflSeason";
-import { getChampionForLeague } from "./scoring";
+import { getChampionForLeague, loadFinalGamesForSeason } from "./scoring";
 
 // Constants
 const MAX_PARTICIPANTS = 8;
@@ -468,13 +468,17 @@ export const joinLeague = mutation({
 async function completeLiveLeagues(ctx: MutationCtx, seasonYear: number) {
   const liveLeagues = await ctx.db
     .query("leagues")
-    .withIndex("by_status", (q) => q.eq("status", "live"))
+    .withIndex("by_status_and_season", (q) =>
+      q.eq("status", "live").eq("seasonYear", seasonYear),
+    )
     .collect();
+
+  // Scan the season's games once and share them across every league.
+  const finalGames = await loadFinalGamesForSeason(ctx, seasonYear);
 
   let completed = 0;
   for (const league of liveLeagues) {
-    if (league.seasonYear !== seasonYear) continue;
-    const champion = await getChampionForLeague(ctx, league._id);
+    const champion = await getChampionForLeague(ctx, league._id, finalGames);
     await ctx.db.patch(league._id, {
       status: "completed",
       champion: champion ?? undefined,

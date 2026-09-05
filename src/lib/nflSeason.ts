@@ -24,7 +24,7 @@ export function defaultDraftDatetimeLocal(): string {
   );
 }
 
-export function leagueEntryPath(leagueId: string, status?: string): string {
+export function leagueEntryPath(leagueId: string, status: string): string {
   if (status === "live" || status === "completed") {
     return `/league/${leagueId}/leaderboard`;
   }

@@ -114,8 +114,8 @@ export function LeagueSelectionPageShadCN() {
           });
         }
         
-        // Navigate to the league page
-        setSelectedLeagueId(result.leagueId);
+        // Navigate to the league page (auto-join only succeeds for leagues in setup)
+        setSelectedLeagueId(result.leagueId, "setup");
       } else {
         toast.error("Failed to join league automatically. Please try again manually.");
         // Fallback: show join form
@@ -164,7 +164,7 @@ export function LeagueSelectionPageShadCN() {
       setLeagueName("");
       setScheduledDraftDate("");
       setTeamName("");
-      setSelectedLeagueId(leagueId);
+      setSelectedLeagueId(leagueId, "setup");
     } catch (error) {
       toast.error(String(error));
     } finally {
@@ -188,7 +188,8 @@ export function LeagueSelectionPageShadCN() {
       setShowJoinForm(false);
       setJoinCode("");
       setDisplayName("");
-      setSelectedLeagueId(result.leagueId, result.status);
+      // joinLeague only succeeds for leagues in setup
+      setSelectedLeagueId(result.leagueId, "setup");
     } catch (error) {
       toast.error(String(error));
     } finally {
@@ -212,7 +213,7 @@ export function LeagueSelectionPageShadCN() {
       setShowJoinForm(false);
       setJoinCode("");
       setDisplayName("");
-      setSelectedLeagueId(result.leagueId);
+      setSelectedLeagueId(result.leagueId, result.status);
     } catch (error) {
       toast.error(String(error));
     } finally {
@@ -613,10 +614,20 @@ function LeagueCard({
   statusVariant: "secondary" | "default" | "outline";
   onSelect: (leagueId: string, status: string) => void;
 }) {
+  const select = () => onSelect(league._id, league.status);
   return (
     <Card
-      className="cursor-pointer hover:shadow-md transition-shadow"
-      onClick={() => onSelect(league._id, league.status)}
+      role="button"
+      tabIndex={0}
+      aria-label={`Open ${league.name}`}
+      className="cursor-pointer hover:shadow-md transition-shadow focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+      onClick={select}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          select();
+        }
+      }}
     >
       <CardHeader className="pb-3">
         <div className="flex items-start justify-between">

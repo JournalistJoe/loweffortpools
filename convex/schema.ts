@@ -41,7 +41,8 @@ const applicationTables = {
   })
     .index("by_admin", ["adminUserId"])
     .index("by_join_code", ["joinCode"])
-    .index("by_status", ["status"]),
+    .index("by_status", ["status"])
+    .index("by_status_and_season", ["status", "seasonYear"]),
 
   participants: defineTable({
     leagueId: v.id("leagues"),

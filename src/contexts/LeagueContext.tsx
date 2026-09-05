@@ -4,7 +4,11 @@ import { leagueEntryPath } from "../lib/nflSeason";
 
 interface LeagueContextType {
   selectedLeagueId: string | null;
-  setSelectedLeagueId: (leagueId: string | null, status?: string) => void;
+  /** Selecting a league requires its status so navigation lands on the right page. */
+  setSelectedLeagueId: {
+    (leagueId: string, status: string): void;
+    (leagueId: null): void;
+  };
 }
 
 const LeagueContext = createContext<LeagueContextType | undefined>(undefined);
@@ -27,14 +31,16 @@ export function LeagueProvider({ children }: { children: React.ReactNode }) {
     }
   }, [location.pathname, selectedLeagueId]);
 
-  const handleSetSelectedLeagueId = (leagueId: string | null, status?: string) => {
+  function handleSetSelectedLeagueId(leagueId: string, status: string): void;
+  function handleSetSelectedLeagueId(leagueId: null): void;
+  function handleSetSelectedLeagueId(leagueId: string | null, status?: string) {
     setSelectedLeagueId(leagueId);
-    if (leagueId) {
+    if (leagueId !== null && status !== undefined) {
       void navigate(leagueEntryPath(leagueId, status));
     } else {
       void navigate("/");
     }
-  };
+  }
 
   return (
     <LeagueContext.Provider

@@ -1,12 +1,13 @@
 import { v } from "convex/values";
 import { query, QueryCtx } from "./_generated/server";
 import { getAuthUserId } from "@convex-dev/auth/server";
-import { Id } from "./_generated/dataModel";
+import { Doc, Id } from "./_generated/dataModel";
 import { getCurrentNFLWeek } from "./lib/nflSeason";
 
 export async function computeStandings(
   ctx: QueryCtx,
   leagueId: Id<"leagues">,
+  preloadedFinalGames?: Doc<"games">[],
 ) {
   const league = await ctx.db.get(leagueId);
   if (!league) return null;
@@ -21,13 +22,9 @@ export async function computeStandings(
     .withIndex("by_league", (q) => q.eq("leagueId", leagueId))
     .collect();
 
-  const games = await ctx.db
-    .query("games")
-    .withIndex("by_season_and_week", (q) =>
-      q.eq("seasonYear", league.seasonYear),
-    )
-    .filter((q) => q.eq(q.field("status"), "final"))
-    .collect();
+  const games =
+    preloadedFinalGames ??
+    (await loadFinalGamesForSeason(ctx, league.seasonYear));
 
   const leaderboard = await Promise.all(
     participants.map(async (participant) => {
@@ -77,13 +74,27 @@ export async function computeStandings(
   return leaderboard;
 }
 
+export async function loadFinalGamesForSeason(
+  ctx: QueryCtx,
+  seasonYear: number,
+) {
+  return await ctx.db
+    .query("games")
+    .withIndex("by_season_and_week", (q) => q.eq("seasonYear", seasonYear))
+    .filter((q) => q.eq(q.field("status"), "final"))
+    .collect();
+}
+
 export async function getChampionForLeague(
   ctx: QueryCtx,
   leagueId: Id<"leagues">,
+  preloadedFinalGames?: Doc<"games">[],
 ) {
-  const standings = await computeStandings(ctx, leagueId);
-  const top = standings?.[0];
-  if (!top) return null;
+  const standings = await computeStandings(ctx, leagueId, preloadedFinalGames);
+  if (!standings || standings.length === 0) return null;
+  const top = standings[0];
+  // No results synced yet: nobody has earned the title.
+  if (top.totalWins === 0) return null;
   // Standings are sorted by totalWins only, so everyone tied at the top is a co-champion.
   const coChampions = standings.filter((entry) => entry.totalWins === top.totalWins);
   return {

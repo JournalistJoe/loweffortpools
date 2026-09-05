@@ -4,6 +4,7 @@ import { internalAction, internalMutation } from "./_generated/server";
 import { v } from "convex/values";
 import {
   CURRENT_SEASON_YEAR,
+  MAX_WEEK,
   getCurrentNFLWeek,
   isRegularSeasonComplete,
 } from "./lib/nflSeason";
@@ -13,8 +14,10 @@ const crons = cronJobs();
 // Nightly sync at 03:00 PT (11:00 UTC)
 crons.cron("nightly sync", "0 11 * * *", internal.crons.nightlySync, {});
 
-// Weekly finalize at Tuesday 03:15 PT (11:15 UTC)
-crons.cron("weekly finalize", "15 11 * * 2", internal.crons.weeklyFinalize, {});
+// Weekly finalize at Wednesday 03:15 PT (11:15 UTC). The NFL week rolls over at
+// Wednesday 00:00 UTC (see getCurrentNFLWeek), so by now getCurrentNFLWeek() - 1
+// is the week whose Monday night game just finished.
+crons.cron("weekly finalize", "15 11 * * 3", internal.crons.weeklyFinalize, {});
 
 // Check for expired draft picks every minute as backup (can't do 30 seconds with standard cron)
 crons.cron("draft autopick", "* * * * *", internal.draft.checkAndMakeAutoPick, {});
@@ -58,9 +61,11 @@ export const weeklyFinalize = internalAction({
   returns: v.null(),
   handler: async (ctx) => {
     const seasonYear = CURRENT_SEASON_YEAR;
-    // getCurrentNFLWeek clamps at 18, so once the season is over the week to
-    // finalize is 18 itself; otherwise it is the week that just ended.
-    const previousWeek = isRegularSeasonComplete() ? 18 : getCurrentNFLWeek() - 1;
+    // getCurrentNFLWeek clamps at MAX_WEEK, so once the season is over the week
+    // to finalize is MAX_WEEK itself; otherwise it is the week that just ended.
+    const previousWeek = isRegularSeasonComplete()
+      ? MAX_WEEK
+      : getCurrentNFLWeek() - 1;
 
     let syncSucceeded = previousWeek < 1;
     if (previousWeek >= 1) {

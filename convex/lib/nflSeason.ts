@@ -18,7 +18,7 @@ export const SEASON_KICKOFF = {
 } as const;
 
 const WEEK_MS = 7 * 24 * 60 * 60 * 1000;
-const MAX_WEEK = 18;
+export const MAX_WEEK = 18;
 
 export function getSeasonKickoffDate(): Date {
   return new Date(
