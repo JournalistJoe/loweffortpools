@@ -1,9 +1,10 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
+import { leagueEntryPath } from "../lib/nflSeason";
 
 interface LeagueContextType {
   selectedLeagueId: string | null;
-  setSelectedLeagueId: (leagueId: string | null) => void;
+  setSelectedLeagueId: (leagueId: string | null, status?: string) => void;
 }
 
 const LeagueContext = createContext<LeagueContextType | undefined>(undefined);
@@ -21,18 +22,17 @@ export function LeagueProvider({ children }: { children: React.ReactNode }) {
       if (leagueId !== selectedLeagueId) {
         setSelectedLeagueId(leagueId);
       }
-    } else if (location.pathname !== "/leagues" && selectedLeagueId) {
-      // If we're not on a league route and not on the leagues page, clear selection
+    } else if (location.pathname !== "/" && selectedLeagueId) {
       setSelectedLeagueId(null);
     }
   }, [location.pathname, selectedLeagueId]);
 
-  const handleSetSelectedLeagueId = (leagueId: string | null) => {
+  const handleSetSelectedLeagueId = (leagueId: string | null, status?: string) => {
     setSelectedLeagueId(leagueId);
     if (leagueId) {
-      void navigate(`/league/${leagueId}/draft`);
+      void navigate(leagueEntryPath(leagueId, status));
     } else {
-      void navigate("/leagues");
+      void navigate("/");
     }
   };
 

@@ -21,31 +21,36 @@ export function LeaderboardPage() {
     );
   }
 
+  const isCompleted = league.status === "completed";
+
   return (
     <div>
       <div className="max-w-6xl mx-auto p-4 pb-20">
         <div className="mb-6">
-          <h1 className="text-3xl font-bold text-foreground">Leaderboard</h1>
+          <h1 className="text-3xl font-bold text-foreground">
+            {isCompleted ? "Final Standings" : "Leaderboard"}
+          </h1>
           <p className="text-muted-foreground mt-2">
-            Current standings for {league.name || "Unnamed League"}
+            {isCompleted ? "Final standings" : "Current standings"} for{" "}
+            {league.name || "Unnamed League"}
           </p>
         </div>
 
         <div className="bg-card rounded-lg border border-border overflow-hidden">
           <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
+            <table className="min-w-full divide-y divide-border">
               <thead className="bg-muted">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-20">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider w-20">
                     Rank
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-48">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider w-48">
                     Participant
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-24">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider w-24">
                     Total Wins
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
                     Teams
                   </th>
                 </tr>
@@ -67,10 +72,10 @@ export function LeaderboardPage() {
                               index === 0
                                 ? "text-yellow-600"
                                 : index === 1
-                                  ? "text-gray-500"
+                                  ? "text-muted-foreground"
                                   : index === 2
                                     ? "text-orange-600"
-                                    : "text-gray-900"
+                                    : "text-foreground"
                             }`}
                           >
                             #{index + 1}
@@ -83,15 +88,15 @@ export function LeaderboardPage() {
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm font-medium text-gray-900">
+                        <div className="text-sm font-medium text-foreground">
                           {entry.participant.displayName}
                         </div>
-                        <div className="text-sm text-gray-500">
+                        <div className="text-sm text-muted-foreground">
                           Draft Position {entry.participant.draftPosition}
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-lg font-semibold text-gray-900">
+                        <div className="text-lg font-semibold text-foreground">
                           {entry.totalWins}
                         </div>
                       </td>
@@ -106,7 +111,7 @@ export function LeaderboardPage() {
                           {entry.teamRecords.map((record) => (
                             <span
                               key={record.team?._id}
-                              className="inline-flex items-center px-1.5 py-0.5 sm:px-2 sm:py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800 flex-shrink-0"
+                              className="inline-flex items-center px-1.5 py-0.5 sm:px-2 sm:py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-950 dark:text-blue-200 flex-shrink-0"
                             >
                               <span className="sm:hidden">
                                 {record.team?.abbrev}

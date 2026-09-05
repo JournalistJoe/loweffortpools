@@ -16,13 +16,6 @@ import {
   CardTitle,
 } from "../components/ui/card";
 import { Badge } from "../components/ui/badge";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "../components/ui/select";
 import { Separator } from "../components/ui/separator";
 import {
   Plus,
@@ -41,6 +34,7 @@ import { EmptyLeaguesState } from "../components/EmptyLeaguesState";
 import { SignOutButton } from "../SignOutButton";
 import { UserMenu } from "../components/UserMenu";
 import { AppHeader } from "../components/AppHeader";
+import { CURRENT_SEASON_YEAR } from "../lib/nflSeason";
 
 export function LeagueSelectionPageShadCN() {
   const leagues = useQuery(api.leagues.getUserLeagues);
@@ -52,7 +46,6 @@ export function LeagueSelectionPageShadCN() {
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [showJoinForm, setShowJoinForm] = useState(false);
   const [leagueName, setLeagueName] = useState("");
-  const [seasonYear, setSeasonYear] = useState("2025");
   const [scheduledDraftDate, setScheduledDraftDate] = useState("");
   const [teamName, setTeamName] = useState("");
   const [isCreating, setIsCreating] = useState(false);
@@ -162,7 +155,7 @@ export function LeagueSelectionPageShadCN() {
     try {
       const leagueId = await createLeague({
         name: leagueName.trim(),
-        seasonYear: parseInt(seasonYear),
+        seasonYear: CURRENT_SEASON_YEAR,
         scheduledDraftDate: scheduledDraftMs,
         teamName: teamName.trim() || undefined,
       });
@@ -227,11 +220,13 @@ export function LeagueSelectionPageShadCN() {
     }
   };
 
-  const handleSelectLeague = (leagueId: string) => {
-    setSelectedLeagueId(leagueId);
+  const handleSelectLeague = (leagueId: string, status: string) => {
+    setSelectedLeagueId(leagueId, status);
   };
 
-  const getStatusVariant = (status: string) => {
+  const getStatusVariant = (
+    status: string,
+  ): "secondary" | "default" | "outline" => {
     switch (status) {
       case "setup":
         return "secondary";
@@ -254,6 +249,13 @@ export function LeagueSelectionPageShadCN() {
     );
   }
 
+  const currentSeasonLeagues = leagues.filter(
+    (league) => league.seasonYear === CURRENT_SEASON_YEAR,
+  );
+  const pastSeasonLeagues = leagues.filter(
+    (league) => league.seasonYear !== CURRENT_SEASON_YEAR,
+  );
+
   const systemAdminAction = currentUser?.isSuperuser ? (
     <Button
       onClick={() => navigate("/system-admin")}
@@ -274,65 +276,39 @@ export function LeagueSelectionPageShadCN() {
       <main className="max-w-6xl mx-auto p-6 pb-20">
 
       {leagues.length > 0 ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-          {leagues.map((league) => (
-            <Card
-              key={league._id}
-              className="cursor-pointer hover:shadow-md transition-shadow"
-              onClick={() => handleSelectLeague(league._id)}
-            >
-              <CardHeader className="pb-3">
-                <div className="flex items-start justify-between">
-                  <div className="space-y-1">
-                    <CardTitle className="text-lg">{league.name}</CardTitle>
-                    <div className="flex items-center gap-1 text-sm text-muted-foreground">
-                      <Calendar className="h-3 w-3" />
-                      Season {league.seasonYear}
-                    </div>
-                  </div>
-                  <div className="flex flex-col items-end space-y-2">
-                    <Badge variant={getStatusVariant(league.status)}>
-                      {league.status.toUpperCase()}
-                    </Badge>
-                    {league.isAdmin && (
-                      <Badge variant="outline" className="gap-1">
-                        <Crown className="h-3 w-3" />
-                        Admin
-                      </Badge>
-                    )}
-                  </div>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-2">
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    {league.isParticipant && league.participant ? (
-                      <>
-                        <UserCheck className="h-4 w-4" />
-                        <span>Team: {league.participant.displayName}</span>
-                      </>
-                    ) : league.isAdmin ? (
-                      <>
-                        <Crown className="h-4 w-4" />
-                        <span>League Administrator</span>
-                      </>
-                    ) : (
-                      <>
-                        <Eye className="h-4 w-4" />
-                        <span>Spectator</span>
-                      </>
-                    )}
-                  </div>
-                  {league.status === "setup" && league.scheduledDraftDate && (
-                    <DraftCountdown
-                      scheduledDraftDate={league.scheduledDraftDate}
-                      className="text-xs"
-                    />
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-          ))}
+        <div className="space-y-10 mb-8">
+          {currentSeasonLeagues.length > 0 && (
+            <section>
+              <h2 className="text-lg font-semibold mb-4">
+                {CURRENT_SEASON_YEAR} Season
+              </h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {currentSeasonLeagues.map((league) => (
+                  <LeagueCard
+                    key={league._id}
+                    league={league}
+                    statusVariant={getStatusVariant(league.status)}
+                    onSelect={handleSelectLeague}
+                  />
+                ))}
+              </div>
+            </section>
+          )}
+          {pastSeasonLeagues.length > 0 && (
+            <section>
+              <h2 className="text-lg font-semibold mb-4">Past seasons</h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {pastSeasonLeagues.map((league) => (
+                  <LeagueCard
+                    key={league._id}
+                    league={league}
+                    statusVariant={getStatusVariant(league.status)}
+                    onSelect={handleSelectLeague}
+                  />
+                ))}
+              </div>
+            </section>
+          )}
         </div>
       ) : (
         <EmptyLeaguesState 
@@ -372,21 +348,15 @@ export function LeagueSelectionPageShadCN() {
                     type="text"
                     value={leagueName}
                     onChange={(e) => setLeagueName(e.target.value)}
-                    placeholder="e.g., Office Pool 2025"
+                    placeholder="e.g., Office Pool 2026"
                   />
                 </div>
 
                 <div>
-                  <Label htmlFor="season-year">Season Year</Label>
-                  <Select value={seasonYear} onValueChange={setSeasonYear}>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="2025">2025</SelectItem>
-                      <SelectItem value="2026">2026</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <Label>Season</Label>
+                  <p className="text-sm text-muted-foreground mt-2">
+                    {CURRENT_SEASON_YEAR} NFL season
+                  </p>
                 </div>
 
                 <div>
@@ -619,5 +589,93 @@ export function LeagueSelectionPageShadCN() {
         </div>
       </footer>
     </div>
+  );
+}
+
+type UserLeague = {
+  _id: string;
+  name: string;
+  status: string;
+  seasonYear: number;
+  isAdmin: boolean;
+  isParticipant: boolean;
+  scheduledDraftDate?: number;
+  participant?: { displayName: string } | null;
+  champion?: { displayName: string; totalWins: number } | null;
+};
+
+function LeagueCard({
+  league,
+  statusVariant,
+  onSelect,
+}: {
+  league: UserLeague;
+  statusVariant: "secondary" | "default" | "outline";
+  onSelect: (leagueId: string, status: string) => void;
+}) {
+  return (
+    <Card
+      className="cursor-pointer hover:shadow-md transition-shadow"
+      onClick={() => onSelect(league._id, league.status)}
+    >
+      <CardHeader className="pb-3">
+        <div className="flex items-start justify-between">
+          <div className="space-y-1">
+            <CardTitle className="text-lg">{league.name}</CardTitle>
+            <div className="flex items-center gap-1 text-sm text-muted-foreground">
+              <Calendar className="h-3 w-3" />
+              Season {league.seasonYear}
+            </div>
+          </div>
+          <div className="flex flex-col items-end space-y-2">
+            <Badge variant={statusVariant}>
+              {league.status.toUpperCase()}
+            </Badge>
+            {league.isAdmin && (
+              <Badge variant="outline" className="gap-1">
+                <Crown className="h-3 w-3" />
+                Admin
+              </Badge>
+            )}
+          </div>
+        </div>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-2">
+          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+            {league.isParticipant && league.participant ? (
+              <>
+                <UserCheck className="h-4 w-4" />
+                <span>Team: {league.participant.displayName}</span>
+              </>
+            ) : league.isAdmin ? (
+              <>
+                <Crown className="h-4 w-4" />
+                <span>League Administrator</span>
+              </>
+            ) : (
+              <>
+                <Eye className="h-4 w-4" />
+                <span>Spectator</span>
+              </>
+            )}
+          </div>
+          {league.status === "completed" && league.champion && (
+            <div className="flex items-center gap-2 text-sm font-medium">
+              <Trophy className="h-4 w-4 text-yellow-600" />
+              <span>
+                {league.champion.displayName} · {league.champion.totalWins} wins
+              </span>
+            </div>
+          )}
+          {league.status === "setup" && league.scheduledDraftDate && (
+            <DraftCountdown
+              scheduledDraftDate={league.scheduledDraftDate}
+              className="text-xs"
+            />
+          )}
+        </div>
+      </CardContent>
+    </Card>
   );
 }

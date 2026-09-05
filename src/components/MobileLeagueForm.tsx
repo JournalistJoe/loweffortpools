@@ -3,6 +3,7 @@ import { useMutation, useQuery } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import { toast } from "sonner";
 import { JOIN_CODE_LENGTH } from "../utils/joinCodeUtils";
+import { CURRENT_SEASON_YEAR } from "../lib/nflSeason";
 
 interface MobileLeagueFormProps {
   onLeagueSelected: (leagueId: string) => void;
@@ -13,7 +14,6 @@ export function MobileLeagueForm({ onLeagueSelected }: MobileLeagueFormProps) {
 
   // Create League State
   const [leagueName, setLeagueName] = useState("");
-  const [seasonYear, setSeasonYear] = useState(2025);
   const [teamName, setTeamName] = useState("");
   const [isCreating, setIsCreating] = useState(false);
 
@@ -39,7 +39,7 @@ export function MobileLeagueForm({ onLeagueSelected }: MobileLeagueFormProps) {
     try {
       const leagueId = await createLeague({
         name: leagueName.trim(),
-        seasonYear,
+        seasonYear: CURRENT_SEASON_YEAR,
         teamName: teamName.trim() || undefined,
       });
       toast.success("League created successfully!");
@@ -131,7 +131,7 @@ export function MobileLeagueForm({ onLeagueSelected }: MobileLeagueFormProps) {
                 type="text"
                 value={leagueName}
                 onChange={(e) => setLeagueName(e.target.value)}
-                placeholder="e.g., Office Pool 2025"
+                placeholder="e.g., Office Pool 2026"
                 className="w-full px-4 py-4 border border-blue-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base min-h-[44px]"
                 maxLength={50}
               />
@@ -139,16 +139,11 @@ export function MobileLeagueForm({ onLeagueSelected }: MobileLeagueFormProps) {
 
             <div>
               <label className="block text-base font-medium text-blue-900 mb-2">
-                Season Year
+                Season
               </label>
-              <select
-                value={seasonYear}
-                onChange={(e) => setSeasonYear(parseInt(e.target.value))}
-                className="w-full px-4 py-4 border border-blue-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base min-h-[44px]"
-              >
-                <option value={2025}>2025</option>
-                <option value={2026}>2026</option>
-              </select>
+              <p className="text-base text-blue-700">
+                {CURRENT_SEASON_YEAR} NFL season
+              </p>
             </div>
 
             <div>

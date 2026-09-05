@@ -35,6 +35,9 @@ const applicationTables = {
     scheduledDraftDate: v.optional(v.number()),
     draftPickTimeLimit: v.optional(v.number()), // Time limit in milliseconds, defaults to 180000 (3 minutes)
     scheduledAutopickId: v.optional(v.id("_scheduled_functions")), // ID of scheduled function for auto-pick cancellation
+    champion: v.optional(
+      v.object({ displayName: v.string(), totalWins: v.number() }),
+    ), // Set when the league is marked completed
   })
     .index("by_admin", ["adminUserId"])
     .index("by_join_code", ["joinCode"])

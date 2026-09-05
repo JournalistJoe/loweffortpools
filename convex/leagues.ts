@@ -1,8 +1,10 @@
 import { v } from "convex/values";
-import { query, mutation } from "./_generated/server";
+import { query, mutation, internalMutation, MutationCtx } from "./_generated/server";
 import { getAuthUserId } from "@convex-dev/auth/server";
 import { JOIN_CODE_LENGTH } from "./constants";
 import { api, internal } from "./_generated/api";
+import { CURRENT_SEASON_YEAR } from "./lib/nflSeason";
+import { getChampionForLeague } from "./scoring";
 
 // Constants
 const MAX_PARTICIPANTS = 8;
@@ -227,9 +229,14 @@ export const getUserLeagues = query({
       }
     });
 
-    return Array.from(allLeagues.values()).sort(
+    const leagues = Array.from(allLeagues.values()).sort(
       (a, b) => b._creationTime - a._creationTime,
     );
+
+    return leagues.map((league) => ({
+      ...league,
+      champion: league.status === "completed" ? (league.champion ?? null) : null,
+    }));
   },
 });
 
@@ -319,6 +326,10 @@ export const createLeague = mutation({
   handler: async (ctx, args) => {
     const userId = await getAuthUserId(ctx);
     if (!userId) throw new Error("Must be logged in");
+
+    if (args.seasonYear < CURRENT_SEASON_YEAR) {
+      throw new Error(`${args.seasonYear} season is closed`);
+    }
 
     // Generate unique join code
     let joinCode: string;
@@ -439,6 +450,10 @@ export const joinLeague = mutation({
       throw new Error("Cannot join league - draft has already started");
     }
 
+    if (league.seasonYear < CURRENT_SEASON_YEAR) {
+      throw new Error(`${league.seasonYear} season is closed`);
+    }
+
     // Use helper to join participant
     const { participantId } = await joinParticipant(ctx, {
       leagueId: league._id,
@@ -447,6 +462,53 @@ export const joinLeague = mutation({
     });
 
     return { leagueId: league._id, participantId };
+  },
+});
+
+async function completeLiveLeagues(ctx: MutationCtx, seasonYear: number) {
+  const liveLeagues = await ctx.db
+    .query("leagues")
+    .withIndex("by_status", (q) => q.eq("status", "live"))
+    .collect();
+
+  let completed = 0;
+  for (const league of liveLeagues) {
+    if (league.seasonYear !== seasonYear) continue;
+    const champion = await getChampionForLeague(ctx, league._id);
+    await ctx.db.patch(league._id, {
+      status: "completed",
+      champion: champion ?? undefined,
+    });
+    completed++;
+  }
+  return { completed };
+}
+
+export const completeSeason = mutation({
+  args: {
+    seasonYear: v.number(),
+  },
+  returns: v.object({ completed: v.number() }),
+  handler: async (ctx, args) => {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) throw new Error("Must be logged in");
+
+    const user = await ctx.db.get(userId);
+    if (!user?.isSuperuser) {
+      throw new Error("Must be a superuser to complete a season");
+    }
+
+    return await completeLiveLeagues(ctx, args.seasonYear);
+  },
+});
+
+export const completeLiveLeaguesForSeason = internalMutation({
+  args: {
+    seasonYear: v.number(),
+  },
+  returns: v.object({ completed: v.number() }),
+  handler: async (ctx, args) => {
+    return await completeLiveLeagues(ctx, args.seasonYear);
   },
 });
 
@@ -1105,6 +1167,10 @@ export const startDraft = mutation({
 
     if (league.status !== "setup") {
       throw new Error("League must be in setup status to start draft");
+    }
+
+    if (league.seasonYear < CURRENT_SEASON_YEAR) {
+      throw new Error(`${league.seasonYear} season is closed`);
     }
 
     // Check that we have exactly the required number of participants

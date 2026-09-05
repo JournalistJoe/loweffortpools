@@ -60,7 +60,7 @@ export async function sendPasswordResetEmail({
       </div>
       
       <div style="text-align: center; color: #9ca3af; font-size: 12px;">
-        <p>© 2025 LowEffort.bet - NFL Pool Application</p>
+        <p>© 2026 LowEffort.bet - NFL Pool Application</p>
       </div>
     </div>
   `;
@@ -73,7 +73,7 @@ ${resetUrl}
 
 This link will expire in 1 hour. If you didn't request this, you can safely ignore this email.
 
-© 2025 LowEffort.bet - NFL Pool Application`;
+© 2026 LowEffort.bet - NFL Pool Application`;
 
   try {
     await sendEmail(identifier, "Reset your password - LowEffort.bet", htmlContent, textContent);
@@ -121,7 +121,7 @@ export async function sendVerificationEmail({
       </div>
       
       <div style="text-align: center; color: #9ca3af; font-size: 12px;">
-        <p>© 2025 LowEffort.bet - NFL Pool Application</p>
+        <p>© 2026 LowEffort.bet - NFL Pool Application</p>
       </div>
     </div>
   `;
@@ -134,7 +134,7 @@ ${verifyUrl}
 
 This link will expire in 24 hours. If you didn't create this account, you can safely ignore this email.
 
-© 2025 LowEffort.bet - NFL Pool Application`;
+© 2026 LowEffort.bet - NFL Pool Application`;
 
   try {
     await sendEmail(identifier, "Verify your email - LowEffort.bet", htmlContent, textContent);

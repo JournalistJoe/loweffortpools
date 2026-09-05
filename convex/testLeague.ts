@@ -1,7 +1,7 @@
-import { v } from "convex/values";
 import { mutation } from "./_generated/server";
 import { getAuthUserId } from "@convex-dev/auth/server";
 import { JOIN_CODE_LENGTH } from "./constants";
+import { CURRENT_SEASON_YEAR } from "./lib/nflSeason";
 
 // Generate a random join code (copied from leagues.ts)
 function generateJoinCode(): string {
@@ -33,7 +33,7 @@ export const createTestLeague = mutation({
     const userId = await getAuthUserId(ctx);
     if (!userId) throw new Error("Must be logged in");
 
-    const seasonYear = 2025;
+    const seasonYear = CURRENT_SEASON_YEAR;
     const timestamp = Date.now();
 
     // Generate unique join code
@@ -68,198 +68,11 @@ export const createTestLeague = mutation({
       .withIndex("by_season", (q) => q.eq("seasonYear", seasonYear))
       .collect();
 
-    let nflTeams = existingTeams;
-    if (existingTeams.length === 0) {
-      // Import NFL teams if they don't exist
-      const NFL_TEAMS_2025 = [
-        {
-          espnId: 1,
-          abbrev: "ATL",
-          name: "Falcons",
-          fullName: "Atlanta Falcons",
-        },
-        { espnId: 2, abbrev: "BUF", name: "Bills", fullName: "Buffalo Bills" },
-        { espnId: 3, abbrev: "CHI", name: "Bears", fullName: "Chicago Bears" },
-        {
-          espnId: 4,
-          abbrev: "CIN",
-          name: "Bengals",
-          fullName: "Cincinnati Bengals",
-        },
-        {
-          espnId: 5,
-          abbrev: "CLE",
-          name: "Browns",
-          fullName: "Cleveland Browns",
-        },
-        {
-          espnId: 6,
-          abbrev: "DAL",
-          name: "Cowboys",
-          fullName: "Dallas Cowboys",
-        },
-        {
-          espnId: 7,
-          abbrev: "DEN",
-          name: "Broncos",
-          fullName: "Denver Broncos",
-        },
-        { espnId: 8, abbrev: "DET", name: "Lions", fullName: "Detroit Lions" },
-        {
-          espnId: 9,
-          abbrev: "GB",
-          name: "Packers",
-          fullName: "Green Bay Packers",
-        },
-        {
-          espnId: 10,
-          abbrev: "TEN",
-          name: "Titans",
-          fullName: "Tennessee Titans",
-        },
-        {
-          espnId: 11,
-          abbrev: "IND",
-          name: "Colts",
-          fullName: "Indianapolis Colts",
-        },
-        {
-          espnId: 12,
-          abbrev: "KC",
-          name: "Chiefs",
-          fullName: "Kansas City Chiefs",
-        },
-        {
-          espnId: 13,
-          abbrev: "LV",
-          name: "Raiders",
-          fullName: "Las Vegas Raiders",
-        },
-        {
-          espnId: 14,
-          abbrev: "LAR",
-          name: "Rams",
-          fullName: "Los Angeles Rams",
-        },
-        {
-          espnId: 15,
-          abbrev: "MIA",
-          name: "Dolphins",
-          fullName: "Miami Dolphins",
-        },
-        {
-          espnId: 16,
-          abbrev: "MIN",
-          name: "Vikings",
-          fullName: "Minnesota Vikings",
-        },
-        {
-          espnId: 17,
-          abbrev: "NE",
-          name: "Patriots",
-          fullName: "New England Patriots",
-        },
-        {
-          espnId: 18,
-          abbrev: "NO",
-          name: "Saints",
-          fullName: "New Orleans Saints",
-        },
-        {
-          espnId: 19,
-          abbrev: "NYG",
-          name: "Giants",
-          fullName: "New York Giants",
-        },
-        { espnId: 20, abbrev: "NYJ", name: "Jets", fullName: "New York Jets" },
-        {
-          espnId: 21,
-          abbrev: "PHI",
-          name: "Eagles",
-          fullName: "Philadelphia Eagles",
-        },
-        {
-          espnId: 22,
-          abbrev: "ARI",
-          name: "Cardinals",
-          fullName: "Arizona Cardinals",
-        },
-        {
-          espnId: 23,
-          abbrev: "PIT",
-          name: "Steelers",
-          fullName: "Pittsburgh Steelers",
-        },
-        {
-          espnId: 24,
-          abbrev: "LAC",
-          name: "Chargers",
-          fullName: "Los Angeles Chargers",
-        },
-        {
-          espnId: 25,
-          abbrev: "SF",
-          name: "49ers",
-          fullName: "San Francisco 49ers",
-        },
-        {
-          espnId: 26,
-          abbrev: "SEA",
-          name: "Seahawks",
-          fullName: "Seattle Seahawks",
-        },
-        {
-          espnId: 27,
-          abbrev: "TB",
-          name: "Buccaneers",
-          fullName: "Tampa Bay Buccaneers",
-        },
-        {
-          espnId: 28,
-          abbrev: "WAS",
-          name: "Commanders",
-          fullName: "Washington Commanders",
-        },
-        {
-          espnId: 29,
-          abbrev: "CAR",
-          name: "Panthers",
-          fullName: "Carolina Panthers",
-        },
-        {
-          espnId: 30,
-          abbrev: "JAX",
-          name: "Jaguars",
-          fullName: "Jacksonville Jaguars",
-        },
-        {
-          espnId: 33,
-          abbrev: "BAL",
-          name: "Ravens",
-          fullName: "Baltimore Ravens",
-        },
-        {
-          espnId: 34,
-          abbrev: "HOU",
-          name: "Texans",
-          fullName: "Houston Texans",
-        },
-      ];
-
-      const teamIds = [];
-      for (const teamData of NFL_TEAMS_2025) {
-        const teamId = await ctx.db.insert("nflTeams", {
-          ...teamData,
-          seasonYear,
-        });
-        teamIds.push(teamId);
-      }
-
-      // Refetch the teams after inserting
-      nflTeams = await ctx.db
-        .query("nflTeams")
-        .withIndex("by_season", (q) => q.eq("seasonYear", seasonYear))
-        .collect();
+    const nflTeams = existingTeams;
+    if (nflTeams.length === 0) {
+      throw new Error(
+        `No NFL teams found for ${seasonYear}. Import teams first from System Admin.`,
+      );
     }
 
     // Create 8 test participants with realistic team names
