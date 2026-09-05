@@ -63,22 +63,29 @@ export function PartialLeagueWelcome({ league, currentUser, participants }: Part
     : null;
   const canShare = joinCode !== null;
 
-  const handleShareJoinCode = () => {
+  const copyToClipboard = async (text: string, successMessage: string) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      toast.success(successMessage);
+    } catch {
+      toast.error("Couldn't copy to clipboard. Please copy it manually.");
+    }
+  };
+
+  const handleShareJoinCode = async () => {
     if (!joinCode) {
       toast.error("This league doesn't have a join code yet");
       return;
     }
-    navigator.clipboard.writeText(joinCode);
-    toast.success("Join code copied to clipboard!");
+    await copyToClipboard(joinCode, "Join code copied to clipboard!");
   };
 
-  const handleShareLeagueLink = () => {
+  const handleShareLeagueLink = async () => {
     if (!inviteUrl) {
       toast.error("This league doesn't have a join code yet");
       return;
     }
-    navigator.clipboard.writeText(inviteUrl);
-    toast.success("League invitation link copied to clipboard!");
+    await copyToClipboard(inviteUrl, "League invitation link copied to clipboard!");
   };
   
   const handleSetDraftDate = () => {
@@ -133,13 +140,12 @@ Join here: ${inviteUrl}
 
 Don't make me be the guy who couldn't get 8 people together for something this stupid simple.`;
 
-  const handleCopyMessage = () => {
+  const handleCopyMessage = async () => {
     if (!inviteUrl) {
       toast.error("This league doesn't have a join code yet");
       return;
     }
-    navigator.clipboard.writeText(copyMessage);
-    toast.success("Recruitment message copied to clipboard!");
+    await copyToClipboard(copyMessage, "Recruitment message copied to clipboard!");
   };
 
   return (
@@ -294,7 +300,7 @@ Don't make me be the guy who couldn't get 8 people together for something this s
                 <div className="flex items-center justify-between">
                   <span className="text-sm font-medium text-muted-foreground">Join Link:</span>
                   <Badge variant="outline" className="text-sm font-mono px-2 py-1 max-w-xs truncate">
-                    {joinCode ? `loweffort.bet/signin?joinCode=${joinCode}` : "Not available"}
+                    {inviteUrl ?? "Not available"}
                   </Badge>
                 </div>
                 <div className="flex items-center justify-between">
@@ -308,15 +314,15 @@ Don't make me be the guy who couldn't get 8 people together for something this s
                 </div>
               </div>
               <div className="flex flex-wrap gap-2 mt-4">
-                <Button onClick={handleShareJoinCode} disabled={!canShare} variant="outline" size="sm" className="gap-2">
+                <Button onClick={() => void handleShareJoinCode()} disabled={!canShare} variant="outline" size="sm" className="gap-2">
                   <Share className="h-4 w-4" />
                   Copy Code
                 </Button>
-                <Button onClick={handleShareLeagueLink} disabled={!canShare} variant="outline" size="sm" className="gap-2">
+                <Button onClick={() => void handleShareLeagueLink()} disabled={!canShare} variant="outline" size="sm" className="gap-2">
                   <Share className="h-4 w-4" />
                   Copy Link
                 </Button>
-                <Button onClick={handleCopyMessage} disabled={!canShare} variant="outline" size="sm" className="gap-2">
+                <Button onClick={() => void handleCopyMessage()} disabled={!canShare} variant="outline" size="sm" className="gap-2">
                   <Share className="h-4 w-4" />
                   Copy Recruitment Message
                 </Button>
@@ -426,7 +432,7 @@ Don't make me be the guy who couldn't get 8 people together for something this s
             </div>
           ) : (
             <div className="flex flex-wrap gap-3 justify-center mb-6">
-              <Button onClick={handleShareJoinCode} disabled={!canShare} className="gap-2">
+              <Button onClick={() => void handleShareJoinCode()} disabled={!canShare} className="gap-2">
                 <Share className="h-4 w-4" />
                 Share Join Code
               </Button>
@@ -436,11 +442,11 @@ Don't make me be the guy who couldn't get 8 people together for something this s
                   {league.scheduledDraftDate ? "Update Draft Date" : "Set Draft Date"}
                 </Button>
               )}
-              <Button variant="outline" className="gap-2" disabled={!canShare} onClick={handleShareLeagueLink}>
+              <Button variant="outline" className="gap-2" disabled={!canShare} onClick={() => void handleShareLeagueLink()}>
                 <Users className="h-4 w-4" />
                 Invite Friends
               </Button>
-              <Button variant="outline" className="gap-2" disabled={!canShare} onClick={handleCopyMessage}>
+              <Button variant="outline" className="gap-2" disabled={!canShare} onClick={() => void handleCopyMessage()}>
                 <Share className="h-4 w-4" />
                 Send Reminder
               </Button>
