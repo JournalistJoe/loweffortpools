@@ -44,8 +44,8 @@ export function RankTeamsPrompt({ leagueId, participantId }: RankTeamsPromptProp
             <p className="text-muted-foreground">
               {hasRankings
                 ? preferences.enableAutoDraft
-                  ? "If you miss your turn, we'll pick your highest-ranked available team."
-                  : "Auto-draft is off, so rankings only apply if you turn it on."
+                  ? "Auto-draft is on: your top available team is picked the moment your turn starts."
+                  : "Auto-draft is off: we wait for you each turn and use your list only if the timer runs out."
                 : "If you're away when your turn comes, we'll pick from your list instead of at random."}
             </p>
           </div>

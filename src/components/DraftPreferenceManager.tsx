@@ -129,8 +129,8 @@ export function DraftPreferenceManager({ leagueId }: DraftPreferenceManagerProps
             Draft Preferences
           </CardTitle>
           <p className="text-sm text-muted-foreground">
-            Rank teams in order of preference. If you're unavailable or time expires during the draft, 
-            we'll automatically pick your highest ranked available team.
+            Rank teams in order of preference. Whenever the app picks for you, it takes your
+            highest-ranked team that is still available. Without a list, it picks at random.
           </p>
         </CardHeader>
         <CardContent>
@@ -141,9 +141,14 @@ export function DraftPreferenceManager({ leagueId }: DraftPreferenceManagerProps
                 checked={enableAutoDraft}
                 onCheckedChange={handleAutoDraftChange}
               />
-              <Label htmlFor="auto-draft">
-                Enable auto-draft when I'm unavailable
-              </Label>
+              <div className="space-y-1">
+                <Label htmlFor="auto-draft">Draft for me automatically</Label>
+                <p className="text-sm text-muted-foreground">
+                  {enableAutoDraft
+                    ? "On: the moment your turn starts, your top available team is picked. No waiting."
+                    : "Off: we wait for you each turn. If the pick timer runs out, we pick from your list."}
+                </p>
+              </div>
             </div>
             
             {hasUnsavedChanges && (
