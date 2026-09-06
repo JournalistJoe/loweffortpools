@@ -20,6 +20,7 @@ import type * as http from "../http.js";
 import type * as leagues from "../leagues.js";
 import type * as lib_nflSeason from "../lib/nflSeason.js";
 import type * as lib_pushNotificationSender from "../lib/pushNotificationSender.js";
+import type * as lib_teamRecords from "../lib/teamRecords.js";
 import type * as migrations from "../migrations.js";
 import type * as nflData from "../nflData.js";
 import type * as notificationActions from "../notificationActions.js";
@@ -49,6 +50,7 @@ declare const fullApi: ApiFromModules<{
   leagues: typeof leagues;
   "lib/nflSeason": typeof lib_nflSeason;
   "lib/pushNotificationSender": typeof lib_pushNotificationSender;
+  "lib/teamRecords": typeof lib_teamRecords;
   migrations: typeof migrations;
   nflData: typeof nflData;
   notificationActions: typeof notificationActions;

@@ -12,7 +12,8 @@ function draftPositionForPick(pickIndex: number): number {
   return round % 2 === 1 ? positionInRound + 1 : PARTICIPANTS - positionInRound;
 }
 
-export type TeamRecord = { wins: number; losses: number; ties: number };
+import { getSeasonRecordsByEspnId, TeamRecord } from "./lib/teamRecords";
+export type { TeamRecord };
 
 export type AiDraftContext = {
   leagueName: string;
@@ -78,32 +79,7 @@ export const getAiDraftContext = internalQuery({
     const teamById = new Map(teamsThisSeason.map((t) => [t._id, t]));
 
     // Prior-season records, joined through espnId since teams are stored per season.
-    const lastYear = league.seasonYear - 1;
-    const teamsLastSeason = await ctx.db
-      .query("nflTeams")
-      .withIndex("by_season", (q) => q.eq("seasonYear", lastYear))
-      .collect();
-    const gamesLastSeason = await ctx.db
-      .query("games")
-      .withIndex("by_season_and_week", (q) => q.eq("seasonYear", lastYear))
-      .filter((q) => q.eq(q.field("status"), "final"))
-      .collect();
-    const recordByLastSeasonId = new Map<Id<"nflTeams">, TeamRecord>();
-    for (const t of teamsLastSeason) recordByLastSeasonId.set(t._id, { wins: 0, losses: 0, ties: 0 });
-    for (const g of gamesLastSeason) {
-      for (const side of [g.homeTeamId, g.awayTeamId]) {
-        const rec = recordByLastSeasonId.get(side);
-        if (!rec) continue;
-        if (g.tie) rec.ties++;
-        else if (g.winnerTeamId === side) rec.wins++;
-        else rec.losses++;
-      }
-    }
-    const recordByEspnId = new Map<number, TeamRecord>();
-    for (const t of teamsLastSeason) {
-      const rec = recordByLastSeasonId.get(t._id);
-      if (rec && rec.wins + rec.losses + rec.ties > 0) recordByEspnId.set(t.espnId, rec);
-    }
+    const recordByEspnId = await getSeasonRecordsByEspnId(ctx.db, league.seasonYear - 1);
 
     const pickedIds = new Set(picks.map((p) => p.nflTeamId));
     const availableTeams = teamsThisSeason
