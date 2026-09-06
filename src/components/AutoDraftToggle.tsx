@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useMutation } from "convex/react";
+import { useMutation, useQuery } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import { Id, Doc } from "../../convex/_generated/dataModel";
 
@@ -29,6 +29,8 @@ export function AutoDraftToggle({
 }: AutoDraftToggleProps) {
   const [isLoading, setIsLoading] = useState(false);
   const toggleAutoDraft = useMutation(api.draft.toggleAutoDraft);
+  const preferences = useQuery(api.draft.getDraftPreferences, { leagueId });
+  const hasRankings = (preferences?.rankings.length ?? 0) > 0;
 
   // Only show if user is a participant and it's either their turn or they want to prepare for future turns
   const isUserParticipant = participant && currentUser && participant.userId === currentUser._id;
@@ -48,9 +50,9 @@ export function AutoDraftToggle({
         reason: enabled ? "user_request" : undefined,
       });
       
-      const message = enabled 
-        ? "Auto-draft enabled! Your picks will be made automatically when it's your turn."
-        : "Auto-draft disabled. You'll need to make picks manually.";
+      const message = enabled
+        ? "Drafting for you automatically. Your top available team is picked the moment your turn starts."
+        : "Waiting for you each turn. If the timer runs out, we pick from your rankings.";
       
       toast.success(message);
     } catch (error) {
@@ -64,7 +66,7 @@ export function AutoDraftToggle({
     <Card className={`transition-colors ${
       isCurrentParticipantTurn 
         ? "border-primary bg-primary/5" 
-        : "border-gray-200"
+        : "border-border"
     }`}>
       <CardContent className="p-4">
         <div className="flex items-center justify-between">
@@ -76,13 +78,16 @@ export function AutoDraftToggle({
             )}
             <div>
               <Label className="text-base font-medium">
-                {isAutoDrafting ? "Auto-draft ON" : "Manual drafting"}
+                {isAutoDrafting ? "Drafting for you automatically" : "Waiting for you each turn"}
               </Label>
               <p className="text-sm text-muted-foreground mt-1">
-                {isAutoDrafting 
-                  ? "Your picks will be made automatically based on your preferences"
-                  : "You'll make picks manually when it's your turn"
-                }
+                {isAutoDrafting
+                  ? hasRankings
+                    ? "Your top available ranked team is picked the moment your turn starts."
+                    : "A random team is picked the moment your turn starts. Add rankings on My Team to control it."
+                  : hasRankings
+                    ? "You have the full timer to pick. If it runs out, we pick from your rankings."
+                    : "You have the full timer to pick. If it runs out, we pick a random team."}
               </p>
               {isCurrentParticipantTurn && (
                 <div className="flex items-center gap-1 mt-2 text-sm text-primary">

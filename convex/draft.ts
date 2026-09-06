@@ -358,6 +358,15 @@ export const setDraftPreferences = mutation({
       });
     }
 
+    // The participant flag is what the scheduler reads. Keep it in step with
+    // the switch on the rankings page so "auto-draft on" means an instant pick.
+    if ((participant.isAutoDrafting ?? false) !== args.enableAutoDraft) {
+      await ctx.db.patch(participant._id, {
+        isAutoDrafting: args.enableAutoDraft,
+        autoDraftReason: args.enableAutoDraft ? "user_request" : undefined,
+      });
+    }
+
     // Log activity
     await ctx.db.insert("activity", {
       leagueId: args.leagueId,
@@ -408,6 +417,8 @@ export const getDraftPreferences = query({
 
     return {
       ...preferences,
+      // Single source of truth for the switch is the participant flag.
+      enableAutoDraft: participant.isAutoDrafting ?? preferences.enableAutoDraft,
       rankedTeams: rankedTeams.filter(Boolean), // Remove any null teams
     };
   },
@@ -442,6 +453,17 @@ export const toggleAutoDraft = mutation({
       isAutoDrafting: args.enabled,
       autoDraftReason: args.enabled ? (args.reason || "user_request") : undefined,
     });
+
+    // Mirror into the rankings-page switch so both places show the same state.
+    const prefs = await ctx.db
+      .query("draftPreferences")
+      .withIndex("by_league_and_participant", (q) =>
+        q.eq("leagueId", args.leagueId).eq("participantId", participant._id),
+      )
+      .unique();
+    if (prefs && prefs.enableAutoDraft !== args.enabled) {
+      await ctx.db.patch(prefs._id, { enableAutoDraft: args.enabled, updatedAt: Date.now() });
+    }
 
     // If enabling auto-draft and it's currently this participant's turn, reschedule immediately
     if (args.enabled && league.status === "draft" && league.currentPickIndex !== undefined) {
