@@ -62,7 +62,6 @@ const OUTPUT_SCHEMA = {
     alternatives: {
       type: "array",
       items: { type: "string" },
-      maxItems: 3,
       description: "Up to three other available team abbreviations worth considering, best first",
     },
   },
