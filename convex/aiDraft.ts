@@ -20,18 +20,26 @@ export type PickSuggestion = {
 
 const SYSTEM_PROMPT = `You are advising one manager in an NFL pool draft.
 
-Format: 8 managers each draft 4 NFL teams in a snake draft. Every regular season
-win by one of a manager's teams is 1 point (ties are worth half or nothing
-depending on league settings). The manager with the most total wins at the end
-of the regular season wins. There are no trades, no waivers, and no playoffs.
-The only thing that matters is expected regular season wins.
+Format: 8 managers each draft 4 NFL teams over 4 rounds. It is a snake draft:
+round 1 goes slot 1 through 8, round 2 goes 8 back to 1, round 3 goes 1 to 8,
+round 4 goes 8 to 1. So the manager in slot 8 picks twice in a row at the turn
+(picks 8 and 9), while slot 1 waits 14 picks between their first and second
+selection. A manager's score is the sum of regular season wins across their 4
+teams (ties are worth half or nothing depending on league settings). Most wins
+at the end of the regular season wins. There are no trades, no waivers, and no
+playoffs. The only thing that matters is expected regular season wins, and the
+four teams simply add up; there is no roster construction beyond that, except
+that two of your own teams playing each other split those games.
 
 Recommend the single best available team for the manager on the clock. Weigh
 projected wins for the upcoming season above all else: roster strength,
 quarterback situation, coaching stability, schedule difficulty, and regression
 or bounce-back from last year's record. Last season's record is provided as a
-signal, not the answer. Consider draft position: if several picks happen before
-this manager's next turn, prefer the team most likely to be gone by then.
+signal, not the answer. Use the snake position: you are told exactly which
+managers pick before this manager's next turn and which pick numbers they still
+own. If many picks happen before their next turn, take the team most likely to
+be gone; if their next pick comes right away, you can take the best team now
+and plan the follow-up. Account for the teams already on this manager's roster.
 
 You have web search. Before deciding, run a few targeted searches for this
 season's projected win totals and any major news since last season (starting
@@ -75,23 +83,34 @@ function formatRecord(r: { wins: number; losses: number; ties: number } | null) 
 }
 
 function buildPrompt(c: AiDraftContext): string {
-  const rosters = c.rosters
-    .map((r) => `- ${r.displayName}${r.isMe ? " (on the clock)" : ""}: ${r.teams.length ? r.teams.join(", ") : "none yet"}`)
+  const others = c.rosters
+    .filter((r) => !r.isMe)
+    .map((r) => `- ${r.displayName}: ${r.teams.length ? r.teams.join(", ") : "none yet"}`)
     .join("\n");
   const available = c.availableTeams
     .map((t) => `- ${t.abbrev} ${t.fullName} (last season ${formatRecord(t.lastSeason)})`)
     .join("\n");
+  const laterPicks = c.myRemainingPickNumbers.slice(1);
+  const nextTurn =
+    c.pickersBeforeMyNextTurn.length === 0
+      ? laterPicks.length
+        ? `This manager picks again immediately at pick ${laterPicks[0]} (back-to-back at the turn).`
+        : "This is this manager's final pick."
+      : `Before this manager's next pick (#${laterPicks[0]}), these managers pick in order: ${c.pickersBeforeMyNextTurn.join(", ")}.`;
   return `League: ${c.leagueName}, ${c.seasonYear} NFL season.
-Pick ${c.pickNumber} of 32, round ${c.round}. ${c.me.displayName} is on the clock (draft slot ${c.me.draftPosition}).
-${c.picksUntilMyNextTurn} other picks happen before this manager picks again.
+Pick ${c.pickNumber} of 32, round ${c.round} of 4. ${c.me.displayName} is on the clock from draft slot ${c.me.draftPosition}.
 
-Rosters so far:
-${rosters}
+This manager's roster so far: ${c.myRoster.length ? c.myRoster.join(", ") : "empty (first pick)"}.
+This manager's remaining pick numbers including this one: ${c.myRemainingPickNumbers.join(", ")}.
+${nextTurn}
+
+Other managers' rosters:
+${others}
 
 Available teams:
 ${available}
 
-Recommend one team from the available list.`;
+Recommend one team from the available list for ${c.me.displayName}.`;
 }
 
 /**

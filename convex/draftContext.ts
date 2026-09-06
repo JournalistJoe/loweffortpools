@@ -21,6 +21,11 @@ export type AiDraftContext = {
   round: number;
   picksUntilMyNextTurn: number;
   me: { displayName: string; draftPosition: number };
+  myRoster: string[];
+  /** 1-based overall pick numbers still owned by this manager, including the current one. */
+  myRemainingPickNumbers: number[];
+  /** Managers who pick between now and this manager's next turn, in order. */
+  pickersBeforeMyNextTurn: string[];
   rosters: Array<{ displayName: string; isMe: boolean; teams: string[] }>;
   availableTeams: Array<{
     id: Id<"nflTeams">;
@@ -123,12 +128,23 @@ export const getAiDraftContext = internalQuery({
           .map((pk) => teamById.get(pk.nflTeamId)?.abbrev ?? "?"),
       }));
 
-    // How many other picks happen before this participant is up again.
-    let picksUntilMyNextTurn = 0;
+    // Snake order bookkeeping: who picks before this manager is up again, and
+    // which overall pick numbers this manager still owns.
+    const byPosition = new Map(participants.map((p) => [p.draftPosition, p.displayName]));
+    const pickersBeforeMyNextTurn: string[] = [];
+    const myRemainingPickNumbers: number[] = [league.currentPickIndex + 1];
+    let reachedNextTurn = false;
     for (let i = league.currentPickIndex + 1; i < TOTAL_PICKS; i++) {
-      if (draftPositionForPick(i) === current.draftPosition) break;
-      picksUntilMyNextTurn++;
+      const pos = draftPositionForPick(i);
+      if (pos === current.draftPosition) {
+        myRemainingPickNumbers.push(i + 1);
+        reachedNextTurn = true;
+      } else if (!reachedNextTurn) {
+        pickersBeforeMyNextTurn.push(byPosition.get(pos) ?? `slot ${pos}`);
+      }
     }
+    const picksUntilMyNextTurn = pickersBeforeMyNextTurn.length;
+    const myRoster = rosters.find((r) => r.isMe)?.teams ?? [];
 
     return {
       leagueName: league.name,
@@ -137,6 +153,9 @@ export const getAiDraftContext = internalQuery({
       round: Math.floor(league.currentPickIndex / PARTICIPANTS) + 1,
       picksUntilMyNextTurn,
       me: { displayName: current.displayName, draftPosition: current.draftPosition },
+      myRoster,
+      myRemainingPickNumbers,
+      pickersBeforeMyNextTurn,
       rosters,
       availableTeams,
     };
