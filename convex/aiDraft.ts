@@ -31,7 +31,22 @@ projected wins for the upcoming season above all else: roster strength,
 quarterback situation, coaching stability, schedule difficulty, and regression
 or bounce-back from last year's record. Last season's record is provided as a
 signal, not the answer. Consider draft position: if several picks happen before
-this manager's next turn, prefer the team most likely to be gone by then.`;
+this manager's next turn, prefer the team most likely to be gone by then.
+
+You have web search. Before deciding, run a few targeted searches for this
+season's projected win totals and any major news since last season (starting
+quarterback injuries, trades, coaching changes) for the top candidates. Keep it
+to a handful of searches; you do not need to research every team. Mention in
+the rationale anything current that drove the choice.`;
+
+const WEB_SEARCH_TOOL = {
+  type: "web_search_20260209",
+  name: "web_search",
+  max_uses: 5,
+} as const;
+
+/** Server-side tools can pause a long turn; resume a bounded number of times. */
+const MAX_CONTINUATIONS = 3;
 
 const OUTPUT_SCHEMA = {
   type: "object",
@@ -80,6 +95,66 @@ ${available}
 Recommend one team from the available list.`;
 }
 
+/**
+ * One advisory turn with web search, resuming if the server pauses the turn.
+ * Structured output is requested first; if the API rejects that combination,
+ * the same request is retried asking for JSON in plain text.
+ */
+async function askClaude(client: Anthropic, userPrompt: string): Promise<string> {
+  const run = async (structured: boolean): Promise<string> => {
+    const messages: Anthropic.MessageParam[] = [
+      {
+        role: "user",
+        content: structured
+          ? userPrompt
+          : `${userPrompt}\n\nReply with only a JSON object: {"teamAbbrev": string, "rationale": string, "alternatives": string[]}.`,
+      },
+    ];
+    const request = () =>
+      client.messages.create({
+        model: MODEL,
+        max_tokens: 16000,
+        tools: [WEB_SEARCH_TOOL],
+        output_config: {
+          effort: "medium",
+          ...(structured ? { format: { type: "json_schema", schema: OUTPUT_SCHEMA } } : {}),
+        },
+        system: SYSTEM_PROMPT,
+        messages,
+      });
+
+    let response = await request();
+    for (let i = 0; i < MAX_CONTINUATIONS && response.stop_reason === "pause_turn"; i++) {
+      messages.push({ role: "assistant", content: response.content });
+      response = await request();
+    }
+
+    if (response.stop_reason === "refusal") {
+      throw new Error("The AI declined to make a recommendation");
+    }
+    // The final answer is the last text block; earlier ones are search commentary.
+    const textBlocks = response.content.filter(
+      (block): block is Anthropic.TextBlock => block.type === "text",
+    );
+    return textBlocks[textBlocks.length - 1]?.text ?? "";
+  };
+
+  try {
+    return await run(true);
+  } catch (error) {
+    if (error instanceof Anthropic.BadRequestError && /output_config|format/i.test(error.message)) {
+      return await run(false);
+    }
+    throw error;
+  }
+}
+
+function extractJsonObject(text: string): string {
+  const start = text.indexOf("{");
+  const end = text.lastIndexOf("}");
+  return start >= 0 && end > start ? text.slice(start, end + 1) : text;
+}
+
 /** Superuser-only: ask Claude which available team to draft right now. */
 export const suggestPick = action({
   args: { leagueId: v.id("leagues") },
@@ -98,28 +173,11 @@ export const suggestPick = action({
     if (context.availableTeams.length === 0) throw new Error("No teams left to pick");
 
     const client = new Anthropic();
-    const response = await client.messages.create({
-      model: MODEL,
-      max_tokens: 16000,
-      output_config: {
-        effort: "medium",
-        format: { type: "json_schema", schema: OUTPUT_SCHEMA },
-      },
-      system: SYSTEM_PROMPT,
-      messages: [{ role: "user", content: buildPrompt(context) }],
-    });
-
-    if (response.stop_reason === "refusal") {
-      throw new Error("The AI declined to make a recommendation");
-    }
-    const text = response.content
-      .filter((block): block is Anthropic.TextBlock => block.type === "text")
-      .map((block) => block.text)
-      .join("");
+    const text = await askClaude(client, buildPrompt(context));
 
     let parsed: { teamAbbrev: string; rationale: string; alternatives: string[] };
     try {
-      parsed = JSON.parse(text);
+      parsed = JSON.parse(extractJsonObject(text));
     } catch {
       throw new Error("The AI returned an unreadable answer; try again");
     }
