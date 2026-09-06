@@ -6,13 +6,14 @@ import { toast } from "sonner";
 import { useParams } from "react-router-dom";
 import { Button } from "../components/ui/button";
 import { Badge } from "../components/ui/badge";
+import { Switch } from "../components/ui/switch";
 import {
   Card,
   CardContent,
   CardHeader,
   CardTitle,
 } from "../components/ui/card";
-import { Clock, Trophy, Users, Bot } from "lucide-react";
+import { Clock, Trophy, Users, Bot, ListOrdered } from "lucide-react";
 import { CommissionerWelcome } from "../components/CommissionerWelcome";
 import { PartialLeagueWelcome } from "../components/PartialLeagueWelcome";
 import { AutoDraftToggle } from "../components/AutoDraftToggle";
@@ -34,6 +35,12 @@ export function DraftPageShadCN() {
     leagueId ? { leagueId: leagueId as any } : "skip",
   );
   const makePick = useMutation(api.draft.makePick);
+  // The signed-in participant's saved rankings, used to order the board. Read-only here.
+  const myPreferences = useQuery(
+    api.draft.getDraftPreferences,
+    leagueId ? { leagueId: leagueId as Id<"leagues"> } : "skip",
+  );
+  const [sortByMyList, setSortByMyList] = useState(true);
 
   const [selectedTeam, setSelectedTeam] = useState<string | null>(null);
   const [timeRemaining, setTimeRemaining] = useState<number | null>(null);
@@ -142,6 +149,26 @@ export function DraftPageShadCN() {
   const isUserTurn =
     draftState.currentParticipant?.userId === league.participant?.userId;
     
+  // Rank lookup from the saved list; empty when the user has no list.
+  const rankByTeamId = new Map<string, number>(
+    (myPreferences?.rankings ?? []).map((id, i) => [id as string, i + 1]),
+  );
+  const hasMyList = rankByTeamId.size > 0;
+  const orderedAvailableTeams =
+    hasMyList && sortByMyList
+      ? [...draftState.availableTeams].sort((a, b) => {
+          const ra = rankByTeamId.get(a._id) ?? Number.MAX_SAFE_INTEGER;
+          const rb = rankByTeamId.get(b._id) ?? Number.MAX_SAFE_INTEGER;
+          return ra !== rb ? ra - rb : a.fullName.localeCompare(b.fullName);
+        })
+      : draftState.availableTeams;
+  const nextOnMyList = hasMyList
+    ? draftState.availableTeams
+        .filter((t) => rankByTeamId.has(t._id))
+        .sort((a, b) => rankByTeamId.get(a._id)! - rankByTeamId.get(b._id)!)
+        .slice(0, 4)
+    : [];
+
   // Check if admin can pick for admin-managed team
   const canAdminPick = league.isAdmin && 
     draftState.currentParticipant?.isAdminManaged && 
@@ -314,8 +341,51 @@ export function DraftPageShadCN() {
                         />
                       </div>
                     )}
+                  {hasMyList && draftState.league.status === "draft" && (
+                    <div className="mb-4 rounded-lg border border-border bg-muted/40 p-3">
+                      <div className="flex flex-wrap items-center justify-between gap-2">
+                        <div className="flex items-center gap-2 text-sm font-medium text-foreground">
+                          <ListOrdered className="h-4 w-4" />
+                          Next on your list
+                        </div>
+                        <label className="flex items-center gap-2 text-xs text-muted-foreground cursor-pointer">
+                          <Switch
+                            checked={sortByMyList}
+                            onCheckedChange={setSortByMyList}
+                            aria-label="Sort available teams by my list"
+                          />
+                          Sort board by my list
+                        </label>
+                      </div>
+                      {nextOnMyList.length === 0 ? (
+                        <p className="mt-2 text-sm text-muted-foreground">
+                          Every team on your list is gone. Picks past the end use the best remaining team by last season.
+                        </p>
+                      ) : isUserTurn ? (
+                        <div className="mt-2 flex flex-wrap gap-2">
+                          {nextOnMyList.map((team) => (
+                            <Button
+                              key={team._id}
+                              size="sm"
+                              variant={selectedTeam === team._id ? "default" : "outline"}
+                              className="gap-2"
+                              onClick={() => setSelectedTeam(team._id)}
+                            >
+                              <span className="font-mono text-xs opacity-70">#{rankByTeamId.get(team._id)}</span>
+                              {team.abbrev}
+                            </Button>
+                          ))}
+                          <span className="self-center text-xs text-muted-foreground">Tap to select, then Make Pick.</span>
+                        </div>
+                      ) : (
+                        <p className="mt-2 text-sm text-muted-foreground">
+                          {nextOnMyList.map((t) => `#${rankByTeamId.get(t._id)} ${t.abbrev}`).join("  ·  ")}
+                        </p>
+                      )}
+                    </div>
+                  )}
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-                    {draftState.availableTeams.map((team) => (
+                    {orderedAvailableTeams.map((team) => (
                       <Button
                         key={team._id}
                         onClick={() => setSelectedTeam(team._id)}
@@ -347,7 +417,14 @@ export function DraftPageShadCN() {
                           </div>
                         </div>
                         <div className="min-w-0 flex-1">
-                          <div className="font-medium">{team.abbrev}</div>
+                          <div className="font-medium flex items-center gap-1.5">
+                            {team.abbrev}
+                            {rankByTeamId.has(team._id) && (
+                              <span className="rounded bg-primary/10 px-1 font-mono text-[10px] text-primary">
+                                #{rankByTeamId.get(team._id)}
+                              </span>
+                            )}
+                          </div>
                           <div className="text-xs text-muted-foreground truncate">
                             {team.name}
                           </div>
