@@ -46,7 +46,7 @@ export function RankTeamsPrompt({ leagueId, participantId }: RankTeamsPromptProp
                 ? preferences.enableAutoDraft
                   ? "Auto-draft is on: your top available team is picked the moment your turn starts."
                   : "Auto-draft is off: we wait for you each turn and use your list only if the timer runs out."
-                : "If you're away when your turn comes, we'll pick from your list instead of at random."}
+                : "Even a short list helps: if the app ever picks for you, it uses your list first, then the best remaining team by last season's record."}
             </p>
           </div>
         </div>

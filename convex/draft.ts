@@ -2,6 +2,7 @@ import { v } from "convex/values";
 import { query, mutation, internalMutation, MutationCtx } from "./_generated/server";
 import { Doc } from "./_generated/dataModel";
 import { getAuthUserId } from "@convex-dev/auth/server";
+import { getSeasonRecordsByEspnId, recordScore } from "./lib/teamRecords";
 import { api, internal } from "./_generated/api";
 
 // Snake draft order calculation
@@ -325,9 +326,12 @@ export const setDraftPreferences = mutation({
       throw new Error("Invalid NFL team IDs in rankings");
     }
 
-    // Ensure all 32 teams are included and no duplicates
-    if (args.rankings.length !== 32 || new Set(args.rankings).size !== 32) {
-      throw new Error("Rankings must include all 32 NFL teams exactly once");
+    // Partial lists are fine; the auto-pick falls back past the end of the list.
+    if (args.rankings.length === 0) {
+      throw new Error("Rank at least one team");
+    }
+    if (args.rankings.length > 32 || new Set(args.rankings).size !== args.rankings.length) {
+      throw new Error("Each team can appear in your rankings only once");
     }
 
     const now = Date.now();
@@ -420,6 +424,37 @@ export const getDraftPreferences = query({
       // Single source of truth for the switch is the participant flag.
       enableAutoDraft: participant.isAutoDrafting ?? preferences.enableAutoDraft,
       rankedTeams: rankedTeams.filter(Boolean), // Remove any null teams
+    };
+  },
+});
+
+/** Every team for the league's season with last season's record, for the ranking page. */
+export const getRankingBoard = query({
+  args: { leagueId: v.id("leagues") },
+  handler: async (ctx, args) => {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) return null;
+    const league = await ctx.db.get(args.leagueId);
+    if (!league) return null;
+
+    const teams = await ctx.db
+      .query("nflTeams")
+      .withIndex("by_season", (q) => q.eq("seasonYear", league.seasonYear))
+      .collect();
+    const records = await getSeasonRecordsByEspnId(ctx.db, league.seasonYear - 1);
+
+    return {
+      lastSeasonYear: league.seasonYear - 1,
+      teams: teams
+        .map((t) => ({
+          _id: t._id,
+          abbrev: t.abbrev,
+          name: t.name,
+          fullName: t.fullName,
+          logoUrl: t.logoUrl,
+          lastSeason: records.get(t.espnId) ?? null,
+        }))
+        .sort((a, b) => a.fullName.localeCompare(b.fullName)),
     };
   },
 });
@@ -662,7 +697,18 @@ async function makeAutoPick(
     }
   }
 
-  // Fallback to random selection if no preferences, no preferred teams available, or admin-managed
+  // Past the end of the list (or no list): best remaining team by last season's
+  // record, so a short list still degrades sensibly. Random only when there is
+  // no record data at all (or for admin-managed teams, which stay random).
+  if (!selectedTeam && !currentParticipant.isAdminManaged) {
+    const records = await getSeasonRecordsByEspnId(ctx.db, league.seasonYear - 1);
+    let best: { team: (typeof availableTeams)[number]; score: number } | null = null;
+    for (const team of availableTeams) {
+      const score = recordScore(records.get(team.espnId));
+      if (score >= 0 && (!best || score > best.score)) best = { team, score };
+    }
+    if (best) selectedTeam = best.team;
+  }
   if (!selectedTeam) {
     const randomIndex = Math.floor(Math.random() * availableTeams.length);
     selectedTeam = availableTeams[randomIndex];
