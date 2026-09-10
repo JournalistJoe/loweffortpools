@@ -8,7 +8,7 @@ import {
 } from "./_generated/server";
 import { internal } from "./_generated/api";
 import { getAuthUserId } from "@convex-dev/auth/server";
-import { CURRENT_SEASON_YEAR } from "./lib/nflSeason";
+import { CURRENT_SEASON_YEAR, MAX_WEEK } from "./lib/nflSeason";
 
 // NFL team roster (season-agnostic). Import per seasonYear in the database.
 export const NFL_TEAMS = [
@@ -149,6 +149,16 @@ export const importTeamsForSeason = internalMutation({
   },
 });
 
+/**
+ * ESPN's Akamai edge rejects requests from Convex's default fetch with a 403
+ * (no User-Agent, "node", and browser-like strings are all blocked). A curl
+ * style User-Agent is accepted, so send one explicitly.
+ */
+const ESPN_REQUEST_HEADERS = {
+  "User-Agent": "curl/8.7.1",
+  Accept: "application/json",
+} as const;
+
 export const syncGamesFromESPN = internalAction({
   args: {
     week: v.number(),
@@ -159,7 +169,7 @@ export const syncGamesFromESPN = internalAction({
       // ESPN API endpoint for NFL scoreboard
       const url = `https://site.api.espn.com/apis/site/v2/sports/football/nfl/scoreboard?dates=${args.seasonYear}&seasontype=2&week=${args.week}`;
 
-      const response = await fetch(url);
+      const response = await fetch(url, { headers: ESPN_REQUEST_HEADERS });
       if (!response.ok) {
         throw new Error(`ESPN API error: ${response.status}`);
       }
@@ -179,6 +189,32 @@ export const syncGamesFromESPN = internalAction({
         `Failed to sync games: ${error instanceof Error ? error.message : String(error)}`,
       );
     }
+  },
+});
+
+/**
+ * Load every regular-season week for a season. Run once when a new season's
+ * schedule is published so the schedule and team pages show all 18 weeks
+ * (the nightly cron only syncs the current week).
+ */
+export const syncSeasonFromESPN = internalAction({
+  args: {
+    seasonYear: v.optional(v.number()),
+  },
+  returns: v.array(
+    v.object({ week: v.number(), gamesProcessed: v.number() }),
+  ),
+  handler: async (ctx, args) => {
+    const seasonYear = args.seasonYear ?? CURRENT_SEASON_YEAR;
+    const results: { week: number; gamesProcessed: number }[] = [];
+    for (let week = 1; week <= MAX_WEEK; week++) {
+      const result = await ctx.runAction(internal.nflData.syncGamesFromESPN, {
+        week,
+        seasonYear,
+      });
+      results.push({ week, gamesProcessed: result.gamesProcessed });
+    }
+    return results;
   },
 });
 
